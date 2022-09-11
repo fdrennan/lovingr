@@ -20,7 +20,8 @@ server_body <- function(id = "body") {
   shiny$moduleServer(
     id,
     function(input, output, session) {
-      file_upload$server_file_upload()
+      ns <- session$ns
+      file_upload$server_file_upload("file_upload")
     }
   )
 }
