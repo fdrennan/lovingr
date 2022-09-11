@@ -21,7 +21,12 @@ server_body <- function(id = "body") {
     id,
     function(input, output, session) {
       ns <- session$ns
-      file_upload$server_file_upload("file_upload")
+      datapath <- file_upload$server_file_upload("file_upload")
+
+      shiny$observe({
+        shiny$req(datapath())
+        shiny$showNotification(datapath())
+      })
     }
   )
 }
