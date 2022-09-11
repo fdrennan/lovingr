@@ -20,18 +20,23 @@ ui_file_upload <- function(id = "file_upload",
 }
 
 #' @export
-server_file_upload <- function(id = "file_upload") {
+server_file_upload <- function(
+  id = "file_upload",
+  display_meta = FALSE
+) {
   box::use(shiny)
   shiny$moduleServer(
     id,
     function(input, output, session) {
-      ns <- session$ns
-      shiny$observeEvent(input$fileUpload, {
-        output$fileMetaData <- shiny$renderTable({
-          as.data.frame(input$fileUpload)
+      
+      if (display_meta) {
+        shiny$observeEvent(input$fileUpload, {
+          output$fileMetaData <- shiny$renderTable({
+            as.data.frame(input$fileUpload)
+          })
         })
-      })
-
+      }
+      
       out <- shiny$reactive({
         shiny$req(input$fileUpload)
         input$fileUpload$datapath

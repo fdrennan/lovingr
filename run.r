@@ -1,1 +1,3 @@
-rstudioapi::restartSession("shiny::runApp(\"app.r\")")
+rstudioapi::restartSession(
+  "shiny::runApp(\"main.r\")"
+)

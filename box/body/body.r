@@ -21,8 +21,8 @@ ui_body <- function(id = "body") {
 }
 
 #' @export
-server_body <- function(id = "body") {
-  box::use(shiny)
+server_body <- function(id = "body", appSession) {
+  box::use(shiny, bs4Dash)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / read / xlsx)
   shiny$moduleServer(
@@ -30,7 +30,16 @@ server_body <- function(id = "body") {
     function(input, output, session) {
       ns <- session$ns
       datapath <- file_upload$server_file_upload("file_upload")
+
       xlsx$server_xlsx("xlsx", datapath)
+      shiny$observeEvent(datapath(), {
+        browser()
+        bs4Dash$updateTabItems(
+          session=appSession,
+          inputId = "sidebar",
+          selected = 'tab2'
+        )
+      })
     }
   )
 }
