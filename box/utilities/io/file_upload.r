@@ -15,7 +15,6 @@ ui_file_upload <- function(id = "file_upload") {
     shiny$fluidRow(
       class = "p-2",
       {
-        options(shiny.maxRequestSize = 300 * 1024^2)
         shiny$fileInput(
           ns("fileUpload"),
           "Choose CSV File",
@@ -35,13 +34,10 @@ server_file_upload <- function(id = "file_upload") {
     id,
     function(input, output, session) {
       ns <- session$ns
-      file <- shiny$reactive({
-        shiny$req(input$fileUpload)
-      })
 
-      shiny$observe(file(), {
+      shiny$observeEvent(input$fileUpload, {
         output$fileMetaData <- shiny$renderTable({
-          as.data.frame(file())
+          as.data.frame(input$fileUpload)
         })
       })
     }
