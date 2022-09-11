@@ -30,7 +30,7 @@ ui_file_upload <- function(id = "file_upload") {
 }
 
 #' @export
-server_file_upload <- function(id = "file_upload") {
+server_file_upload <- function(id = "file_upload", parentSession) {
   box::use(shiny, bs4Dash, ../images/display)
   shiny$moduleServer(
     id,
@@ -46,12 +46,13 @@ server_file_upload <- function(id = "file_upload") {
 
       shiny$observeEvent(file(), {
         file <- file()
+        browser()
         lapply(
           split(file, 1:nrow(file)), function(x) {
             shiny$insertUI(
               selector = paste0("#", ns("image_container")),
               where = 'afterBegin',
-              ui = display$ui_image_output(x$name)
+              ui = display$ui_image_output(x$size)
             )
           }
         )
@@ -59,12 +60,12 @@ server_file_upload <- function(id = "file_upload") {
         lapply(
           split(file, 1:nrow(file)), 
           function(x) {
-            browser()
-            display$server_image_output(x$name, x$datapath, session)
+            display$server_image_output(x$size, x$datapath, parentSession)
           }
         )
         
       })
-    }
+    },
+    session = parentSession
   )
 }

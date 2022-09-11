@@ -7,23 +7,23 @@ ui_image_output <- function(id = "image") {
 
 #' @export
 server_image_output <- function(
-  id = "image", datapath, session
+  id = "image", datapath, parentSession
 ) {
   box::use(shiny)
-  
-  server_fn <- function(
-    input, output, session
-  ) {
-    output$image <- shiny$renderImage({
-      browser()
-      shiny$req(datapath)
-      list(src = datapath)
-    })
-  }
-  
+   
   shiny$moduleServer(
     id,
-    server_fn, 
-    session
+    function(
+      input, output, session
+    ) {
+      
+      output$image <- shiny$renderImage({
+        browser()
+        shiny$req(datapath)
+        
+        list(src = datapath)
+      })
+    }, 
+    parentSession
   )
 }

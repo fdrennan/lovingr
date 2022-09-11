@@ -73,10 +73,10 @@ ui_app <- function() {
   )
 }
 
-server_app <- function() {
+server_app <- function(session) {
   box::use(shiny, bs4Dash)
   box::use(. / box / utilities / io / file_upload)
-  file_upload$server_file_upload()
+  file_upload$server_file_upload(parentSession=session)
 }
 
 ui <- function() {
@@ -84,7 +84,7 @@ ui <- function() {
 }
 
 server <- function(input, output, session) {
-  server_app()
+  server_app(session)
 }
 
 box::use(shiny)
