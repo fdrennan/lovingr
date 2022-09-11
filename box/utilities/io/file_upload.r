@@ -1,6 +1,7 @@
 
 #' @export
-ui_file_upload <- function(id = "file_upload") {
+ui_file_upload <- function(id = "file_upload", 
+                           label = 'Upload a file', accept = "*", multiple = FALSE) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   shiny$fluidRow(
@@ -8,10 +9,10 @@ ui_file_upload <- function(id = "file_upload") {
       title = "File Upload",
       width = 12,
       shiny$fileInput(
-        ns("fileUpload"),
-        "Choose CSV File",
-        accept = "*",
-        multiple = TRUE
+        inputId = ns("fileUpload"),
+        label = label,
+        accept = accept,
+        multiple = multiple
       ),
       shiny$tableOutput(ns("fileMetaData"))
     )
