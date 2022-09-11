@@ -52,7 +52,7 @@ server_file_upload <- function(id = "file_upload", parentSession) {
             shiny$insertUI(
               selector = paste0("#", ns("image_container")),
               where = 'afterBegin',
-              ui = display$ui_image_output(x$size)
+              ui = display$ui_image_output(x$name)
             )
           }
         )
@@ -60,7 +60,7 @@ server_file_upload <- function(id = "file_upload", parentSession) {
         lapply(
           split(file, 1:nrow(file)), 
           function(x) {
-            display$server_image_output(x$size, x$datapath, parentSession)
+            display$server_image_output(x$name, x$datapath, parentSession)
           }
         )
         

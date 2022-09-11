@@ -1,6 +1,6 @@
 #' @export
 ui_image_output <- function(id = "image") {
-  box::use(shiny)
+  box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   shiny$imageOutput(ns("image"))
 }
@@ -18,9 +18,7 @@ server_image_output <- function(
     ) {
       
       output$image <- shiny$renderImage({
-        browser()
         shiny$req(datapath)
-        
         list(src = datapath)
       })
     }, 
