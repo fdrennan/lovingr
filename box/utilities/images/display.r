@@ -19,7 +19,7 @@ server_image_output <- function(
       
       output$image <- shiny$renderImage({
         shiny$req(datapath)
-        list(src = datapath)
+        list(src = datapath, className = paste0("img-fluid"))
       })
     }, 
     parentSession

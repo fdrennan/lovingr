@@ -46,7 +46,6 @@ server_file_upload <- function(id = "file_upload", parentSession) {
 
       shiny$observeEvent(file(), {
         file <- file()
-        browser()
         lapply(
           split(file, 1:nrow(file)), function(x) {
             shiny$insertUI(
