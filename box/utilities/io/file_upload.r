@@ -20,7 +20,8 @@ ui_file_upload <- function(id = "file_upload") {
         accept = "*",
         multiple = TRUE
       ),
-      shiny$tableOutput(ns("fileMetaData"))
+      shiny$tableOutput(ns("fileMetaData")),
+      shiny$imageOutput(ns('image'))
     )
   )
 }
@@ -35,10 +36,15 @@ server_file_upload <- function(id = "file_upload") {
       file <- shiny$reactive({
         shiny$req(input$fileUpload)
       })
-
       output$fileMetaData <- shiny$renderTable({
         shiny$req(file())
         as.data.frame(file())
+      })
+      
+      output$image <- shiny$renderImage({
+        shiny$req(file())
+        datapath <- file()$datapath
+        list(src = datapath)
       })
     }
   )
