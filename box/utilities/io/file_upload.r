@@ -2,7 +2,6 @@
 #' @export
 ui_file_upload <- function(id = "file_upload") {
   box::use(shiny, bs4Dash)
-  options(shiny.maxRequestSize = 300*1024^2)
   ns <- shiny$NS(id)
   bs4Dash$box(
     title = "File Upload",
@@ -13,22 +12,26 @@ ui_file_upload <- function(id = "file_upload") {
     sidebar = bs4Dash$boxSidebar(
       startOpen = FALSE
     ),
-    shiny$fluidRow(class='p-2',
-      shiny$fileInput(
-        ns("fileUpload"),
-        "Choose CSV File",
-        accept = "*",
-        multiple = TRUE
-      ),
+    shiny$fluidRow(
+      class = "p-2",
+      {
+        options(shiny.maxRequestSize = 300 * 1024^2)
+        shiny$fileInput(
+          ns("fileUpload"),
+          "Choose CSV File",
+          accept = "*",
+          multiple = TRUE
+        )
+      },
       shiny$tableOutput(ns("fileMetaData")),
-      shiny$imageOutput(ns('image'))
+      shiny$div(id = ns("image_container"))
     )
   )
 }
 
 #' @export
 server_file_upload <- function(id = "file_upload") {
-  box::use(shiny, bs4Dash)
+  box::use(shiny, bs4Dash, ../images/display)
   shiny$moduleServer(
     id,
     function(input, output, session) {
@@ -40,11 +43,27 @@ server_file_upload <- function(id = "file_upload") {
         shiny$req(file())
         as.data.frame(file())
       })
-      
-      output$image <- shiny$renderImage({
-        shiny$req(file())
-        datapath <- file()$datapath
-        list(src = datapath)
+
+      shiny$observeEvent(file(), {
+        file <- file()
+        lapply(
+          split(file, 1:nrow(file)), function(x) {
+            shiny$insertUI(
+              selector = paste0("#", ns("image_container")),
+              where = 'afterBegin',
+              ui = display$ui_image_output(x$name)
+            )
+          }
+        )
+        
+        lapply(
+          split(file, 1:nrow(file)), 
+          function(x) {
+            browser()
+            display$server_image_output(x$name, x$datapath, session)
+          }
+        )
+        
       })
     }
   )
