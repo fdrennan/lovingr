@@ -1,31 +1,29 @@
 
-ui_header <- function(id='header') {
+ui_header <- function(id = "header") {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$dashboardHeader(skin = "dark")
 }
 
-ui_body <- function(id='body') {
+ui_body <- function(id = "body") {
   box::use(shiny, bs4Dash)
-  box::use(./box/utilities/io/file_upload)
+  box::use(. / box / utilities / io / file_upload)
   ns <- shiny$NS(id)
   bs4Dash$dashboardBody(
     bs4Dash$tabItems(
       bs4Dash$tabItem(
         tabName = "tab1",
-        bs4Dash$box(
-          file_upload$ui_file_upload(),
-          title = 'File Upload'
-        )
+        file_upload$ui_file_upload()
       )
     )
   )
 }
 
-ui_sidebar <- function(id='sidebar') {
+ui_sidebar <- function(id = "sidebar") {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$dashboardSidebar(
+    expandOnHover = FALSE,
     collapsed = TRUE,
     inputId = "sidebarState",
     bs4Dash$sidebarMenu(
@@ -33,7 +31,7 @@ ui_sidebar <- function(id='sidebar') {
       bs4Dash$menuItem(
         text = "Home",
         icon = shiny$icon("bars"),
-        startExpanded = TRUE,
+        startExpanded = FALSE,
         bs4Dash$menuSubItem(
           text = "Item 1",
           tabName = "tab1",
@@ -49,13 +47,15 @@ ui_sidebar <- function(id='sidebar') {
   )
 }
 
-ui_controlbar <- function(id='controlbar') {
+ui_controlbar <- function(id = "controlbar") {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  bs4Dash$dashboardControlbar()
+  bs4Dash$dashboardControlbar(
+    collapsed = TRUE
+  )
 }
 
-ui_footer <- function(id='footer') {
+ui_footer <- function(id = "footer") {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$bs4DashFooter()
@@ -75,7 +75,7 @@ ui_app <- function() {
 
 server_app <- function() {
   box::use(shiny, bs4Dash)
-  box::use(./box/utilities/io/file_upload)
+  box::use(. / box / utilities / io / file_upload)
   file_upload$server_file_upload()
 }
 
