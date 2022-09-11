@@ -20,6 +20,9 @@ ui_app <- function() {
 #' @export
 server_app <- function(session) {
   box::use(shiny, bs4Dash)
-  box::use(. / box / utilities / io / file_upload)
-  file_upload$server_file_upload()
+  box::use(
+    bs4Dash,
+    . / body / body
+  )
+  body$server_body()
 }

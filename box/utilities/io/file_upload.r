@@ -3,6 +3,7 @@
 ui_file_upload <- function(id = "file_upload") {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
+  print(ns("fileUpload"))
   bs4Dash$box(
     title = "File Upload",
     width = 12,
@@ -34,7 +35,10 @@ server_file_upload <- function(id = "file_upload") {
     id,
     function(input, output, session) {
       ns <- session$ns
-
+      shiny$observe({
+        print(ns("fileUpload"))
+        print(shiny$reactiveValuesToList(input))
+      })
       shiny$observeEvent(input$fileUpload, {
         output$fileMetaData <- shiny$renderTable({
           as.data.frame(input$fileUpload)
