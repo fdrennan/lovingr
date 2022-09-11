@@ -3,7 +3,7 @@
 ui_xlsx <- function(id = "xlsx") {
   box::use(shiny, .. / tables / datatable)
   ns <- shiny$NS(id)
-  shiny$div(id='sheets')
+  shiny$div(id = "sheets")
 }
 
 #' @export
@@ -23,8 +23,8 @@ server_xlsx <- function(id = "xlsx", datapath) {
           n_sheets,
           function(x) {
             shiny$insertUI(
-              '#sheets', 
-              'afterBegin',
+              "#sheets",
+              "afterBegin",
               datatable$ui_dt(ns(x))
             )
             data <- openxlsx$read.xlsx(datapath, sheetNames[[x]])
