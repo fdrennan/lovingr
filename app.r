@@ -76,7 +76,7 @@ ui_app <- function() {
 server_app <- function(session) {
   box::use(shiny, bs4Dash)
   box::use(. / box / utilities / io / file_upload)
-  file_upload$server_file_upload(parentSession=session)
+  file_upload$server_file_upload()
 }
 
 ui <- function() {

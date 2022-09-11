@@ -23,15 +23,14 @@ ui_file_upload <- function(id = "file_upload") {
           multiple = TRUE
         )
       },
-      shiny$tableOutput(ns("fileMetaData")),
-      shiny$div(id = ns("image_container"))
+      shiny$tableOutput(ns("fileMetaData"))
     )
   )
 }
 
 #' @export
-server_file_upload <- function(id = "file_upload", parentSession) {
-  box::use(shiny, bs4Dash, ../images/display)
+server_file_upload <- function(id = "file_upload") {
+  box::use(shiny)
   shiny$moduleServer(
     id,
     function(input, output, session) {
@@ -39,32 +38,12 @@ server_file_upload <- function(id = "file_upload", parentSession) {
       file <- shiny$reactive({
         shiny$req(input$fileUpload)
       })
-      output$fileMetaData <- shiny$renderTable({
-        shiny$req(file())
-        as.data.frame(file())
-      })
 
-      shiny$observeEvent(file(), {
-        file <- file()
-        lapply(
-          split(file, 1:nrow(file)), function(x) {
-            shiny$insertUI(
-              selector = paste0("#", ns("image_container")),
-              where = 'afterBegin',
-              ui = display$ui_image_output(x$name)
-            )
-          }
-        )
-        
-        lapply(
-          split(file, 1:nrow(file)), 
-          function(x) {
-            display$server_image_output(x$name, x$datapath, parentSession)
-          }
-        )
-        
+      shiny$observe(file(), {
+        output$fileMetaData <- shiny$renderTable({
+          as.data.frame(file())
+        })
       })
-    },
-    session = parentSession
+    }
   )
 }
