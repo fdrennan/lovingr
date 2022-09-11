@@ -1,7 +1,7 @@
 
 #' @export
-ui_file_upload <- function(id = "file_upload", 
-                           label = 'Upload a file', accept = "*", multiple = FALSE) {
+ui_file_upload <- function(id = "file_upload",
+                           label = "Upload a file", accept = "*", multiple = FALSE) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   shiny$fluidRow(
