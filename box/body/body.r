@@ -10,7 +10,10 @@ ui_body <- function(id = "body") {
     bs4Dash$tabItems(
       bs4Dash$tabItem(
         tabName = "tab1",
-        file_upload$ui_file_upload(ns("file_upload")),
+        file_upload$ui_file_upload(ns("file_upload"))
+      ),
+      bs4Dash$tabItem(
+        tabName = 'tab2',
         xlsx$ui_xlsx(ns("xlsx"))
       )
     )
