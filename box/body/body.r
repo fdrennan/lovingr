@@ -15,7 +15,7 @@ ui_body <- function(id = "body") {
         tabName = "tab1",
         metadata$ui_metadata(ns("metadata")),
         file_upload$ui_file_upload(ns("file_upload")),
-        bs4Dash$actionButton(ns("goToReview"), "Next")
+        shiny$div(class='text-right', bs4Dash$actionButton(ns("goToReview"), "Next"))
       ),
       bs4Dash$tabItem(
         tabName = "tab2",
