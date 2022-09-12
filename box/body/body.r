@@ -49,6 +49,13 @@ ui_body <- function(id = "body") {
             title = "Flagging Preview",
             collapsed = TRUE, width = 12
           )
+        ),
+        shiny$fluidRow(
+          datatable$ui_dt(
+            ns("data_for_analysis"),
+            title = "Analysis Data",
+            collapsed = TRUE, width = 12
+          )
         )
       )
     )
@@ -100,16 +107,19 @@ server_body <- function(id = "body", appSession) {
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
 
-      shiny$observe({
+      data_for_analysis <- shiny$reactive({
         shiny$req(metadata())
         shiny$req(config()())
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
+        datatable$server_dt("config", clean_config)
+        clean_config
+      })
 
-        clean_config_subset <- dplyr$select(
-          clean_config, analysis, paramcd, flagging_specification
-        )
-        datatable$server_dt("config", clean_config_subset)
+
+      shiny$observe({
+        shiny$req(data_for_analysis())
+        datatable$server_dt("data_for_analysis", data_for_analysis())
       })
     }
   )
