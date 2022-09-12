@@ -37,8 +37,8 @@ server_metadata <- function(id = "metadata") {
         datafiles <- datafiles()
         study <- datafiles$study
         shiny$selectizeInput(ns("study"), shiny$h5("Study"),
-          choices = study,
-          selected = study[1],
+          choices = unique(study),
+          selected = "111302",
           multiple = FALSE
         )
       })

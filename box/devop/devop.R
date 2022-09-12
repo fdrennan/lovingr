@@ -22,7 +22,6 @@ server_devop <- function(id = "devop") {
     function(input, output, session) {
       shiny$observeEvent(input$deleteDevelopmentFolder, {
         fs$dir_delete(getOption("datamisc_cache_path"))
-        shiny$showNotification("Development Data Deleted")
       })
       shiny$observeEvent(input$createDevelopmentFolder, {
         shiny$req(filteredData())
@@ -40,7 +39,6 @@ server_devop <- function(id = "devop") {
 
         if (nrow(data)) {
           n_files <- length(data$local_path)
-          shiny$showNotification(glue$glue("Copying {n_files} to local project"))
           data <- data |>
             dplyr$mutate(
               create_dir = fs$dir_create(fs$path_dir(local_path), recurse = T),
@@ -48,8 +46,6 @@ server_devop <- function(id = "devop") {
             ) |>
             dplyr$ungroup()
         }
-
-        shiny$showNotification("Data moved to local storage")
       })
     }
   )

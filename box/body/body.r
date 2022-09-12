@@ -83,11 +83,6 @@ server_body <- function(id = "body", appSession) {
 
       opts <- options$server_options("options")
 
-      shiny$observe({
-        shiny$req(opts)
-        shiny$showNotification("Ops generated")
-      })
-
       metadata <- metadata$server_metadata("metadata")
 
       shinyFiles$shinyFileChoose(
