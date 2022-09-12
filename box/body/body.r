@@ -2,7 +2,7 @@
 
 #' @export
 ui_body <- function(id = "body") {
-  box::use(shiny, bs4Dash)
+  box::use(shiny, bs4Dash, shinyFiles)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / options / options)
   box::use(.. / utilities / read / xlsx)
@@ -32,7 +32,11 @@ ui_body <- function(id = "body") {
                   }
                 }
               )
-            )
+            ),
+            shinyFiles$shinyFilesButton(ns('files'), 
+                                        label='File select', 
+                                        title='Please select a file', multiple=FALSE)
+            
           )
         ),
         shiny$fluidRow(
@@ -61,7 +65,7 @@ ui_body <- function(id = "body") {
 
 #' @export
 server_body <- function(id = "body", appSession) {
-  box::use(shiny, bs4Dash, dplyr)
+  box::use(shiny, bs4Dash, dplyr, shinyFiles)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / read / xlsx)
   box::use(.. / csm_config / clean)
@@ -77,11 +81,20 @@ server_body <- function(id = "body", appSession) {
       opts <- options$server_options("options")
 
       shiny$observe({
-        browser()
         shiny$req(opts)
-        shiny$showNotification("Ops updated")
+        shiny$showNotification("Ops generated")
       })
+      
       metadata <- metadata$server_metadata("metadata")
+      fileChosen <- shinyFiles$shinyFileChoose(
+        input, 'files', 
+        root=c(root={
+          browser()
+          getOption("base_directory")
+        }), 
+        filetypes=c('*')
+      )
+ 
       datapath <- file_upload$server_file_upload("file_upload")
       config <- xlsx$server_xlsx("xlsx", datapath, width = 12)
 
