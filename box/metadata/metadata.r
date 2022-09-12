@@ -1,12 +1,19 @@
 #' @export
-ui_metadata <- function(id = "metadata") {
+ui_metadata <- function(id = "metadata", width = 6) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  shiny$fluidRow(
-    shiny$uiOutput(ns("study")),
-    shiny$uiOutput(ns("year")),
-    shiny$uiOutput(ns("month")),
-    shiny$uiOutput(ns("analysis"))
+  input_container <- function(...) {
+    shiny$column(6, ...)
+  }
+  bs4Dash$box(
+    title = "Select data to import",
+    width = width,
+    shiny$fluidRow(
+      shiny$uiOutput(ns("study"), container = input_container),
+      shiny$uiOutput(ns("year"), container = input_container),
+      shiny$uiOutput(ns("month"), container = input_container),
+      shiny$uiOutput(ns("analysis"), container = input_container)
+    )
   )
 }
 
@@ -24,7 +31,7 @@ server_metadata <- function(id = "metadata") {
         datafiles <- cache$check()
         datafiles
       })
-      
+
       output$study <- shiny$renderUI({
         shiny$req(datafiles())
         datafiles <- datafiles()
@@ -43,10 +50,10 @@ server_metadata <- function(id = "metadata") {
           dplyr$pull(year)
 
         shiny$selectizeInput(
-          ns("year"), 
-          shiny$h5("Year"), 
-          choices = year, 
-          selected = year[1], 
+          ns("year"),
+          shiny$h5("Year"),
+          choices = year,
+          selected = year[1],
           multiple = FALSE
         )
       })
@@ -61,12 +68,12 @@ server_metadata <- function(id = "metadata") {
         max_month <- datafiles |>
           dplyr$filter(date == max(date)) |>
           dplyr$pull(monthName)
-        
+
         shiny$selectizeInput(
-          ns("monthName"), 
-          shiny$h5("Month"), 
-          choices = monthName, 
-          selected = max_month, 
+          ns("monthName"),
+          shiny$h5("Month"),
+          choices = monthName,
+          selected = max_month,
           multiple = TRUE
         )
       })

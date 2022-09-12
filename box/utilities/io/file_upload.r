@@ -1,21 +1,19 @@
 
 #' @export
-ui_file_upload <- function(id = "file_upload",
+ui_file_upload <- function(id = "file_upload", width = 6,
                            label = "Upload a file", accept = "*", multiple = FALSE) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  shiny$fluidRow(
-    bs4Dash$box(
-      title = "File Upload",
-      width = 12,
-      shiny$fileInput(
-        inputId = ns("fileUpload"),
-        label = label,
-        accept = accept,
-        multiple = multiple
-      ),
-      shiny$tableOutput(ns("fileMetaData"))
-    )
+  bs4Dash$box(
+    title = "File Upload",
+    width = width,
+    shiny$fileInput(
+      inputId = ns("fileUpload"),
+      label = label,
+      accept = accept,
+      multiple = multiple
+    ),
+    shiny$tableOutput(ns("fileMetaData"))
   )
 }
 

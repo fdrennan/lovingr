@@ -13,13 +13,20 @@ ui_body <- function(id = "body") {
     bs4Dash$tabItems(
       bs4Dash$tabItem(
         tabName = "tab1",
-        metadata$ui_metadata(ns("metadata")),
-        file_upload$ui_file_upload(ns("file_upload")),
-        shiny$div(class='text-right', bs4Dash$actionButton(ns("goToReview"), "Next"))
+        shiny$fluidRow(
+          metadata$ui_metadata(ns("metadata")),
+          file_upload$ui_file_upload(ns("file_upload")),
+          shiny$column(12,
+            class = "text-right", bs4Dash$actionButton(ns("goToReview"), "Next")
+          )
+        )
       ),
       bs4Dash$tabItem(
         tabName = "tab2",
-        datatable$ui_dt(ns("config"), collapsed = FALSE),
+        datatable$ui_dt(ns("config"),
+          title = "Flagging Preview",
+          collapsed = FALSE
+        ),
         xlsx$ui_xlsx(ns("xlsx"))
       )
     )
