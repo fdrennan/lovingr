@@ -1,45 +1,58 @@
 #' @export
-ui_options <- function(id = "options") {
-  box::use(shiny, shinyWidgets)
+ui_options <- function(id = "options", width = 6) {
+  box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  shinyWidgets$prettyToggle(
-    ns("development"),
-    label_on = "Development",
-    label_off = "Production",
-    value = TRUE
+  bs4Dash$box(
+    title = 'Options',
+    width = width,
+    shiny$fluidRow(
+      shiny$column(12, shiny$div(class='text-right', bs4Dash$actionButton(ns('resetOptions'), 'Reset')))
+    ),
+    shiny$uiOutput(ns('optionUI'), container = shiny$fluidRow)
   )
 }
 
 #' @export
 server_options <- function(id = "options") {
-  box::use(shiny, glue)
+  box::use(shiny, glue, shinyWidgets, bs4Dash)
+  
   shiny$moduleServer(
     id,
     function(input, output, session) {
+      ns <- session$ns
+      output$optionUI <- shiny$renderUI({
+        input$resetOptions
+        shiny$column(12,
+          bs4Dash$bs4Card(title = 'General Options',
+            shinyWidgets$prettyToggle(
+              ns("development"),
+              label_on = "Development",
+              label_off = "Production",
+              value = TRUE
+            )
+          ),
+          bs4Dash$bs4Card(title = 'File Aggregation',
+            shiny$textInput(ns('file_regex'), 'file_regex', "csm[0-9]{6}[a|b|c]/datamisc$"),
+            shiny$textInput(ns('bmrn_base_dir'), 'bmrn_base_dir', "/sassys/cdm/cdmdev/bmn111/ach"),
+            shiny$textInput(ns('local_base_prefix'), 'local_base_prefix', "datamisc")
+          )
+        )
+      })
+      
+      
       shiny$observeEvent(input$development, {
         options(development = input$development)
       })
-
-      output$ui <- shiny$renderUI({
-        # options(shiny.maxRequestSize = 300 * 1024^2)
-        # options(development = TRUE)
-        # options(base_config = "Config.xlsx")
-        # options(cache = getOption("development"))
-        # options(file_regex = "csm[0-9]{6}[a|b|c]/datamisc$")
-        # options(datamisc_cache_path = "./datamisc")
-        # options(bmrn_base_dir = "/sassys/cdm/cdmdev/bmn111/ach")
-        # options(base_directory = getOption("bmrn_base_dir"))
-        # options(cache_path = "./cache/data.rda")
-        # options(analysis_filter = {
-        #   if (getOption("development")) {
-        #     c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
-        #   } else {
-        #     c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
-        #   }
-        # })
+      
+      shiny$observeEvent(input$file_regex, {
+        options(file_regex = input$file_regex)
+      })
+      
+      shiny$observeEvent(input$local_base_prefix, {
+        options(local_base_prefix = input$local_base_prefix)
       })
 
-      input
+      
     }
   )
 }

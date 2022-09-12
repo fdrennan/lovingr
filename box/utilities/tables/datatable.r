@@ -1,16 +1,16 @@
 #' @export
-ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE) {
+ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12) {
   box::use(shiny, DT, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
-    width = 12,
+    width = width,
     title = title, collapsed = collapsed,
     DT$DTOutput(ns("ui"))
   )
 }
 
 #' @export
-server_dt <- function(id = "dt", data) {
+server_dt <- function(id = "dt", data, pageLength = 50) {
   box::use(shiny, DT, bs4Dash)
   shiny$moduleServer(
     id,
@@ -20,7 +20,7 @@ server_dt <- function(id = "dt", data) {
         DT::datatable(data,
           options = list(
             scrollX = TRUE,
-            pageLength = 5,
+            pageLength = pageLength,
             filter = "top"
           ),
           class = "display",

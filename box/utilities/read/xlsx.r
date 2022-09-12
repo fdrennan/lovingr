@@ -7,7 +7,7 @@ ui_xlsx <- function(id = "xlsx") {
 }
 
 #' @export
-server_xlsx <- function(id = "xlsx", datapath) {
+server_xlsx <- function(id = "xlsx", datapath, width = 12) {
   box::use(shiny, openxlsx, fs, glue, uuid)
   box::use(shiny, .. / tables / datatable)
   shiny$moduleServer(
@@ -45,7 +45,7 @@ server_xlsx <- function(id = "xlsx", datapath) {
             shiny$insertUI(
               "#sheets",
               "afterEnd",
-              datatable$ui_dt(ns(uuid), title = data$sheetName)
+              datatable$ui_dt(ns(uuid), title = data$sheetName, width = width)
             )
             datatable$server_dt(uuid, data$data)
           }

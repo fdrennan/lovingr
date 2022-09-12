@@ -2,9 +2,9 @@
 ui_sidebar <- function(id = "sidebar") {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  bs4Dash$dashboardSidebar(
+  bs4Dash$dashboardSidebar(disable = TRUE,
     expandOnHover = FALSE,
-    collapsed = TRUE,
+    collapsed = TRUE, 
     inputId = "sidebarState",
     bs4Dash$sidebarMenu(
       id = "sidebar",
