@@ -13,7 +13,8 @@ ui_body <- function(id = "body") {
   bs4Dash$dashboardBody(
     shiny$fluidRow(
       shiny$column(
-        8, offset = 2,
+        8,
+        offset = 2,
         shiny$fluidRow(
           options$ui_options(ns("options"), width = 12),
           metadata$ui_metadata(ns("metadata"), width = 12),
@@ -21,17 +22,21 @@ ui_body <- function(id = "body") {
         )
       ),
       shiny$column(
-        8, offset = 2,
-        datatable$ui_dt(
-          ns("config"),
-          title = "Flagging Preview",
-          collapsed = FALSE, width = 12
+        8,
+        offset = 2,
+        shiny$fluidRow(
+          datatable$ui_dt(
+            ns("config"),
+            title = "Flagging Preview",
+            collapsed = FALSE, width = 12
+          )
         )
       ),
       shiny$column(
-        8, offset = 2,
+        8,
+        offset = 2,
         xlsx$ui_xlsx(ns("xlsx"))
-      ) 
+      )
     )
   )
 }
@@ -56,21 +61,21 @@ server_body <- function(id = "body", appSession) {
       metadata <- metadata$server_metadata("metadata")
       datapath <- file_upload$server_file_upload("file_upload")
       config <- xlsx$server_xlsx("xlsx", datapath, width = 12)
- 
-      
-      
+
+
+
       shiny$observe({
         shiny$throttle(metadata(), 20000)
         shiny$throttle(config(), 20000)
-        
+
         shiny$req(metadata())
         shiny$req(config())
-        
-        
+
+
         metadata <- metadata()
         config <- config()
-        
-        
+
+
         clean_config <- clean$clean_config(config)
         clean_config <- dplyr$left_join(metadata, clean_config)
 
