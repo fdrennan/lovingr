@@ -2,7 +2,6 @@
 check <- function() {
   box::use(readr, dplyr)
   cache_path <- getOption("cache_path")
-  # browser()
   if (getOption("cache")) {
     analysis_filter <- getOption("analysis_filter")
     data <- readr$read_rds(cache_path)

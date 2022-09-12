@@ -6,7 +6,13 @@ ui_options <- function(id = "options", width = 6) {
     title = "Break Things",
     width = width,
     shiny$fluidRow(
-      shiny$column(12, shiny$div(class = "text-right py-2", bs4Dash$actionButton(ns("resetOptions"), "Reset")))
+      shiny$column(
+        12,
+        shiny$div(
+          class = "text-right py-2",
+          bs4Dash$actionButton(ns("resetOptions"), "Reset")
+        )
+      )
     ),
     shiny$uiOutput(ns("optionUI"), container = shiny$fluidRow)
   )

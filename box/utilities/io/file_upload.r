@@ -1,7 +1,10 @@
 
 #' @export
-ui_file_upload <- function(id = "file_upload", width = 6,
-                           label = "Upload a file", accept = "*", multiple = FALSE) {
+ui_file_upload <- function(id = "file_upload",
+                           width = 6,
+                           label = "Upload a file",
+                           accept = "*",
+                           multiple = FALSE) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
@@ -33,8 +36,13 @@ server_file_upload <- function(id = "file_upload",
       }
 
       out <- shiny$reactive({
-        shiny$req(input$fileUpload)
-        input$fileUpload$datapath
+        if (getOption("development")) {
+          out <- getOption("base_config")
+        } else {
+          shiny$req(input$fileUpload)
+          out <- input$fileUpload$datapath
+        }
+        out
       })
 
       out

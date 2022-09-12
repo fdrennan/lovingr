@@ -44,7 +44,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12) {
             uuid <- uuid::UUIDgenerate()
             shiny$insertUI(
               "#sheets",
-              "afterEnd",
+              "afterBegin",
               datatable$ui_dt(ns(uuid), title = data$sheetName, width = width)
             )
             datatable$server_dt(uuid, data$data)

@@ -38,7 +38,8 @@ server_metadata <- function(id = "metadata") {
         study <- datafiles$study
         shiny$selectizeInput(ns("study"), shiny$h5("Study"),
           choices = study,
-          selected = study[1], multiple = FALSE
+          selected = study[1],
+          multiple = FALSE
         )
       })
 
@@ -52,19 +53,16 @@ server_metadata <- function(id = "metadata") {
         shiny$selectizeInput(
           ns("year"),
           shiny$h5("Year"),
-          choices = year,
-          selected = year[1],
+          choices = unique(year),
+          selected = max(as.numeric(year)),
           multiple = FALSE
         )
       })
 
       output$month <- shiny$renderUI({
-        datafiles <- datafiles()
         shiny$req(input$year)
-        monthName <- datafiles |>
-          dplyr$filter(study %in% input$study, year %in% input$year) |>
-          dplyr$pull(monthName)
-
+        datafiles <- dplyr$filter(datafiles(), study %in% input$study, year %in% input$year)
+        monthName <- dplyr$pull(datafiles, monthName)
         max_month <- datafiles |>
           dplyr$filter(date == max(date)) |>
           dplyr$pull(monthName)
@@ -72,8 +70,8 @@ server_metadata <- function(id = "metadata") {
         shiny$selectizeInput(
           ns("monthName"),
           shiny$h5("Month"),
-          choices = monthName,
-          selected = max_month,
+          choices = unique(monthName),
+          selected = unique(max_month),
           multiple = TRUE
         )
       })
@@ -81,9 +79,11 @@ server_metadata <- function(id = "metadata") {
       output$analysis <- shiny$renderUI({
         shiny$req(input$monthName)
         datafiles <- datafiles()
+
         analysis <- datafiles |>
           dplyr$filter(
-            study %in% input$study, year %in% input$year,
+            study %in% input$study,
+            year %in% input$year,
             monthName %in% input$monthName
           ) |>
           dplyr$pull(analysis)

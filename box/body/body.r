@@ -16,14 +16,26 @@ ui_body <- function(id = "body") {
         8,
         offset = 2,
         shiny$fluidRow(
-          options$ui_options(ns("options"), width = 12),
-          metadata$ui_metadata(ns("metadata"), width = 12),
-          file_upload$ui_file_upload(ns("file_upload"), width = 12)
-        )
-      ),
-      shiny$column(
-        8,
-        offset = 2,
+          options$ui_options(ns("options"), width = 12)
+        ),
+        shiny$fluidRow(
+          bs4Dash$box(
+            title = "Data Import", width = 12,
+            metadata$ui_metadata(ns("metadata"), width = 12),
+            file_upload$ui_file_upload(ns("file_upload"), width = 12)
+          )
+        ),
+        shiny$fluidRow(
+          bs4Dash$box(
+            title = "Raw Data", width = 12,
+            shiny$fluidRow(
+              shiny$column(
+                12,
+                xlsx$ui_xlsx(ns("xlsx"))
+              )
+            )
+          )
+        ),
         shiny$fluidRow(
           datatable$ui_dt(
             ns("config"),
@@ -31,11 +43,6 @@ ui_body <- function(id = "body") {
             collapsed = FALSE, width = 12
           )
         )
-      ),
-      shiny$column(
-        8,
-        offset = 2,
-        xlsx$ui_xlsx(ns("xlsx"))
       )
     )
   )
