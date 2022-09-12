@@ -26,9 +26,9 @@ clean_config <- function(config) {
   flagging_sheet <- purrr$map_dfr(flagging_sheet, function(x) {
     x$Flagging.Specification <- unescape_html(x$Flagging.Specification)
     data.frame(
-      Analysis = x$Analysis,
-      Signals = strsplit(x$Signals[1], ", ")[[1]],
-      Flagging.Specification = x$Flagging.Specification
+      analysis = tolower(x$Analysis),
+      paramcd = tolower(strsplit(x$Signals[1], ", ")[[1]]),
+      flagging_specification = x$Flagging.Specification
     )
   })
 

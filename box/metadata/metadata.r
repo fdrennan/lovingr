@@ -68,17 +68,14 @@ server_metadata <- function(id = "metadata") {
           ) |>
           dplyr$pull(analysis)
 
-        shiny$div(
-          shiny$selectizeInput(ns("analysis"), "Analysis",
-            choices = analysis,
-            selected = analysis, multiple = TRUE
-          ),
-          bs4Dash$actionButton(ns("go"), shiny$h5("Import Study"))
+        shiny$selectizeInput(ns("analysis"), "Analysis",
+          choices = analysis,
+          selected = analysis, multiple = TRUE
         )
       })
 
       filteredData <- shiny$eventReactive(
-        input$go,
+        input$analysis,
         {
           datafiles <- datafiles()
           files <- datafiles |>
@@ -87,16 +84,16 @@ server_metadata <- function(id = "metadata") {
               year %in% input$year,
               monthName %in% input$monthName,
               analysis %in% input$analysis
+            ) |>
+            dplyr$select(
+              study, month, monthName, year, date,
+              analysis, filename
             )
           files
         }
       )
 
-      out <- shiny$reactive({
-        shiny$req(filteredData())
-        filteredData()
-      })
-      out
+      filteredData
     }
   )
 }
