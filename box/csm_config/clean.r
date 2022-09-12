@@ -9,9 +9,10 @@ clean_config <- function(config) {
     xml2$xml_text(rvest$read_html(paste0("<x>", str, "</x>")))
   }
 
-  flagging_sheet <- purrr$keep(config, ~ .$sheetName == "Flagging")
+  flagging_sheet <- purrr$keep(config, ~ .$sheetName == "Flagging")[[1]]
+  datapaths <- purrr$keep(config, ~ .$sheetName == "DataPaths")[[1]]
 
-  flagging_sheet <- flagging_sheet[[1]]$data |>
+  flagging_sheet <- flagging_sheet$data |>
     dplyr$select(Analysis, Signals, Flagging.Specification) |>
     dplyr$filter(!is.na(Flagging.Specification)) |>
     dplyr$group_by_all() |>
@@ -31,6 +32,5 @@ clean_config <- function(config) {
       flagging_specification = x$Flagging.Specification
     )
   })
-
-  flagging_sheet
+  flagging_sheet <- dplyr$inner_join(flagging_sheet, datapaths$data)
 }

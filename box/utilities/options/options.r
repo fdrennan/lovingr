@@ -38,12 +38,6 @@ server_options <- function(id = "options") {
             bs4Dash$bs4Card(
               title = "General Options", width = 12,
               shinyWidgets$prettyToggle(
-                ns("development"),
-                label_on = "Development",
-                label_off = "Production",
-                value = TRUE
-              ),
-              shinyWidgets$prettyToggle(
                 ns("chatty"),
                 label_on = "Use Chatty",
                 label_off = "Shut Up",
@@ -66,11 +60,6 @@ server_options <- function(id = "options") {
         )
       })
 
-
-      shiny$observeEvent(input$development, {
-        options(development = input$development)
-        chatty$chatty(session, input)
-      })
 
       shiny$observeEvent(input$chatty, {
         options(chatty = input$chatty)

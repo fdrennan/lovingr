@@ -100,7 +100,6 @@ server_body <- function(id = "body", appSession) {
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
 
-
       shiny$observe({
         shiny$req(metadata())
         shiny$req(config()())
