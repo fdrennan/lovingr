@@ -13,6 +13,11 @@ ui_sidebar <- function(id = "sidebar") {
         icon = shiny$icon("bars"),
         startExpanded = FALSE,
         bs4Dash$menuSubItem(
+          text = "Options",
+          tabName = "tab0",
+          icon = shiny$icon("cog")
+        ),
+        bs4Dash$menuSubItem(
           text = "Upload",
           tabName = "tab1",
           icon = shiny$icon("bars")

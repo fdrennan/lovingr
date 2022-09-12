@@ -12,6 +12,10 @@ ui_body <- function(id = "body") {
   bs4Dash$dashboardBody(
     bs4Dash$tabItems(
       bs4Dash$tabItem(
+        tabName = "tab0",
+        shiny$div("Options")
+      ),
+      bs4Dash$tabItem(
         tabName = "tab1",
         shiny$fluidRow(
           metadata$ui_metadata(ns("metadata")),
