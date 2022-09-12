@@ -23,8 +23,10 @@ ui_app <- function() {
 #' @export
 server_app <- function(session) {
   box::use(
-    . / body / body
+    . / body / body,
+    . / controlbar / controlbar
   )
 
   body$server_body(appSession = session)
+  controlbar$server_controlbar()
 }

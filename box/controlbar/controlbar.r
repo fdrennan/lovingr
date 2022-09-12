@@ -1,36 +1,30 @@
 #' @export
 ui_controlbar <- function(id = "controlbar") {
   box::use(shiny, bs4Dash)
-  box::use(.. / metadata / ui_metadata)
-  box::use(.. / devop / ui_devop)
+
+  box::use(.. / devop / devop)
   ns <- shiny$NS(id)
+  print(ns("metadata"))
   bs4Dash$dashboardControlbar(
     collapsed = TRUE,
     shiny$div(
       class = "p-3",
-      if (getOption("development")) NULL else ui_devop$ui(),
-      ui_metadata$ui()
+      if (getOption("development")) devop$ui_devop(ns("devop")) else NULL
     )
   )
 }
 
 #' @export
-server_controlbar <- function(id) {
+server_controlbar <- function(id = "controlbar") {
   box::use(shiny)
 
   shiny$moduleServer(
     id,
     function(input, output, session) {
-      box::use(.. / metadata / ui_metadata)
-      box::use(.. / devop / ui_devop)
-      server_devop$server()
-      metadata <- server_metadata$server()
+      ns <- session$ns
 
-      observe({
-        browser()
-        shiny$req(metadata())
-        print(metadata())
-      })
+      box::use(.. / devop / devop)
+      devop$server_devop(id = "devop")
     }
   )
 }
