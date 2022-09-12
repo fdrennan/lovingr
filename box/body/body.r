@@ -22,7 +22,17 @@ ui_body <- function(id = "body") {
           bs4Dash$box(
             title = "Data Import", width = 12,
             metadata$ui_metadata(ns("metadata"), width = 12),
-            file_upload$ui_file_upload(ns("file_upload"), width = 12)
+            file_upload$ui_file_upload(ns("file_upload"),
+              width = 12,
+              footer = shiny$div(
+                class = "text-right",
+                {
+                  if (getOption("development")) {
+                    shiny$tags$p("Running in development mode.")
+                  }
+                }
+              )
+            )
           )
         ),
         shiny$fluidRow(
@@ -64,7 +74,13 @@ server_body <- function(id = "body", appSession) {
     function(input, output, session) {
       ns <- session$ns
 
-      options$server_options("options")
+      opts <- options$server_options("options")
+
+      shiny$observe({
+        browser()
+        shiny$req(opts)
+        shiny$showNotification("Ops updated")
+      })
       metadata <- metadata$server_metadata("metadata")
       datapath <- file_upload$server_file_upload("file_upload")
       config <- xlsx$server_xlsx("xlsx", datapath, width = 12)

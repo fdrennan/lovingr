@@ -62,6 +62,12 @@ server_options <- function(id = "options") {
       shiny$observeEvent(input$local_base_prefix, {
         options(local_base_prefix = input$local_base_prefix)
       })
+
+      shiny$observe({
+        box::use(.. / chatty / chatty)
+        chatty$chatty(input)
+      })
+      input
     }
   )
 }
