@@ -15,7 +15,7 @@ server_xlsx <- function(id = "xlsx", datapath) {
     function(input, output, session) {
       ns <- session$ns
 
-      xlsx_path <- shiny$eventReactive(datapath(), {
+      xlsx_data <- shiny$eventReactive(datapath(), {
         datapath <- datapath()
         datapath_ext <- fs$path_ext(datapath)
         is_xlsx <- datapath_ext == "xlsx"
@@ -26,26 +26,33 @@ server_xlsx <- function(id = "xlsx", datapath) {
           shiny$req(is_xlsx)
         }
 
-        datapath
+        sheetNames <- openxlsx$getSheetNames(datapath)
+
+        lapply(sheetNames, function(sheetName) {
+          list(
+            sheetName = sheetName,
+            data = openxlsx$read.xlsx(datapath, sheetName)
+          )
+        })
       })
 
-      shiny$observeEvent(xlsx_path(), {
-        datapath <- datapath()
-        sheetNames <- openxlsx$getSheetNames(datapath)
+      shiny$observeEvent(xlsx_data(), {
+        xlsx_data <- xlsx_data()
         lapply(
-          sheetNames,
-          function(sheetName) {
+          xlsx_data,
+          function(data) {
             uuid <- uuid::UUIDgenerate()
             shiny$insertUI(
               "#sheets",
-              "afterBegin",
-              datatable$ui_dt(ns(uuid), title = sheetName)
+              "afterEnd",
+              datatable$ui_dt(ns(uuid), title = data$sheetName)
             )
-            data <- openxlsx$read.xlsx(datapath, sheetName)
-            datatable$server_dt(uuid, data)
+            datatable$server_dt(uuid, data$data)
           }
         )
       })
+
+      xlsx_data
     }
   )
 }

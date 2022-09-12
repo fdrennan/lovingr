@@ -1,10 +1,10 @@
 #' @export
-ui_dt <- function(id = "dt", title = NULL) {
+ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE) {
   box::use(shiny, DT, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
     width = 12,
-    title = title,
+    title = title, collapsed = collapsed,
     DT$DTOutput(ns("ui"))
   )
 }
@@ -18,7 +18,11 @@ server_dt <- function(id = "dt", data) {
       ns <- session$ns
       output$ui <- DT$renderDT({
         DT::datatable(data,
-          options = list(scrollX = TRUE),
+          options = list(
+            scrollX = TRUE,
+            pageLength = 5,
+            filter = "top"
+          ),
           class = "display",
           caption = NULL,
           filter = c("none", "bottom", "top"),

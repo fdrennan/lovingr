@@ -24,6 +24,5 @@ server_app <- function(session) {
     bs4Dash,
     . / body / body
   )
-  browser()
-  body$server_body(appSession=session)
+  body$server_body(appSession = session)
 }
