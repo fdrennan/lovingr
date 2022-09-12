@@ -9,6 +9,7 @@ ui_body <- function(id = "body") {
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
 
+
   ns <- shiny$NS(id)
   bs4Dash$dashboardBody(
     shiny$fluidRow(
@@ -32,11 +33,10 @@ ui_body <- function(id = "body") {
                   }
                 }
               )
-            ),
-            shinyFiles$shinyFilesButton(ns('files'), 
-                                        label='File select', 
-                                        title='Please select a file', multiple=FALSE)
-            
+            )
+            # shinyFiles$shinyFilesButton(ns('files'),
+            #                             label='File select',
+            #                             title='Please select a file', multiple=FALSE)
           )
         ),
         shiny$fluidRow(
@@ -45,7 +45,8 @@ ui_body <- function(id = "body") {
             shiny$fluidRow(
               shiny$column(
                 12,
-                xlsx$ui_xlsx(ns("xlsx"))
+                xlsx$ui_xlsx(ns("xlsx-server")),
+                xlsx$ui_xlsx(ns("xlsx-local"))
               )
             )
           )
@@ -66,6 +67,7 @@ ui_body <- function(id = "body") {
 #' @export
 server_body <- function(id = "body", appSession) {
   box::use(shiny, bs4Dash, dplyr, shinyFiles)
+  box::use(.. / utilities / chatty / chatty)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / read / xlsx)
   box::use(.. / csm_config / clean)
@@ -78,42 +80,50 @@ server_body <- function(id = "body", appSession) {
     function(input, output, session) {
       ns <- session$ns
 
+      shiny$observe(chatty$chatty(session, input))
+
       opts <- options$server_options("options")
 
       shiny$observe({
         shiny$req(opts)
         shiny$showNotification("Ops generated")
       })
-      
-      metadata <- metadata$server_metadata("metadata")
-      fileChosen <- shinyFiles$shinyFileChoose(
-        input, 'files', 
-        root=c(root={
-          browser()
-          getOption("base_directory")
-        }), 
-        filetypes=c('*')
-      )
- 
-      datapath <- file_upload$server_file_upload("file_upload")
-      config <- xlsx$server_xlsx("xlsx", datapath, width = 12)
 
+      metadata <- metadata$server_metadata("metadata")
+
+      shinyFiles$shinyFileChoose(
+        input, "files",
+        root = c(root = {
+          "."
+        }),
+        filetypes = c("xlsx")
+      )
+
+      # datapathServer <- shiny$reactive({
+      #   input$files$files[[1]][[2]]
+      # })
+      #
+      #
+      # config <- shiny$eventReactive(datapathServer, {
+      #   browser
+      #   shiny$showNotification('Using Server File')
+      #   xlsx$server_xlsx("xlsx-server", datapathServer, width = 12)
+      # })
+      #
+      datapathUpload <- file_upload$server_file_upload("file_upload")
+
+
+      config <- shiny$eventReactive(datapathUpload, {
+        shiny$showNotification("Using Uploaded File")
+        xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
+      })
 
 
       shiny$observe({
-        shiny$throttle(metadata(), 20000)
-        shiny$throttle(config(), 20000)
-
         shiny$req(metadata())
-        shiny$req(config())
-
-
-        metadata <- metadata()
-        config <- config()
-
-
-        clean_config <- clean$clean_config(config)
-        clean_config <- dplyr$left_join(metadata, clean_config)
+        shiny$req(config()())
+        clean_config <- clean$clean_config(config()())
+        clean_config <- dplyr$left_join(metadata(), clean_config)
 
         clean_config_subset <- dplyr$select(
           clean_config, analysis, paramcd, flagging_specification

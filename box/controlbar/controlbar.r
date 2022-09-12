@@ -3,7 +3,6 @@ ui_controlbar <- function(id = "controlbar") {
   box::use(shiny, bs4Dash)
   box::use(.. / devop / devop)
   ns <- shiny$NS(id)
-  print(ns("metadata"))
   bs4Dash$dashboardControlbar(
     collapsed = TRUE,
     shiny$div(

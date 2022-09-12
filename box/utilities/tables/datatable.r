@@ -39,11 +39,6 @@ server_dt <- function(id = "dt", data, pageLength = 50) {
           editable = FALSE
         )
       })
-
-      shiny$observe({
-        data <- shiny$reactiveValuesToList(input)
-        print(data)
-      })
     }
   )
 }

@@ -7,7 +7,7 @@ chatty <- function(session = shiny$getDefaultReactiveDomain, input, ...) {
       session,
       input,
       id = uuid$UUIDgenerate(),
-      shiny$fluidRow( 
+      shiny$fluidRow(
         shiny$column(
           12,
           shiny$pre(json_data)
@@ -17,8 +17,8 @@ chatty <- function(session = shiny$getDefaultReactiveDomain, input, ...) {
         border = "4px solid crimson",
         boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
       ),
-      bodyClassName = 'row',
-      toastClassName = 'row',
+      bodyClassName = "row",
+      toastClassName = "row",
       autoClose = FALSE
     )
   }
