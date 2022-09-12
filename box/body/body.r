@@ -29,9 +29,6 @@ ui_body <- function(id = "body") {
                 shiny$tags$p("Upload Disabled - Running in development mode.")
               }
             )
-            # shinyFiles$shinyFilesButton(ns('files'),
-            #                             label='File select',
-            #                             title='Please select a file', multiple=FALSE)
           )
         ),
         shiny$fluidRow(
@@ -94,17 +91,7 @@ server_body <- function(id = "body", appSession) {
         filetypes = c("xlsx")
       )
 
-      # datapathServer <- shiny$reactive({
-      #   input$files$files[[1]][[2]]
-      # })
-      #
-      #
-      # config <- shiny$eventReactive(datapathServer, {
-      #   browser
-      #   shiny$showNotification('Using Server File')
-      #   xlsx$server_xlsx("xlsx-server", datapathServer, width = 12)
-      # })
-      #
+
       datapathUpload <- file_upload$server_file_upload("file_upload")
 
 
@@ -128,3 +115,18 @@ server_body <- function(id = "body", appSession) {
     }
   )
 }
+
+# shinyFiles$shinyFilesButton(ns('files'),
+#                             label='File select',
+#                             title='Please select a file', multiple=FALSE)
+# datapathServer <- shiny$reactive({
+#   input$files$files[[1]][[2]]
+# })
+#
+#
+# config <- shiny$eventReactive(datapathServer, {
+#   browser
+#   shiny$showNotification('Using Server File')
+#   xlsx$server_xlsx("xlsx-server", datapathServer, width = 12)
+# })
+#
