@@ -3,7 +3,7 @@ ui_options <- function(id = "options", width = 6) {
   box::use(shiny, bs4Dash, shinyToastify)
   ns <- shiny$NS(id)
   bs4Dash$box(
-    title = "Break Things",
+    title = "Options and General Settings",
     width = width,
     shiny$fluidRow(
       shiny$tags$head(shinyToastify$useShinyToastify()),
@@ -53,7 +53,14 @@ server_options <- function(id = "options") {
             bs4Dash$bs4Card(
               title = "File Aggregation", width = 12,
               shiny$textInput(ns("file_regex"), "file_regex", "csm[0-9]{6}[a|b|c]/datamisc$"),
-              shiny$textInput(ns("base_dir"), "base_dir", paste0(getOption("datamisc_cache_path"), getOption("bmrn_base_dir")))
+              shiny$textInput(
+                ns("base_dir"),
+                "base_dir",
+                paste0(
+                  getOption("datamisc_cache_path"),
+                  getOption("bmrn_base_dir")
+                )
+              )
             )
           )
         )

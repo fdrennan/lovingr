@@ -25,14 +25,9 @@ ui_body <- function(id = "body") {
             metadata$ui_metadata(ns("metadata"), width = 12),
             file_upload$ui_file_upload(ns("file_upload"),
               width = 12,
-              footer = shiny$div(
-                class = "text-right",
-                {
-                  if (getOption("development")) {
-                    shiny$tags$p("Running in development mode.")
-                  }
-                }
-              )
+              footer = if (getOption("development")) {
+                shiny$tags$p("Upload Disabled - Running in development mode.")
+              }
             )
             # shinyFiles$shinyFilesButton(ns('files'),
             #                             label='File select',
