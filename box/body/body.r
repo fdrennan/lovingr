@@ -55,7 +55,7 @@ ui_body <- function(id = "body") {
           datatable$ui_dt(
             ns("config"),
             title = "Flagging Preview",
-            collapsed = FALSE, width = 12
+            collapsed = TRUE, width = 12
           )
         )
       )
