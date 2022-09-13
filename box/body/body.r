@@ -51,7 +51,8 @@ ui_body <- function(id = "body") {
             collapsed = TRUE, width = 12
           )
         ),
-        shiny$div(id = "dataPreview")
+        shiny$div(id = "dataPreview"),
+        shiny$div(id = "uiAnalyses")
       )
     )
   )
@@ -60,11 +61,12 @@ ui_body <- function(id = "body") {
 
 #' @export
 server_body <- function(id = "body", appSession) {
-  box::use(shiny, bs4Dash, dplyr, shinyFiles)
+  box::use(shiny, bs4Dash, dplyr, shinyFiles, fs, utils, purrr)
   box::use(.. / utilities / chatty / chatty)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / read / xlsx)
   box::use(.. / csm_config / clean)
+  box::use(.. / analysis / app / run_analysis / run_analysis)
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
   box::use(.. / utilities / options / options)
@@ -131,25 +133,42 @@ server_body <- function(id = "body", appSession) {
               "afterBegin",
               xlsx$ui_xlsx(ns(uuid))
             )
-            xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreviewElements")
+            xlsx$server_xlsx(
+              uuid,
+              datapath = path,
+              ui_id = "#dataPreviewElements"
+            )
           }
         )
+      })
+
+      shiny$observeEvent(clean_config(), {
+        # shiny$req(clean_config())
+        clean_config <- clean_config()
+        analysis_code <- fs$dir_info("box/analysis/execute")
+        analysis_code <- analysis_code |>
+          dplyr$select(path) |>
+          dplyr$mutate(
+            analysis = gsub("box/analysis/execute/analysis_", "", path),
+            analysis = fs$path_ext_remove(analysis)
+          )
+        
+        analysis_code <- dplyr$inner_join(analysis_code, clean_config)
+        analysis_code <- split(analysis_code, analysis_code$analysis)
+        
+        purrr$iwalk(analysis_code, function(analysis_data, name) {
+          shiny$insertUI(
+            "#uiAnalyses",
+            "afterBegin",
+            run_analysis$ui_run_analysis(
+              ns(paste0("run_analysis", name)), analysis_data
+            )
+          )
+          run_analysis$server_run_analysis(
+            paste0("run_analysis", name), analysis_data
+          )
+        })
       })
     }
   )
 }
-
-# shinyFiles$shinyFilesButton(ns('files'),
-#                             label='File select',
-#                             title='Please select a file', multiple=FALSE)
-# datapathServer <- shiny$reactive({
-#   input$files$files[[1]][[2]]
-# })
-#
-#
-# config <- shiny$eventReactive(datapathServer, {
-#   browser
-#   shiny$showNotification('Using Server File')
-#   xlsx$server_xlsx("xlsx-server", datapathServer, width = 12)
-# })
-#

@@ -41,7 +41,7 @@ server_options <- function(id = "options") {
                 ns("chatty"),
                 label_on = "Use Chatty",
                 label_off = "Shut Up",
-                value = TRUE
+                value = FALSE
               ),
               shinyWidgets$prettyToggle(
                 ns("ignoreConfigPath"),

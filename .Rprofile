@@ -1,6 +1,6 @@
 source("renv/activate.R")
 options(shiny.maxRequestSize = 300 * 1024^2)
-options(chatty = TRUE)
+options(chatty = FALSE)
 options(development = TRUE)
 options(base_config = "Config.xlsx")
 options(cache = getOption("development"))
@@ -14,9 +14,11 @@ options(base_directory = paste0(
 options(cache_path = "./cache/data.rda")
 options(analysis_filter = {
   if (getOption("development")) {
-    c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
+    # Cc("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
+    c("aei")
   } else {
-    c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
+    c("aei")
+    # c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
   }
 })
 options(ignoreConfigPath = TRUE)
