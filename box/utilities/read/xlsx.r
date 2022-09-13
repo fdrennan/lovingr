@@ -28,20 +28,23 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
           },
           "sas7bdat" = list(
             list(
-              sheetName = datapath,
+              sheetName = fs$path_file(datapath),
               data = haven$read_sas(datapath)
             )
           ),
-          "csv" = list(
+          "csv" = {
             list(
-              sheetName = datapath,
-              readr$read_csv(datapath)
+              list(
+                sheetName = fs$path_file(datapath),
+                data = readr$read_csv(datapath)
+              )
             )
-          )
+          }
         )
       })
 
       shiny$observeEvent(xlsx_data(), {
+        # shiny$removeUI(selector='ui_id')
         xlsx_data <- xlsx_data()
         lapply(
           xlsx_data,

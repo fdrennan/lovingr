@@ -47,11 +47,11 @@ ui_body <- function(id = "body") {
         shiny$fluidRow(
           datatable$ui_dt(
             ns("clean_config"),
-            title = "Analysis Data",
+            title = "Flagging Summary",
             collapsed = TRUE, width = 12
           )
         ),
-        shiny$fluidRow(id = "dataPreview")
+        shiny$div(id = "dataPreview")
       )
     )
   )
@@ -111,15 +111,27 @@ server_body <- function(id = "body", appSession) {
         clean_config <- clean_config()
         import_files <- dplyr$distinct(clean_config(), analysis, filepath)
         uuid <- uuid::UUIDgenerate()
+
+
+        shiny$removeUI(
+          "#dataPreviewElements"
+        )
+
+        shiny$insertUI(
+          "#dataPreview",
+          "afterBegin",
+          shiny$fluidRow(id = "dataPreviewElements")
+        )
+
         lapply(
           import_files$filepath,
           function(path) {
             shiny$insertUI(
-              "#dataPreview",
+              "#dataPreviewElements",
               "afterBegin",
               xlsx$ui_xlsx(ns(uuid))
             )
-            xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreview")
+            xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreviewElements")
           }
         )
       })
