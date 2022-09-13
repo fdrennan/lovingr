@@ -1,4 +1,4 @@
-style:
+style: sass
 	R -e "styler::style_dir()"
 
 sass:

@@ -12,6 +12,7 @@ ui_body <- function(id = "body") {
 
   ns <- shiny$NS(id)
   bs4Dash$dashboardBody(
+    shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
       shiny$column(
         8,

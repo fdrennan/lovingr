@@ -13,12 +13,10 @@ chatty <- function(session = shiny$getDefaultReactiveDomain, input, ...) {
           shiny$pre(json_data)
         )
       ),
-      style = list(
-        border = "4px solid crimson",
-        boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
-      ),
-      bodyClassName = "row",
-      toastClassName = "row",
+      toastClassName = "chatty",
+      bodyClassName = "chatty", progressClassName = "chatty",
+      className = "chatty",
+      position = "top-center",
       autoClose = FALSE
     )
   }
