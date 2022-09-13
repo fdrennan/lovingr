@@ -2,7 +2,7 @@
 
 #' @export
 clean_config <- function(config) {
-  box::use(dplyr, purrr)
+  box::use(dplyr, purrr, shiny)
 
   unescape_html <- function(str) {
     box::use(xml2, rvest)
@@ -10,7 +10,7 @@ clean_config <- function(config) {
   }
 
   flagging_sheet <- purrr$keep(config, ~ .$sheetName == "Flagging")[[1]]
-  datapaths <- purrr$keep(config, ~ .$sheetName == "DataPaths")[[1]]
+  # datapaths <- purrr$keep(config, ~ .$sheetName == "DataPaths")[[1]]
 
   flagging_sheet <- flagging_sheet$data |>
     dplyr$select(Analysis, Signals, Flagging.Specification) |>
@@ -32,5 +32,7 @@ clean_config <- function(config) {
       flagging_specification = x$Flagging.Specification
     )
   })
-  flagging_sheet <- dplyr$inner_join(flagging_sheet, datapaths$data)
+
+  # flagging_sheet <- dplyr$inner_join(flagging_sheet, datapaths$data)
+  flagging_sheet
 }

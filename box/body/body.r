@@ -46,11 +46,12 @@ ui_body <- function(id = "body") {
         ),
         shiny$fluidRow(
           datatable$ui_dt(
-            ns("data_for_analysis"),
+            ns("clean_config"),
             title = "Analysis Data",
             collapsed = TRUE, width = 12
           )
-        )
+        ),
+        shiny$fluidRow(id = "dataPreview")
       )
     )
   )
@@ -67,7 +68,7 @@ server_body <- function(id = "body", appSession) {
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
   box::use(.. / utilities / options / options)
-
+  box::use(.. / utilities / read / xlsx)
   shiny$moduleServer(
     id,
     function(input, output, session) {
@@ -93,21 +94,34 @@ server_body <- function(id = "body", appSession) {
 
       config <- shiny$eventReactive(datapathUpload, {
         shiny$showNotification("Using Uploaded File")
+        datapathUpload <- datapathUpload()
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
 
-      data_for_analysis <- shiny$reactive({
+      clean_config <- shiny$reactive({
         shiny$req(metadata())
         shiny$req(config()())
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
+        datatable$server_dt("clean_config", clean_config)
         clean_config
       })
 
-
-      shiny$observe({
-        shiny$req(data_for_analysis())
-        datatable$server_dt("data_for_analysis", data_for_analysis())
+      shiny$observeEvent(clean_config(), {
+        clean_config <- clean_config()
+        import_files <- dplyr$distinct(clean_config(), analysis, filepath)
+        uuid <- uuid::UUIDgenerate()
+        lapply(
+          import_files$filepath,
+          function(path) {
+            shiny$insertUI(
+              "#dataPreview",
+              "afterBegin",
+              xlsx$ui_xlsx(ns(uuid))
+            )
+            xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreview")
+          }
+        )
       })
     }
   )

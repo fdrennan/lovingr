@@ -42,17 +42,26 @@ server_options <- function(id = "options") {
                 label_on = "Use Chatty",
                 label_off = "Shut Up",
                 value = TRUE
+              ),
+              shinyWidgets$prettyToggle(
+                ns("ignoreConfigPath"),
+                label_on = "Ignore Configuration Datapaths",
+                label_off = "Use Configuration Datapaths",
+                value = TRUE
               )
             ),
             bs4Dash$bs4Card(
               title = "File Aggregation", width = 12,
-              shiny$textInput(ns("file_regex"), "file_regex", "csm[0-9]{6}[a|b|c]/datamisc$"),
+              shiny$textInput(
+                ns("file_regex"),
+                "file_regex",
+                "csm[0-9]{6}[a|b|c]/datamisc$"
+              ),
               shiny$textInput(
                 ns("base_dir"),
                 "base_dir",
                 paste0(
-                  getOption("datamisc_cache_path"),
-                  getOption("bmrn_base_dir")
+                  getOption("datamisc_cache_path")
                 )
               )
             )
@@ -60,6 +69,11 @@ server_options <- function(id = "options") {
         )
       })
 
+
+      shiny$observeEvent(input$ignoreConfigPath, {
+        options(ignoreConfigPath = input$ignoreConfigPath)
+        chatty$chatty(session, input)
+      })
 
       shiny$observeEvent(input$chatty, {
         options(chatty = input$chatty)

@@ -20,7 +20,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
 
 #' @export
 server_metadata <- function(id = "metadata") {
-  box::use(shiny, dplyr, stats, bs4Dash)
+  box::use(shiny, dplyr, stats, bs4Dash, fs)
   shiny$moduleServer(
     id,
     function(input, output, session) {
@@ -107,11 +107,18 @@ server_metadata <- function(id = "metadata") {
             ) |>
             dplyr$select(
               study, month, monthName, year, date,
-              analysis, filename
+              analysis, filename,
+              filepath = path
             )
+
+          if (nchar(getOption("datamisc_cache_path")) > 0) {
+            files$filepath <- paste0(getOption("datamisc_cache_path"), files$filepath)
+          }
+
           files
         }
       )
+
 
       filteredData
     }

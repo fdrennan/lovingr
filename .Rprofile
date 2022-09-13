@@ -19,3 +19,4 @@ options(analysis_filter = {
     c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
   }
 })
+options(ignoreConfigPath = TRUE)

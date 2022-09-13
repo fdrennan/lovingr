@@ -7,33 +7,38 @@ ui_xlsx <- function(id = "xlsx") {
 }
 
 #' @export
-server_xlsx <- function(id = "xlsx", datapath, width = 12) {
+server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
   box::use(shiny, openxlsx, fs, glue, uuid)
-  box::use(shiny, .. / tables / datatable)
+  box::use(shiny, .. / tables / datatable, haven, readr)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
-
-      xlsx_data <- shiny$eventReactive(datapath(), {
-        datapath <- datapath()
+      xlsx_data <- shiny$reactive({
         datapath_ext <- fs$path_ext(datapath)
-        is_xlsx <- datapath_ext == "xlsx"
-        if (isFALSE(is_xlsx)) {
-          shiny$showNotification(glue$glue(
-            "{datapath} must be an xlsx file"
-          ))
-          shiny$req(is_xlsx)
-        }
-
-        sheetNames <- openxlsx$getSheetNames(datapath)
-
-        lapply(sheetNames, function(sheetName) {
-          list(
-            sheetName = sheetName,
-            data = openxlsx$read.xlsx(datapath, sheetName)
+        switch(datapath_ext,
+          "xlsx" = {
+            sheetNames <- openxlsx$getSheetNames(datapath)
+            lapply(sheetNames, function(sheetName) {
+              list(
+                sheetName = sheetName,
+                data = openxlsx$read.xlsx(datapath, sheetName)
+              )
+            })
+          },
+          "sas7bdat" = list(
+            list(
+              sheetName = datapath,
+              data = haven$read_sas(datapath)
+            )
+          ),
+          "csv" = list(
+            list(
+              sheetName = datapath,
+              readr$read_csv(datapath)
+            )
           )
-        })
+        )
       })
 
       shiny$observeEvent(xlsx_data(), {
@@ -43,7 +48,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12) {
           function(data) {
             uuid <- uuid::UUIDgenerate()
             shiny$insertUI(
-              "#sheets",
+              ui_id,
               "afterBegin",
               datatable$ui_dt(ns(uuid), title = data$sheetName, width = width)
             )
