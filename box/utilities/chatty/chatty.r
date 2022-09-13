@@ -13,11 +13,11 @@ chatty <- function(session = shiny$getDefaultReactiveDomain, input, ...) {
           shiny$pre(json_data)
         )
       ),
-      toastClassName = "chatty",
-      bodyClassName = "chatty", progressClassName = "chatty",
+      # toastClassName = "chatty",
+      # bodyClassName = "chatty",
       className = "chatty",
       position = "top-center",
-      autoClose = FALSE
+      autoClose = 2000
     )
   }
 }

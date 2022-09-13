@@ -46,13 +46,6 @@ ui_body <- function(id = "body") {
         ),
         shiny$fluidRow(
           datatable$ui_dt(
-            ns("config"),
-            title = "Flagging Preview",
-            collapsed = TRUE, width = 12
-          )
-        ),
-        shiny$fluidRow(
-          datatable$ui_dt(
             ns("data_for_analysis"),
             title = "Analysis Data",
             collapsed = TRUE, width = 12
@@ -108,7 +101,6 @@ server_body <- function(id = "body", appSession) {
         shiny$req(config()())
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
-        datatable$server_dt("config", clean_config)
         clean_config
       })
 

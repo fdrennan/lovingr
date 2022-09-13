@@ -10,7 +10,7 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12) {
 }
 
 #' @export
-server_dt <- function(id = "dt", data, pageLength = 50) {
+server_dt <- function(id = "dt", data, pageLength = 10) {
   box::use(shiny, DT, bs4Dash)
   shiny$moduleServer(
     id,
