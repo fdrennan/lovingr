@@ -160,7 +160,7 @@ server_body <- function(id = "body", appSession) {
 
         analysis_code <- dplyr$inner_join(analysis_code, clean_config)
         analysis_code <- split(analysis_code, analysis_code$analysis)
-
+        n_increments <- length(analysis_code)
         purrr$iwalk(
           analysis_code,
           function(analysis_data, name) {

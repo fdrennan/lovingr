@@ -75,13 +75,11 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         shinyToastify$showToast(
           session = session, input = input, id = uuid$UUIDgenerate(),
           text = shiny$tags$pre(
-            glue$glue("Generating statistics for {analysisInput$analysis_name}")
+            glue$glue("Generating {analysisInput$analysis_name}")
           ),
-          autoClose = 4000,
-          style = list(
-            border = "4px solid crimson",
-            boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
-          )
+          autoClose = 2000,
+          className = "analysisSection",
+          position = "top-left"
         )
       })
 
@@ -91,14 +89,11 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         shinyToastify$showToast(
           session = session, input = input, id = uuid$UUIDgenerate(),
           text = shiny$tags$pre(
-            glue$glue("Statistics generated for {analysisInput$analysis_name}")
+            glue$glue("{analysisInput$analysis_name} complete")
           ),
-          autoClose = 4000,
-          position = "bottom-center",
-          style = list(
-            border = "4px solid crimson",
-            boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
-          )
+          autoClose = 2000,
+          className = "analysisSection",
+          position = "top-left"
         )
       })
 
@@ -141,11 +136,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
                   )
                 )
               ),
-              autoClose = FALSE,
-              style = list(
-                border = "4px solid crimson",
-                boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
-              )
+              autoClose = FALSE
             )
           }
         )
