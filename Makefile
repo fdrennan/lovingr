@@ -1,5 +1,5 @@
 snapshot:
-	R -e "renv::snapshot"
+	R -e "renv::snapshot()"
 	
 restore:
 	R -e "renv::restore()"
