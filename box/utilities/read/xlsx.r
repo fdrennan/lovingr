@@ -44,7 +44,6 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
       })
 
       shiny$observeEvent(xlsx_data(), {
-        # shiny$removeUI(selector='ui_id')
         xlsx_data <- xlsx_data()
         lapply(
           xlsx_data,
