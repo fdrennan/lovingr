@@ -1,9 +1,12 @@
 
 #' @export
 ui_xlsx <- function(id = "xlsx") {
-  box::use(shiny, .. / tables / datatable)
+  box::use(shiny, .. / tables / datatable, sortable)
   ns <- shiny$NS(id)
-  shiny$fluidRow(id = "sheets")
+  shiny$fluidRow(
+    shiny$column(12, shiny$fluidRow(id = "sheets")),
+    sortable$sortable_js(css_id = "sheets")
+  )
 }
 
 #' @export

@@ -8,6 +8,7 @@ ui_body <- function(id = "body") {
   box::use(.. / utilities / read / xlsx)
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
+  box::use(sortable)
 
 
   ns <- shiny$NS(id)
@@ -16,7 +17,7 @@ ui_body <- function(id = "body") {
     shiny$fluidRow(
       shiny$column(
         12,
-        # offset = 1,
+        id = "mainSort", sortable$sortable_js("mainSort"),
         shiny$fluidRow(
           options$ui_options(ns("options"), width = 12)
         ),
@@ -37,60 +38,51 @@ ui_body <- function(id = "body") {
                 class = "col-xl-6 col-lg-12 col-md-12",
                 shiny$fluidRow(
                   file_upload$ui_file_upload(ns("file_upload"),
-                                             width = 12,
-                                             footer = if (getOption("development")) {
-                                               shiny$tags$p("Upload Disabled - Running in development mode.")
-                                             }
+                    width = 12,
+                    footer = if (getOption("development")) {
+                      shiny$tags$p("Upload Disabled - Running in development mode.")
+                    }
                   )
                 )
               ),
               shiny$column(12,
-                           class = "text-right py-3",
-                           bs4Dash$actionButton(ns("start"), "Start", status = "primary")
+                class = "text-right py-3",
+                bs4Dash$actionButton(ns("start"), "Start", status = "primary")
               )
             )
-          ),
-          shiny$column(
-            12,
-            shiny$fluidRow(
-              shiny$div(class = "col-xl-6 col-lg-12 col-md-12",
-                        shiny$fluidRow(
-                          bs4Dash$box(
-                            maximizable = TRUE,
-                            title = "Configuration", width = 12,
-                            collapsed = FALSE,
-                            status = "info",
-                            xlsx$ui_xlsx(ns("xlsx-local"))
-                          )
-                        )
-              ),
-              shiny$div(
-                class = "col-xl-6 col-lg-12 col-md-12",
-                shiny$fluidRow(
-                  datatable$ui_dt(
-                    ns("clean_config"),
-                    status = "info",
-                    title = "Flagging Summary",
-                    collapsed = TRUE, width = 12
-                  )
-                )
-              )
-            )
-          ),
+          )
+        ),
+        shiny$fluidRow(
           bs4Dash$box(
             collapsed = TRUE,
             maximizable = TRUE,
             width = 12,
             status = "primary",
             title = "Data Preview",
-            shiny$div(id = "dataPreview")
+            shiny$fluidRow(id = "dataPreview")
+          )
+        ),
+        shiny$fluidRow(
+          bs4Dash$box(
+            maximizable = TRUE,
+            title = "Configuration", width = 12,
+            collapsed = FALSE,
+            status = "info",
+            xlsx$ui_xlsx(ns("xlsx-local"))
+          )
+        ),
+        shiny$fluidRow(
+          datatable$ui_dt(
+            ns("clean_config"),
+            status = "info",
+            title = "Flagging Summary",
+            collapsed = TRUE, width = 12
           )
         ),
         shiny$fluidRow(
           shiny$column(12, id = "uiAnalyses")
         )
       )
-
     )
   )
 }
@@ -150,7 +142,10 @@ server_body <- function(id = "body", appSession) {
         shiny$insertUI(
           "#dataPreview",
           "afterBegin",
-          shiny$fluidRow(id = "dataPreviewElements")
+          shiny$div(
+            class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
+            id = "dataPreviewElements"
+          )
         )
 
         lapply(
