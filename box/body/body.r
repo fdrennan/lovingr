@@ -82,20 +82,10 @@ server_body <- function(id = "body", appSession) {
 
       metadata <- metadata$server_metadata("metadata")
 
-      # shinyFiles$shinyFileChoose(
-      #   input, "files",
-      #   root = c(root = {
-      #     "."
-      #   }),
-      #   filetypes = c("xlsx")
-      # )
-
-
       datapathUpload <- file_upload$server_file_upload("file_upload")
 
 
       config <- shiny$eventReactive(datapathUpload, {
-        shiny$showNotification("Using Uploaded File")
         datapathUpload <- datapathUpload()
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
@@ -103,6 +93,7 @@ server_body <- function(id = "body", appSession) {
       clean_config <- shiny$reactive({
         shiny$req(metadata())
         shiny$req(config()())
+
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
         datatable$server_dt("clean_config", clean_config)
@@ -111,6 +102,7 @@ server_body <- function(id = "body", appSession) {
 
       shiny$observeEvent(clean_config(), {
         clean_config <- clean_config()
+
         import_files <- dplyr$distinct(clean_config(), analysis, filepath)
         uuid <- uuid::UUIDgenerate()
 
@@ -143,6 +135,7 @@ server_body <- function(id = "body", appSession) {
       })
 
       shiny$observeEvent(clean_config(), {
+
         # shiny$req(clean_config())
         clean_config <- clean_config()
         analysis_code <- fs$dir_info("box/analysis/execute")
@@ -156,21 +149,24 @@ server_body <- function(id = "body", appSession) {
         analysis_code <- dplyr$inner_join(analysis_code, clean_config)
         analysis_code <- split(analysis_code, analysis_code$analysis)
 
-        purrr$iwalk(analysis_code, function(analysis_data, name) {
-          shiny$insertUI(
-            "#uiAnalyses",
-            "afterBegin",
-            run_analysis$ui_run_analysis(
-              ns(paste0("run_analysis", name)), analysis_data
+        purrr$iwalk(
+          analysis_code,
+          function(analysis_data, name) {
+            shiny$insertUI(
+              "#uiAnalyses",
+              "afterBegin",
+              run_analysis$ui_run_analysis(
+                ns(paste0("run_analysis", name)), analysis_data
+              )
             )
-          )
 
-          variables <- dplyr$mutate_all(config()()[[1]]$data, tolower)
-          names(variables) <- tolower(names(variables))
-          run_analysis$server_run_analysis(
-            paste0("run_analysis", name), analysis_data, variables
-          )
-        })
+            variables <- dplyr$mutate_all(config()()[[1]]$data, tolower)
+            names(variables) <- tolower(names(variables))
+            run_analysis$server_run_analysis(
+              paste0("run_analysis", name), analysis_data, variables
+            )
+          }
+        )
       })
     }
   )

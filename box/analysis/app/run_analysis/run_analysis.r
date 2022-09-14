@@ -31,6 +31,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
 #' @export
 server_run_analysis <- function(id = "run_analysis", data, variables) {
   box::use(shiny, bs4Dash, shinyAce, readr)
+  box::use(.. / .. / .. / utilities / chatty / chatty)
   box::use(.. / .. / .. / utilities / io / file_read_multi_ext)
   box::use(.. / .. / .. / utilities / tables / datatable)
 
@@ -39,27 +40,42 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
     function(input, output, session) {
       ns <- session$ns
 
-      analysis_name <- unique(data$analysis)
-      analysis_code_path <- unique(data$path)
-      analysis_file <- file_read_multi_ext$run(analysis_code_path)
-      analysis_data <- file_read_multi_ext$run(unique(data$filepath))[[1]]$data
-      names(analysis_data) <- tolower(names(analysis_data))
+      analysisInput <- shiny$reactive({
+        shiny$req(data)
+        shiny$req(variables)
+
+        analysis_name <- unique(data$analysis)
+        analysis_code_path <- unique(data$path)
+        analysis_data_path <- unique(data$filepath)
+        list(
+          analysis_name = analysis_name,
+          analysis_code_path = analysis_code_path,
+          analysis_file = file_read_multi_ext$run(analysis_code_path),
+          analysis_data = {
+            analysis_data <- file_read_multi_ext$run(analysis_data_path)[[1]]$data
+            names(analysis_data) <- tolower(names(analysis_data))
+            analysis_data
+          }
+        )
+      })
 
       output$app <- shiny$renderUI({
         input$reset
+        shiny$req(analysisInput())
+        analysisInput <- analysisInput()
         shiny$column(
           12,
           shiny$fluidRow(
             bs4Dash$box(
               width = 12,
-              title = shiny$h1(analysis_name), collapsed = FALSE,
+              title = shiny$h1(analysisInput$analysis_name), collapsed = FALSE,
               shiny$fluidRow(
                 bs4Dash$box(
-                  title = paste0("Code Review: ", analysis_name),
+                  title = paste0("Code Review: ", analysisInput$analysis_name),
                   width = 12, collapsed = TRUE,
                   shinyAce$aceEditor(
                     outputId = ns("myEditor"),
-                    value = analysis_file,
+                    value = analysisInput$analysis_file,
                     mode = "r",
                     theme = "ambiance"
                   )
@@ -81,9 +97,32 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         )
       })
 
-      shiny$observeEvent(input$execute, {
+
+      notifyUserOfEvent <- shiny$reactive({
+        box::use(shinyToastify, uuid, glue)
+        analysisInput <- analysisInput()
+        shinyToastify$showToast(
+          session = session, input = input, id = uuid$UUIDgenerate(),
+          text = shiny$tags$pre(
+            glue$glue("Generating statistics for {analysisInput$analysis_name}")
+          ),
+          autoClose = 2000,
+          style = list(
+            border = "4px solid crimson",
+            boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+          )
+        )
+      })
+
+      shiny$observeEvent(analysisInput(), {
         box::use(.. / .. / execute / analysis_aei)
-        results <- analysis_aei$analysis_aei(analysis_data, variables)
+        box::use(.. / .. / execute / analysis_rgv)
+        analysisInput <- analysisInput()
+        notifyUserOfEvent()
+        results <- switch(analysisInput$analysis_name,
+          "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
+          "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables)
+        )
         datatable$server_dt("statsResults", results)
       })
     }

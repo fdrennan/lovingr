@@ -5,13 +5,15 @@ analysis_aei <- function(aei_data = NULL, variables) {
   box::use(dplyr, purrr)
   box::use(. / subfunction / compare_f)
   data_split <- split(aei_data, aei_data$paramcd)
-  #
+
   analysis_data <- purrr$map_df(
     data_split,
     function(x) {
       current_signal <- unique(x$paramcd)
       response <- compare_f$compare_f(
-        data = x,
+        r = x$incidence,
+        n = x$numsubj,
+        siteid = x$siteid,
         variables = variables
       )
     }
