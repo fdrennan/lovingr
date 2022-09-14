@@ -1,9 +1,11 @@
 #' @export analysis_underdose
 analysis_underdose <- function(dose_subj = NULL,
-                               configuration = NULL) {
-  box::use(dplyr)
+                               variables = NULL) {
+  box::use(dplyr, purrr, stats)
   box::use(. / subfunction / TukeyOutliers / TukeyOutliers)
+  box::use(. / subfunction / CompareProportion / CompareProportion)
   cutdt <- unique(dose_subj$cutdt)
+  # browser()
   country_mapping <- dplyr$distinct(dplyr$select(dose_subj, studyid, country, site = siteid))
 
   dose_subj$siteid <- as.factor(dose_subj$siteid)
@@ -11,9 +13,9 @@ analysis_underdose <- function(dose_subj = NULL,
 
   names(dose_subj)
 
-  fence <- dplyr$filter(configuration$parameters, parameter == "fence")$value
-  cutoff_perplanned <- as.numeric(dplyr$filter(configuration$parameters, parameter == "cutoff_perplanned")$value)
-  tz_score <- as.numeric(dplyr$filter(configuration$parameters, parameter == "t_zscore")$value)
+  fence <- dplyr$filter(variables, parameter == "fence")$value
+  cutoff_perplanned <- as.numeric(dplyr$filter(variables, parameter == "cutoff_perplanned")$value)
+  tz_score <- as.numeric(dplyr$filter(variables, parameter == "t_zscore")$value)
   DataCutDate <- as.Date(dose_subj$cutdt[1], origin = "1960-1-1")
 
   dose <- dose_subj[dose_subj$exdose >= 0 & !is.na(dose_subj$exdose), ]
@@ -38,7 +40,7 @@ analysis_underdose <- function(dose_subj = NULL,
 
   r <- table(dose[outliers_low, "siteid"])
   # n <- n[names(n) %in% names(r)]
-  site_result <- CompareProportion(as.numeric(r), as.numeric(n), names(n), tz_score)
+  site_result <- CompareProportion$CompareProportion(as.numeric(r), as.numeric(n), names(n), tz_score)
 
   site_result$fence <- fence
   site_result$cutoff_perplanned <- cutoff_perplanned
@@ -51,11 +53,11 @@ analysis_underdose <- function(dose_subj = NULL,
   n <- table(dose$subject)
   r <- table(dose$subject[diff < 0])
   # n <- n[names(n) %in% names(r)]
-  jk1 <- CompareProportion(as.numeric(r), as.numeric(n), names(n), tz_score)
+  jk1 <- CompareProportion$CompareProportion(as.numeric(r), as.numeric(n), names(n), tz_score)
 
 
 
-  jk2 <- aggregate(dose$perdiff, by = list(dose$subject), mean)
+  jk2 <- stats$aggregate(dose$perdiff, by = list(dose$subject), mean)
   jk <- merge(jk1, jk2, by.x = "rowname", by.y = "Group.1")
   dimnames(jk)[[2]] <- c(
     "Subject", "Number of UnderDose", "Number of Dose", "Percentage", "Expected %",
@@ -69,39 +71,21 @@ analysis_underdose <- function(dose_subj = NULL,
 
   SITE_RESULT <-
     SITE_RESULT |>
-    mutate(
+    dplyr$mutate(
       site_pct = ObsPer,
       stdy_pct = ExpPer,
       diff_pct = site_pct - stdy_pct
     )
 
   SITE_RESULT$p_value <- SITE_RESULT$pvalue
-  SITE_RESULT$code <- configuration$configuration$code
   SITE_RESULT <- split(SITE_RESULT, 1:nrow(SITE_RESULT))
-  SITE_RESULT <- map_df(SITE_RESULT, flagger, analysis = "underdose")
 
-  message("Additional summaries in underdose currently not exported,
-          but generated displayed for 2 seconds below.")
-  Sys.sleep(1)
   additional_summaries <- list(
     SUBJECT_UNDERDOSE = SUBJECT_UNDERDOSE,
     OUTLIERS_LOW = OUTLIERS_LOW
   )
 
-  iwalk(additional_summaries, ~ {
-    cat(..2)
-    cat("\n\n")
-    glimpse(..1)
-    cat("\n")
-  })
-  Sys.sleep(2)
-
   SITE_RESULT$cutdt <- cutdt
-  SITE_RESULT <- rename(SITE_RESULT, site = rowname)
   SITE_RESULT$paramcd <- "underdose"
-  SITE_RESULT <- inner_join(
-    SITE_RESULT,
-    mutate(country_mapping, site = as.character(site))
-  )
   SITE_RESULT
 }

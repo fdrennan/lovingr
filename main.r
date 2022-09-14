@@ -5,6 +5,7 @@ ui <- function() {
 
 server <- function(input, output, session) {
   box::use(. / box / app)
+
   app$server_app(session)
 }
 

@@ -74,11 +74,13 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
 
 
       shiny$observeEvent(analysisInput(), {
+        # browser()
         box::use(.. / .. / execute / analysis_aei)
         box::use(.. / .. / execute / analysis_rgv)
         box::use(.. / .. / execute / analysis_aecnt)
         box::use(.. / .. / execute / analysis_aegap)
         box::use(.. / .. / execute / analysis_vitals)
+        box::use(.. / .. / execute / analysis_underdose)
         analysisInput <- analysisInput()
 
         analysis_name <- analysisInput$analysis_name
@@ -92,7 +94,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
           "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
           "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
-          "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables)
+          "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables),
+          "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables)
         )
         datatable$server_dt("statsResults", results)
         shiny$removeNotification(id = analysis_name)
