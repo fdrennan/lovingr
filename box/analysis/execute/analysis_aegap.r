@@ -1,81 +1,26 @@
-#' analysis_aegap
-#'
-#' @description
-#'
-#' # Columns available for flagging
-#'
-#'
-#' ```
-#' Columns: 16
-#' $ grp_id    <chr> "0005"
-#' $ n         <int> 8
-#' $ grp_mean  <dbl> 347.8244
-#' $ grandmean <dbl> 246.823
-#' $ coef      <dbl> 0.3430263
-#' $ sigma     <dbl> 0.2738144
-#' $ tstat     <dbl> 1.252769
-#' $ p_value   <dbl> 0.9944658
-#' $ country   <chr> "USA"
-#' $ diff      <dbl> 101.0014
-#' $ cutdt     <dbl> 22314
-#' $ code      <chr> "flag=0; if ((diff > 100) & (p_value<1) ) {flag = 1};"
-#' $ signal    <chr> "aegap"
-#' $ paramcd   <chr> "aegap"
-#' $ site      <chr> "0005"
-#' $ time      <dttm> 2021-03-25 03:44:43
-#' ```
-#'
-#'
-#' @param aegap aegap data
-#' @param configuration data from mastersheet
-#'
-#' @return tibble
-#' @family csm_analysis_loop
-#' @family csm_analysis
 #' @export analysis_aegap
 analysis_aegap <- function(aegap, configuration) {
-  # CompareMean -------------------------------------------------------------
-
-  # this was added to R/
-  # source("csm_dev/progclin/202102a_progclin/rfunction/CompareMean.r")
-
-  # load data ---------------------------------------------------------------
-  # aegap <- csm::csm_data_load(data_path = "csm_dev/datacollections/202102a_datamisc/csmae.sas7bdat")
+  box::use(dplyr, tidyr)
+  box::use(. / aegap / map_aegap_statistics)
   aegap_clean <-
     aegap %>%
-    rename_all(str_to_lower) %>%
-    mutate(
-      aeyn = recode_binary_yes_no(aeyn),
-      saeyn = recode_binary_yes_no(saeyn)
-    ) %>%
-    pivot_longer(
+    dplyr$rename_all(str_to_lower) %>%
+    tidyr$pivot_longer(
       names_to = "signals",
       values_to = "amount",
       cols = c(
-        contains("toxa"),
-        contains("numtox"),
-        contains("numae"),
+        dplyr$contains("toxa"),
+        dplyr$contains("numtox"),
+        dplyr$contains("numae"),
         aegap,
         saegap
       )
     )
 
-  aegap_clean <- inner_join(aegap_clean, configuration$configuration)
+  aegap_clean <- dplyr$inner_join(aegap_clean, configuration$configuration)
 
-  aegap_clean <- map_aegap_statistics(aegap_clean)
+  aegap_clean <- map_aegap_statistics$map_aegap_statistics(aegap_clean)
 
-  aegap_clean <- map_df(
-    aegap_clean,
-    function(x) {
-      map_df(
-        split(x, 1:nrow(x)),
-        flagger,
-        analysis = "aegap"
-      )
-    }
-  )
-
-  aegap_clean$analysis <- "aegap"
   aegap_clean
 }
 
