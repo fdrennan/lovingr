@@ -23,10 +23,10 @@ map_aegap_statistics <- function(df, configuration) {
             rslt <-
               rslt |>
               dplyr$mutate(
+                paramcd = unique(x$paramcd),
                 grp_mean = exp(grp_mean),
                 grandmean = exp(grandmean),
-                diff = grp_mean - grandmean,
-                paramcd = unique(x$paramcd)
+                diff = grp_mean - grandmean
               )
 
             rslt
