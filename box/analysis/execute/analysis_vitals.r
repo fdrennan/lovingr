@@ -25,7 +25,7 @@
 #' @export analysis_vitals
 analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
   if ("vsdv" %in% names(input_vs)) {
-    split_vs <- input_vs %>%
+    split_vs <- input_vs |>
       mutate(
         split_on = case_when(
           str_detect(paramcd, "dia") ~ paste0(vsdv, "_", paramcd),
@@ -35,13 +35,13 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
         )
       )
   } else {
-    split_vs <- input_vs %>%
+    split_vs <- input_vs |>
       mutate(
         split_on = paramcd
       )
   }
 
-  split_vs <- split_vs %>%
+  split_vs <- split_vs |>
     split(.$split_on)
 
   flags <- imap_dfr(
@@ -51,14 +51,14 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
 
   csm_cli_header("VITAL SIGN ANALYSIS COMPLETE")
 
-  join_meta_data <- distinct(input_vs, siteid, country, cutdt) %>%
-    rename(Groups = siteid) %>%
+  join_meta_data <- distinct(input_vs, siteid, country, cutdt) |>
+    rename(Groups = siteid) |>
     mutate(Groups = as.character(Groups))
 
   flags <- inner_join(flags, join_meta_data)
 
   flags <-
-    flags %>%
+    flags |>
     rename(
       site = Groups,
       value = Values

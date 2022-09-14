@@ -90,7 +90,7 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
 
 
   result <-
-    result %>%
+    result |>
     mutate(
       site_pct = ObsPer,
       stdy_pct = ExpPer,
@@ -113,8 +113,8 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
 
 
   #### SECOND FLAGGING
-  result1 <- result %>%
-    # filter(flag == 1) %>%
+  result1 <- result |>
+    # filter(flag == 1) |>
     mutate(selectedPerdiff = perdiff)
   result2 <- result1[order(result1$rowname, result1$selectedPerdiff, decreasing = T), ]
 
@@ -133,7 +133,7 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
   tops <- merge(merge(top1, top2, by = "rowname"), top3, by = "rowname")
 
   tops <-
-    tops %>%
+    tops |>
     mutate_if(is.numeric, ~ if_else(is.na(.), 0, .))
 
   #
@@ -146,7 +146,7 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
   as_tibble(result3)
 
   out <-
-    result3 %>%
+    result3 |>
     mutate(
       site_max_diff_pct = max,
       sum_site_top2_diff_pct = sum_max2,
@@ -159,7 +159,7 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
   out$cutdt <- analysis_data$cutdt[[1]]
 
   out <-
-    out %>%
+    out |>
     rename(site = rowname)
 }
 

@@ -65,7 +65,7 @@ analysis_aei <- function(aei_data = NULL, variables) {
 #'
 #' ```
 #' library(dplyr)
-#' band_members %>% inner_join(band_instruments)
+#' band_members |> inner_join(band_instruments)
 #' ```
 #'
 #' Once the join is complete, the aei_data is aplit on the param code. Each

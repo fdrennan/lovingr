@@ -77,13 +77,15 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           text = shiny$tags$pre(
             glue$glue("Generating statistics for {analysisInput$analysis_name}")
           ),
-          autoClose = 2000,
+          autoClose = 4000,
           style = list(
             border = "4px solid crimson",
             boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
           )
         )
       })
+
+
 
       shiny$observeEvent(analysisInput(), {
         box::use(.. / .. / execute / analysis_aei)
@@ -92,16 +94,43 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / execute / analysis_aegap)
         analysisInput <- analysisInput()
         notifyUserOfEvent()
-        results <- switch(analysisInput$analysis_name,
-          "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
-          "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
-          "aecnt" = analysis_aecnt$analysis_aecnt(analysisInput$analysis_data, variables),
-          "aegap" = {
-            browser()
-            analysis_aegap$analysis_aegap(analysisInput$analysis_data, variables)
+        tryCatch(
+          {
+            results <- switch(analysisInput$analysis_name,
+              "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
+              "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
+              "aecnt" = analysis_aecnt$analysis_aecnt(analysisInput$analysis_data, variables),
+              "aegap" = analysis_aegap$analysis_aegap(analysisInput$analysis_data, variables)
+            )
+            datatable$server_dt("statsResults", results)
+          },
+          error = function(err) {
+            box::use(shinyToastify, uuid, glue)
+            analysisInput <- analysisInput()
+            shinyToastify$showToast(
+              closeOnClick = FALSE,
+              className = "runAnalysis",
+              position = "top-left",
+              session = session, input = input, id = uuid$UUIDgenerate(),
+              text = shiny$fluidRow(
+                shiny$column(
+                  12,
+                  shiny$tags$pre(
+                    as.character(err)
+                  ),
+                  shiny$tags$pre(
+                    glue$glue("Analysis failed for {analysisInput$analysis_name}")
+                  )
+                )
+              ),
+              autoClose = FALSE,
+              style = list(
+                border = "4px solid crimson",
+                boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+              )
+            )
           }
         )
-        datatable$server_dt("statsResults", results)
       })
     }
   )

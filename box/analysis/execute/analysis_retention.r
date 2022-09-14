@@ -61,14 +61,14 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
   retention_data <- inner_join(
     retention_data,
     transmute(program$configuration, paramcd = signals, code)
-  ) %>%
+  ) |>
     mutate(numsubj = ndenom)
 
 
   #
-  # n_incidence_filter_data <- retention_data %>% group_by(paramcd) %>% summarise(n_incidence = sum(incidence))
+  # n_incidence_filter_data <- retention_data |> group_by(paramcd) |> summarise(n_incidence = sum(incidence))
   #
-  # retention_data <- retention_data %>%
+  # retention_data <- retention_data |>
   #   filter(
   #     paramcd %in% filter(n_incidence_filter_data, n_incidence > 2)$paramcd
   #   )
@@ -96,6 +96,6 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
 
   #
 
-  analysis_data <- inner_join(analysis_data, meta_data_join) %>% mutate(analysis = "retention")
+  analysis_data <- inner_join(analysis_data, meta_data_join) |> mutate(analysis = "retention")
   analysis_data
 }
