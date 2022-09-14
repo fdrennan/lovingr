@@ -1,5 +1,5 @@
 
 # system("make style")
 rstudioapi::restartSession(
-  "shin::runApp(\"main.r\")"
+  "shiny::runApp(\"main.r\")"
 )
