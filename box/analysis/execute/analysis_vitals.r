@@ -1,6 +1,7 @@
 #' @export
 analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
-  box::use(dplyr, stringr, purrr, . / analysis_vitals)
+  box::use(dplyr, stringr, purrr, . / analysis_vitals, furrr, future)
+  future$plan(future$multiprocess)
   browser()
   if ("vsdv" %in% names(input_vs)) {
     split_vs <- input_vs |>
@@ -21,9 +22,14 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
 
   split_vs <- split(split_vs, split_vs$split_on)
 
-  flags <- purrr$imap_dfr(
+  out <- purrr$imap_dfr(
     split_vs,
-    ~ analysis_vitals$rep_value_in_group(..2, ..1)
+    function(x, y) {
+      box::use(. / analysis_vitals, shiny)
+      shiny$showNotification(y)
+      analysis_vitals$rep_value_in_group(y, x)
+    },
+    .progress = TRUE
   )
 
   join_meta_data <-
@@ -32,17 +38,9 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
     dplyr$rename(Groups = siteid) |>
     dplyr$mutate(Groups = as.character(Groups))
 
-  flags <- dplyr$inner_join(flags, join_meta_data)
+  out <- dplyr$inner_join(out, join_meta_data)
 
-  flags <-
-    flags |>
-    dplyr$rename(
-      site = Groups,
-      value = Values
-    )
-
-
-  flags
+  out
 }
 
 
