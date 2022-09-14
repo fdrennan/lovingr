@@ -2,7 +2,7 @@
 GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
                       name, configuration = NULL) {
   box::use(.. / CompareProportion / CompareProportion)
-  box::use(dplyr, stats)
+  box::use(dplyr, stats, purrr)
   T_ZSCORE <- as.numeric(dplyr$filter(configuration, parameter == "t_zscore")$value)
   DataComb <- stats$aggregate(GVData[, c(Var_r, Var_n)], by = list(GVData[, Var_site])[[1]], sum)
   names(DataComb)[1] <- Var_site
@@ -45,7 +45,6 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
   }
 
   GVmethod <- rep(name, dim(result)[1])
-
 
   result
 }

@@ -11,10 +11,6 @@ ui_run_analysis <- function(id = "run_analysis", data) {
       shiny$h1(
         unique(data$analysis),
         class = "text-center display-1"
-      ),
-      shiny$div(
-        class = "text-right",
-        bs4Dash$actionButton(ns("refresh"), "Refresh")
       )
     ),
     shiny$column(
@@ -60,7 +56,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       })
 
       output$app <- shiny$renderUI({
-        input$reset
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
         shiny$column(
@@ -78,12 +73,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
                     value = analysisInput$analysis_file,
                     mode = "r",
                     theme = "ambiance"
-                  )
-                ),
-                shiny$column(
-                  12, shiny$div(
-                    class = "text-center py-3",
-                    bs4Dash$actionButton(ns("execute"), "Execute")
                   )
                 ),
                 datatable$ui_dt(

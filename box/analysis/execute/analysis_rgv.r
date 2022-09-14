@@ -4,11 +4,12 @@ analysis_rgv <- function(rgv_data = NULL, variables) {
   box::use(. / subfunction / compare_f)
   box::use(. / subfunction / GVCheck.f / GVCheck.f)
 
-  # browser()
-  # data <- GVCheck.f$GVCheck.f(
-  #   rgv_data, "siteid", "paramcd", "n", "nrepgv", "GV",
-  #   configuration = variables
-  # )
+
+
+  data <- GVCheck.f$GVCheck.f(
+    rgv_data, "siteid", "paramcd", "numgv", "numrepgv", "GV",
+    configuration = variables
+  )
 
 
 
@@ -24,7 +25,7 @@ analysis_rgv <- function(rgv_data = NULL, variables) {
   #     )
   #   }
   # )
+  data
 
-  rgv_data
   # analysis_data
 }
