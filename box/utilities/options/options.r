@@ -37,33 +37,41 @@ server_options <- function(id = "options") {
         shiny$column(
           12,
           shiny$fluidRow(
-            bs4Dash$bs4Card(
-              title = "General Options", width = 12,
-              shinyWidgets$prettyToggle(
-                ns("chatty"),
-                label_on = "Use Chatty",
-                label_off = "Shut Up",
-                value = FALSE
-              ),
-              shinyWidgets$prettyToggle(
-                ns("ignoreConfigPath"),
-                label_on = "Ignore Configuration Datapaths",
-                label_off = "Use Configuration Datapaths",
-                value = TRUE
+            shiny$div(class='col-xl-6 col-lg-6 col-md-12 col-sm-12',
+              shiny$fluidRow(
+                bs4Dash$bs4Card(
+                  title = "General Options", width = 12,
+                  shinyWidgets$prettyToggle(
+                    ns("chatty"),
+                    label_on = "Use Chatty",
+                    label_off = "Shut Up",
+                    value = FALSE
+                  ),
+                  shinyWidgets$prettyToggle(
+                    ns("ignoreConfigPath"),
+                    label_on = "Ignore Configuration Datapaths",
+                    label_off = "Use Configuration Datapaths",
+                    value = TRUE
+                  )
+                )
               )
             ),
-            bs4Dash$bs4Card(
-              title = "File Aggregation", width = 12,
-              shiny$textInput(
-                ns("file_regex"),
-                "file_regex",
-                "csm[0-9]{6}[a|b|c]/datamisc$"
-              ),
-              shiny$textInput(
-                ns("base_dir"),
-                "base_dir",
-                paste0(
-                  getOption("datamisc_cache_path")
+            shiny$div(class='col-xl-6 col-lg-6 col-md-12 col-sm-12',
+              shiny$fluidRow(
+                bs4Dash$bs4Card(
+                  title = "File Aggregation", width = 12,
+                  shiny$textInput(
+                    ns("file_regex"),
+                    "file_regex",
+                    "csm[0-9]{6}[a|b|c]/datamisc$"
+                  ),
+                  shiny$textInput(
+                    ns("base_dir"),
+                    "base_dir",
+                    paste0(
+                      getOption("datamisc_cache_path")
+                    )
+                  )
                 )
               )
             )

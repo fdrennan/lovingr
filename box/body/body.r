@@ -25,14 +25,24 @@ ui_body <- function(id = "body") {
             id = ns("importBox"),
             status = "primary",
             maximizable = TRUE,
-            title = "Data Import", width = 6,
+            title = "Data Import", width = 12,
             shiny$fluidRow(
-              metadata$ui_metadata(ns("metadata"), width = 6),
-              file_upload$ui_file_upload(ns("file_upload"),
-                width = 6,
-                footer = if (getOption("development")) {
-                  shiny$tags$p("Upload Disabled - Running in development mode.")
-                }
+              shiny$div(
+                class = "col-xl-6 col-lg-12 col-md-12",
+                shiny$fluidRow(
+                  metadata$ui_metadata(ns("metadata"), width = 12)
+                )
+              ),
+              shiny$div(
+                class = "col-xl-6 col-lg-12 col-md-12",
+                shiny$fluidRow(
+                  file_upload$ui_file_upload(ns("file_upload"),
+                    width = 12,
+                    footer = if (getOption("development")) {
+                      shiny$tags$p("Upload Disabled - Running in development mode.")
+                    }
+                  )
+                )
               ),
               shiny$column(12,
                 class = "text-right py-3",
@@ -42,7 +52,7 @@ ui_body <- function(id = "body") {
           ),
           bs4Dash$box(
             maximizable = TRUE,
-            title = "Configuration", width = 6,
+            title = "Configuration", width = 12,
             collapsed = FALSE,
             status = "info",
             xlsx$ui_xlsx(ns("xlsx-server")),
