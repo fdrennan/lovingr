@@ -74,7 +74,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
 
 
       shiny$observeEvent(analysisInput(), {
-        # browser()
+        #
         box::use(.. / .. / execute / analysis_aei)
         box::use(.. / .. / execute / analysis_rgv)
         box::use(.. / .. / execute / analysis_aecnt)

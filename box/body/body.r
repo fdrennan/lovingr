@@ -8,7 +8,7 @@ ui_body <- function(id = "body") {
   box::use(.. / utilities / read / xlsx)
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
-  browser()
+
 
   ns <- shiny$NS(id)
   bs4Dash$dashboardBody(
@@ -74,7 +74,6 @@ ui_body <- function(id = "body") {
 
 #' @export
 server_body <- function(id = "body", appSession) {
-  browser()
   box::use(shiny, bs4Dash, dplyr, shinyFiles, fs, utils, purrr)
   box::use(.. / utilities / chatty / chatty)
   box::use(.. / utilities / io / file_upload)
@@ -88,7 +87,6 @@ server_body <- function(id = "body", appSession) {
   shiny$moduleServer(
     id,
     function(input, output, session) {
-      browser()
       ns <- session$ns
 
       shiny$observe(chatty$chatty(session, input))
