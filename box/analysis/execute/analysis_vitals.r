@@ -28,17 +28,8 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
       box::use(. / analysis_vitals, shiny)
       shiny$showNotification(y)
       analysis_vitals$rep_value_in_group(y, x)
-    },
-    .progress = TRUE
+    }
   )
-
-  join_meta_data <-
-    input_vs |>
-    dplyr$distinct(siteid, country, cutdt) |>
-    dplyr$rename(Groups = siteid) |>
-    dplyr$mutate(Groups = as.character(Groups))
-
-  out <- dplyr$inner_join(out, join_meta_data)
 
   out
 }
