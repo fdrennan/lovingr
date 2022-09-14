@@ -6,8 +6,9 @@ ui_metadata <- function(id = "metadata", width = 6) {
     shiny$column(6, ...)
   }
   bs4Dash$box(
-    title = "Select data to import",
+    title = "Select Study Information",
     width = width,
+    status = "secondary",
     shiny$fluidRow(
       shiny$uiOutput(ns("study"), container = input_container),
       shiny$uiOutput(ns("year"), container = input_container),

@@ -1,10 +1,11 @@
 #' @export
-ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12) {
+ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12, status = "secondary") {
   box::use(shiny, DT, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
     maximizable = TRUE,
     width = width,
+    status = status,
     title = title, collapsed = collapsed,
     DT$DTOutput(ns("ui"))
   )

@@ -11,6 +11,7 @@ ui_file_upload <- function(id = "file_upload",
   bs4Dash$box(
     title = "File Upload",
     width = width,
+    status = "secondary",
     shiny$fileInput(
       inputId = ns("fileUpload"),
       label = label,

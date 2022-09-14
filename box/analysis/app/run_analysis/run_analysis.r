@@ -46,14 +46,14 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
         bs4Dash$box(
-          status = "primary",
+          status = "success",
           id = ns("analysisBox"),
           width = 12,
-          title = shiny$h1(analysisInput$analysis_name), collapsed = FALSE,
+          title = shiny$h1(analysisInput$analysis_name), collapsed = TRUE,
           shiny$fluidRow(
             bs4Dash$box(
               maximizable = TRUE,
-              title = paste0("Code Review: ", analysisInput$analysis_name),
+              title = "Code Review", status = "info",
               width = 12, collapsed = TRUE,
               shinyAce$aceEditor(
                 outputId = ns("myEditor"),
@@ -64,8 +64,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             ),
             datatable$ui_dt(
               ns("statsResults"),
-              title = "Stats Results",
-              collapsed = TRUE, width = 12
+              title = "Pre-Flagging",
+              collapsed = FALSE, width = 12
             )
           )
         )

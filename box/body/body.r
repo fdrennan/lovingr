@@ -24,35 +24,37 @@ ui_body <- function(id = "body") {
           bs4Dash$box(
             id = ns("importBox"),
             status = "primary",
+            maximizable = TRUE,
             title = "Data Import", width = 12,
-            metadata$ui_metadata(ns("metadata"), width = 12),
-            file_upload$ui_file_upload(ns("file_upload"),
-              width = 12,
-              footer = if (getOption("development")) {
-                shiny$tags$p("Upload Disabled - Running in development mode.")
-              }
-            )
-          ),
-          shiny$column(12,
-            class = "text-right py-3",
-            bs4Dash$actionButton(ns("start"), "Start", status = "primary")
-          )
-        ),
-        shiny$fluidRow(
-          bs4Dash$box(
-            title = "Raw Data", width = 12, collapsed = TRUE,
             shiny$fluidRow(
-              shiny$column(
-                12,
-                xlsx$ui_xlsx(ns("xlsx-server")),
-                xlsx$ui_xlsx(ns("xlsx-local"))
+              metadata$ui_metadata(ns("metadata"), width = 6),
+              file_upload$ui_file_upload(ns("file_upload"),
+                width = 6,
+                footer = if (getOption("development")) {
+                  shiny$tags$p("Upload Disabled - Running in development mode.")
+                }
+              ),
+              shiny$column(12,
+                class = "text-right py-3",
+                bs4Dash$actionButton(ns("start"), "Start", status = "primary")
               )
             )
           )
         ),
         shiny$fluidRow(
+          bs4Dash$box(
+            maximizable = TRUE,
+            title = "Configuration", width = 12,
+            collapsed = TRUE,
+            status = "info",
+            xlsx$ui_xlsx(ns("xlsx-server")),
+            xlsx$ui_xlsx(ns("xlsx-local"))
+          )
+        ),
+        shiny$fluidRow(
           datatable$ui_dt(
             ns("clean_config"),
+            status = "info",
             title = "Flagging Summary",
             collapsed = TRUE, width = 12
           )
@@ -60,6 +62,7 @@ ui_body <- function(id = "body") {
         shiny$fluidRow(
           bs4Dash$box(
             collapsed = TRUE,
+            maximizable = TRUE,
             width = 12,
             status = "primary",
             title = "Data Preview",
@@ -103,14 +106,7 @@ server_body <- function(id = "body", appSession) {
 
       config <- shiny$eventReactive(datapathUpload, {
         datapathUpload <- datapathUpload()
-        xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
-      })
-
-
-      shiny$observeEvent(input$start, {
-        bs4Dash$updateBox(ns("importBox"), action = "update", options = list(
-          collapsed = TRUE
-        ))
+        xlsx$server_xlsx("xlsx-local", datapathUpload, width = 6)
       })
 
       clean_config <- shiny$eventReactive(input$start, {
@@ -150,7 +146,7 @@ server_body <- function(id = "body", appSession) {
             xlsx$server_xlsx(
               uuid,
               datapath = path,
-              ui_id = "#dataPreviewElements"
+              ui_id = "#dataPreviewElements", width = 12
             )
           }
         )
