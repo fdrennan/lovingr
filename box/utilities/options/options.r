@@ -37,7 +37,8 @@ server_options <- function(id = "options") {
         shiny$column(
           12,
           shiny$fluidRow(
-            shiny$div(class='col-xl-6 col-lg-6 col-md-12 col-sm-12',
+            shiny$div(
+              class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
               shiny$fluidRow(
                 bs4Dash$bs4Card(
                   title = "General Options", width = 12,
@@ -56,7 +57,8 @@ server_options <- function(id = "options") {
                 )
               )
             ),
-            shiny$div(class='col-xl-6 col-lg-6 col-md-12 col-sm-12',
+            shiny$div(
+              class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
               shiny$fluidRow(
                 bs4Dash$bs4Card(
                   title = "File Aggregation", width = 12,
