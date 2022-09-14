@@ -3,23 +3,10 @@
 #' @export
 ui_run_analysis <- function(id = "run_analysis", data) {
   box::use(shiny, bs4Dash)
-  # box::use(../../../utilities/io/file_read_multi_ext)
   ns <- shiny$NS(id)
-  shiny$fluidRow(
-    shiny$column(
-      12,
-      shiny$h1(
-        unique(data$analysis),
-        class = "text-center display-1"
-      )
-    ),
-    shiny$column(
-      12,
-      shiny$uiOutput(ns("app"), container = function(...) {
-        shiny$fluidRow(...)
-      })
-    )
-  )
+  shiny$uiOutput(ns("app"), container = function(...) {
+    shiny$fluidRow(...)
+  })
 }
 
 
@@ -58,29 +45,24 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       output$app <- shiny$renderUI({
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
-        shiny$column(
-          12,
+        bs4Dash$box(
+          width = 12,
+          title = shiny$h1(analysisInput$analysis_name), collapsed = FALSE,
           shiny$fluidRow(
             bs4Dash$box(
-              width = 12,
-              title = shiny$h1(analysisInput$analysis_name), collapsed = FALSE,
-              shiny$fluidRow(
-                bs4Dash$box(
-                  title = paste0("Code Review: ", analysisInput$analysis_name),
-                  width = 12, collapsed = TRUE,
-                  shinyAce$aceEditor(
-                    outputId = ns("myEditor"),
-                    value = analysisInput$analysis_file,
-                    mode = "r",
-                    theme = "ambiance"
-                  )
-                ),
-                datatable$ui_dt(
-                  ns("statsResults"),
-                  title = "Stats Results",
-                  collapsed = FALSE, width = 12
-                )
+              title = paste0("Code Review: ", analysisInput$analysis_name),
+              width = 12, collapsed = TRUE,
+              shinyAce$aceEditor(
+                outputId = ns("myEditor"),
+                value = analysisInput$analysis_file,
+                mode = "r",
+                theme = "ambiance"
               )
+            ),
+            datatable$ui_dt(
+              ns("statsResults"),
+              title = "Stats Results",
+              collapsed = FALSE, width = 12
             )
           )
         )

@@ -63,7 +63,7 @@ ui_body <- function(id = "body") {
           )
         ),
         shiny$fluidRow(
-          shiny$div(id = "uiAnalyses")
+          shiny$column(12, id = "uiAnalyses")
         )
       )
     )
