@@ -33,6 +33,7 @@ map_aegap_statistics <- function(df, configuration) {
           },
           error = function(err) {
             shiny::showNotification(
+              closeButton = TRUE, duration = NULL,
               shiny::div(
                 shiny::tags$h5(unique(x$paramcd)),
                 shiny::tags$p(as.character(err))
