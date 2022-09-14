@@ -100,7 +100,7 @@ server_body <- function(id = "body", appSession) {
 
       config <- shiny$eventReactive(datapathUpload, {
         datapathUpload <- datapathUpload()
-        xlsx$server_xlsx("xlsx-local", datapathUpload, width = 6)
+        xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
 
       clean_config <- shiny$eventReactive(input$start, {
