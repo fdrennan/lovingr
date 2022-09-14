@@ -85,6 +85,22 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         )
       })
 
+      notifyUserOfSuccess <- shiny$reactive({
+        box::use(shinyToastify, uuid, glue)
+        analysisInput <- analysisInput()
+        shinyToastify$showToast(
+          session = session, input = input, id = uuid$UUIDgenerate(),
+          text = shiny$tags$pre(
+            glue$glue("Statistics generated for {analysisInput$analysis_name}")
+          ),
+          autoClose = 4000,
+          position = "bottom-center",
+          style = list(
+            border = "4px solid crimson",
+            boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+          )
+        )
+      })
 
 
       shiny$observeEvent(analysisInput(), {
@@ -93,9 +109,10 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / execute / analysis_aecnt)
         box::use(.. / .. / execute / analysis_aegap)
         analysisInput <- analysisInput()
-        notifyUserOfEvent()
+
         tryCatch(
           {
+            notifyUserOfEvent()
             results <- switch(analysisInput$analysis_name,
               "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
               "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
@@ -103,6 +120,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
               "aegap" = analysis_aegap$analysis_aegap(analysisInput$analysis_data, variables)
             )
             datatable$server_dt("statsResults", results)
+            notifyUserOfSuccess()
           },
           error = function(err) {
             box::use(shinyToastify, uuid, glue)

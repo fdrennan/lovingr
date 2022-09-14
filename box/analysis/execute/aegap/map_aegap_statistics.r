@@ -4,11 +4,12 @@ map_aegap_statistics <- function(df, configuration) {
   box::use(purrr, dplyr)
   box::use(.. / subfunction / CompareMean / CompareMean)
   split_aegap <- split(df, df$paramcd)
-  purrr$imap_dfr(
+  purrr$map_dfr(
     split_aegap, (
-      function(x, paramcd) {
+      function(x) {
         tryCatch(
           {
+            # browser()
             mean_data <- x[!is.na(x$amount), ]
             mean_data <- x[x$amount > 0, ] # added by freddy
             mean_data$logAEGAP <- log(mean_data$amount)
@@ -24,7 +25,8 @@ map_aegap_statistics <- function(df, configuration) {
               dplyr$mutate(
                 grp_mean = exp(grp_mean),
                 grandmean = exp(grandmean),
-                diff = grp_mean - grandmean
+                diff = grp_mean - grandmean,
+                paramcd = unique(x$paramcd)
               )
 
             rslt
@@ -32,7 +34,7 @@ map_aegap_statistics <- function(df, configuration) {
           error = function(err) {
             shiny::showNotification(
               shiny::div(
-                shiny::tags$h5(paramcd),
+                shiny::tags$h5(unique(x$paramcd)),
                 shiny::tags$p(as.character(err))
               )
             )

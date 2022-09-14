@@ -3,6 +3,7 @@ analysis_aegap <- function(aegap, configuration) {
   box::use(dplyr, tidyr)
   box::use(. / aegap / map_aegap_statistics)
   box::use(. / analysis_aegap)
+  # browser()
   aegap_clean <-
     aegap |>
     dplyr$rename_all(tolower) |>
