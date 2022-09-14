@@ -78,6 +78,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / execute / analysis_rgv)
         box::use(.. / .. / execute / analysis_aecnt)
         box::use(.. / .. / execute / analysis_aegap)
+        box::use(.. / .. / execute / analysis_vitals)
         analysisInput <- analysisInput()
 
         analysis_name <- analysisInput$analysis_name
@@ -85,11 +86,13 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           "Generating data for ", analysis_name
         ), id = analysis_name, closeButton = FALSE, duration = NULL)
 
+        analysis_data <- analysisInput$analysis_data
         results <- switch(analysis_name,
-          "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
-          "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
-          "aecnt" = analysis_aecnt$analysis_aecnt(analysisInput$analysis_data, variables),
-          "aegap" = analysis_aegap$analysis_aegap(analysisInput$analysis_data, variables)
+          "aei" = analysis_aei$analysis_aei(analysis_data, variables),
+          "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
+          "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
+          "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
+          "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables)
         )
         datatable$server_dt("statsResults", results)
         shiny$removeNotification(id = analysis_name)

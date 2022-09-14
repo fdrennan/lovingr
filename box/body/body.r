@@ -29,14 +29,14 @@ ui_body <- function(id = "body") {
             shiny$fluidRow(
               metadata$ui_metadata(ns("metadata"), width = 6),
               file_upload$ui_file_upload(ns("file_upload"),
-                                         width = 6,
-                                         footer = if (getOption("development")) {
-                                           shiny$tags$p("Upload Disabled - Running in development mode.")
-                                         }
+                width = 6,
+                footer = if (getOption("development")) {
+                  shiny$tags$p("Upload Disabled - Running in development mode.")
+                }
               ),
               shiny$column(12,
-                           class = "text-right py-3",
-                           bs4Dash$actionButton(ns("start"), "Start", status = "primary")
+                class = "text-right py-3",
+                bs4Dash$actionButton(ns("start"), "Start", status = "primary")
               )
             )
           ),
@@ -62,7 +62,7 @@ ui_body <- function(id = "body") {
             title = "Data Preview",
             shiny$div(id = "dataPreview")
           )
-          ),
+        ),
         shiny$fluidRow(
           shiny$column(12, id = "uiAnalyses")
         )

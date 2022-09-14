@@ -1,65 +1,42 @@
-#' analysis_vitals;
-#'
-#' @description
-#'
-#' Here are the columns available for flagging
-#'
-#' ```
-#' Columns: 12
-#' $ count           <dbl> 5
-#' $ nObs_Site       <dbl> 163
-#' $ site_percentage <dbl> 3.067485
-#' $ per_of_value    <dbl> 5.434783
-#' $ Count_Study     <dbl> 92
-#' $ nObs_Study      <dbl> 2670
-#' $ PerofStudy      <dbl> 3.445693
-#' $ odds_ratio      <dbl> 0.8802561
-#' $ Pvalue          <dbl> 1
-#' $ p_value         <dbl> 1
-#' $ code            <chr> "flag=0; if (p_value < 0.1 & count > 8 & odds_ratio > 4 & site_percentage > 33 & per_of_value…
-#' $ time            <dttm> 2021-03-25 03:51:12
-#' ```
-#' @family csm_analysis
-#' @family csm_analysis_loop
-#' @seealso rep_value_in_group
-#' @export analysis_vitals
+#' @export
 analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
+  box::use(dplyr, stringr, purrr, . / analysis_vitals)
+  browser()
   if ("vsdv" %in% names(input_vs)) {
     split_vs <- input_vs |>
-      mutate(
-        split_on = case_when(
-          str_detect(paramcd, "dia") ~ paste0(vsdv, "_", paramcd),
-          str_detect(paramcd, "sys") ~ paste0(vsdv, "_", paramcd),
-          str_detect(paramcd, "bp") ~ paste0(vsdv, "_", paramcd),
+      dplyr$mutate(
+        split_on = dplyr$case_when(
+          stringr$str_detect(paramcd, "dia") ~ paste0(vsdv, "_", paramcd),
+          stringr$str_detect(paramcd, "sys") ~ paste0(vsdv, "_", paramcd),
+          stringr$str_detect(paramcd, "bp") ~ paste0(vsdv, "_", paramcd),
           TRUE ~ paramcd
         )
       )
   } else {
     split_vs <- input_vs |>
-      mutate(
+      dplyr$mutate(
         split_on = paramcd
       )
   }
 
-  split_vs <- split_vs |>
-    split(.$split_on)
+  split_vs <- split(split_vs, split_vs$split_on)
 
-  flags <- imap_dfr(
+  flags <- purrr$imap_dfr(
     split_vs,
-    ~ rep_value_in_group(..2, ..1)
+    ~ analysis_vitals$rep_value_in_group(..2, ..1)
   )
 
-  csm_cli_header("VITAL SIGN ANALYSIS COMPLETE")
+  join_meta_data <-
+    input_vs |>
+    dplyr$distinct(siteid, country, cutdt) |>
+    dplyr$rename(Groups = siteid) |>
+    dplyr$mutate(Groups = as.character(Groups))
 
-  join_meta_data <- distinct(input_vs, siteid, country, cutdt) |>
-    rename(Groups = siteid) |>
-    mutate(Groups = as.character(Groups))
-
-  flags <- inner_join(flags, join_meta_data)
+  flags <- dplyr$inner_join(flags, join_meta_data)
 
   flags <-
     flags |>
-    rename(
+    dplyr$rename(
       site = Groups,
       value = Values
     )
@@ -68,28 +45,115 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
   flags
 }
 
-#' rep_value_in_group
-#'
-#' @seealso analysis_vitals
-#'
 #' @export rep_value_in_group
 rep_value_in_group <- function(signal_name = NULL, input_vs) {
-  message(glue("Flagging {signal_name}"))
+  box::use(stringr, . / analysis_vitals)
   signal_name_original <- signal_name
-  if (str_detect(signal_name, "_")) {
-    signal_name <- str_split(signal_name, "_")[[1]][[2]]
+  if (stringr$str_detect(signal_name, "_")) {
+    signal_name <- stringr$str_split(signal_name, "_")[[1]][[2]]
   }
-
-  response <- suppressMessages({
-    RepValueinGroup.f(
-      signal_name,
-      input_vs,
-      "BY"
-      # configuration = configuration
-    )
-  })
-
+  response <- analysis_vitals$RepValueinGroup.f(signal_name, input_vs, "BY")
   response$signal_name <- signal_name_original
-
   response
+}
+
+
+#' @export
+RepValueinGroup.f <- function(Parname, data, padjmethod) {
+  box::use(dplyr, stringr, purrr, stats)
+  box::use(. / analysis_vitals)
+  x <- as.character(data[data$paramcd == Parname, ]$avalc)
+  group <- as.character(data[data$paramcd == Parname, ]$siteid)
+
+  # 1. Perform fisher exact tests of association for each value and site combinations
+  # 2. pvalue adjustment
+  # 3. flag value & site combination based on flagging rules
+
+  # x is the character values we study;
+  # group is the group names, e.g., site id;
+
+  # 0.  Remove missing data first.  assume missing is "NaN";
+
+  ind <- is.na(match(x, "NaN"))
+  x <- x[ind]
+  group <- group[ind]
+
+  # 1. Perform fisher exact tests of association for each value and site combinations
+
+  # create the frequency counts that constitue the 2x2 contigency tableL
+  #                 Group A           Not Group A
+  #  Value=y         count           rowsum-count
+  #  Value ne y  colsum-count   Totalnumber-rowsum-colsum+count
+
+  sitefreq <- table(x, group, exclude = NULL)
+
+  Valuesum <- apply(sitefreq, 1, sum) # frequency of a value in the study;
+  Groupsum <- apply(sitefreq, 2, sum) # number of obs. in a site;
+  Totalnumber <- sum(Valuesum) # total number obs in study
+
+  nGrp <- length(unique(group)) # number of sites;
+  nVal <- length(unique(x)) # number of unique values
+
+  countSeq <- c(sitefreq) # the vector is build by concatanating columns;
+  rowsumSeq <- rep(Valuesum, times = nGrp)
+  colsumSeq <- rep(Groupsum, each = nVal)
+  totalSeq <- rep(Totalnumber, length(countSeq))
+
+  # use mapply to run fisher exact test of association for all value and group combinations;
+  output <- mapply(
+    analysis_vitals$rep_test,
+    count = countSeq, rowsum = rowsumSeq, colsum = colsumSeq, total = totalSeq
+  )
+  output <- data.frame(t(output))
+
+  # add information
+  Values <- rep(as.character(rownames(sitefreq)), times = nGrp)
+  Groups <- rep(as.character(colnames(sitefreq)), each = nVal)
+  Par <- rep(Parname, length(countSeq))
+
+  # adjusting for multiple comparison;
+  output$adjustPval <- stats$p.adjust(output$Pvalue, method = padjmethod)
+
+  # apply flagging rules that based on padj, odds ration and the prevalence of the values;
+  # configuration <- filter(configuration, signals == tolower(unique(Par)))
+
+  output$code <- data$code[[1]]
+
+  output <-
+    dplyr$rename(
+      output,
+      adjusted_p_value = .data$adjustPval,
+      site_value_cnt = Count_Site,
+      stdy_value_cnt = Count_Study,
+      site_value_pct = PerofSite,
+      stdy_value_pct = PerofStudy,
+      p_value = Pvalue
+    ) |>
+    dplyr$mutate(
+      diff_pct = site_value_pct - stdy_value_pct
+    ) |>
+    dplyr$rename_all(str_to_lower)
+
+
+  output
+}
+
+
+#' @export rep_test
+rep_test <- function(count, rowsum, colsum, total) {
+  box::use(stats)
+  # perfroms fisher exact for association between a value and a particular site;
+
+  stat <- c(count, rowsum, colsum, total)
+  stat1 <- c(count, rowsum - count, colsum - count, total - rowsum - colsum + count)
+  Pvalue <- stats$fisher.test(matrix(stat1, 2, 2, byrow = F))$p.value
+
+  oddsRatio <- stat1[1] * stat1[4] / (stat1[2] * stat1[3])
+  oddsRatio[oddsRatio == Inf] <- 100
+
+  t <- c(count, colsum, 100 * count / colsum, 100 * count / rowsum, rowsum, total, 100 * rowsum / total, oddsRatio, Pvalue)
+
+  names(t) <- c("Count_Site", "nObs_Site", "PerofSite", "PerofValue", "Count_Study", "nObs_Study", "PerofStudy", "oddsRatio", "Pvalue")
+
+  t
 }
