@@ -3,6 +3,7 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12) {
   box::use(shiny, DT, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
+    maximizable = TRUE,
     width = width,
     title = title, collapsed = collapsed,
     DT$DTOutput(ns("ui"))

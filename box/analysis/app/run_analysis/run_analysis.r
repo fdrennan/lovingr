@@ -46,10 +46,13 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
         bs4Dash$box(
+          status = "primary",
+          id = ns("analysisBox"),
           width = 12,
           title = shiny$h1(analysisInput$analysis_name), collapsed = FALSE,
           shiny$fluidRow(
             bs4Dash$box(
+              maximizable = TRUE,
               title = paste0("Code Review: ", analysisInput$analysis_name),
               width = 12, collapsed = TRUE,
               shinyAce$aceEditor(
@@ -62,40 +65,12 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             datatable$ui_dt(
               ns("statsResults"),
               title = "Stats Results",
-              collapsed = FALSE, width = 12
+              collapsed = TRUE, width = 12
             )
           )
         )
       })
 
-
-      notifyUserOfEvent <- shiny$reactive({
-        box::use(shinyToastify, uuid, glue)
-        analysisInput <- analysisInput()
-        shinyToastify$showToast(
-          session = session, input = input, id = uuid$UUIDgenerate(),
-          text = shiny$tags$pre(
-            glue$glue("Generating {analysisInput$analysis_name}")
-          ),
-          autoClose = 2000,
-          className = "analysisSection",
-          position = "top-left"
-        )
-      })
-
-      notifyUserOfSuccess <- shiny$reactive({
-        box::use(shinyToastify, uuid, glue)
-        analysisInput <- analysisInput()
-        shinyToastify$showToast(
-          session = session, input = input, id = uuid$UUIDgenerate(),
-          text = shiny$tags$pre(
-            glue$glue("{analysisInput$analysis_name} complete")
-          ),
-          autoClose = 2000,
-          className = "analysisSection",
-          position = "top-left"
-        )
-      })
 
 
       shiny$observeEvent(analysisInput(), {
@@ -105,41 +80,28 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / execute / analysis_aegap)
         analysisInput <- analysisInput()
 
-        tryCatch(
-          {
-            notifyUserOfEvent()
-            results <- switch(analysisInput$analysis_name,
-              "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
-              "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
-              "aecnt" = analysis_aecnt$analysis_aecnt(analysisInput$analysis_data, variables),
-              "aegap" = analysis_aegap$analysis_aegap(analysisInput$analysis_data, variables)
-            )
-            datatable$server_dt("statsResults", results)
-            notifyUserOfSuccess()
-          },
-          error = function(err) {
-            box::use(shinyToastify, uuid, glue)
-            analysisInput <- analysisInput()
-            shinyToastify$showToast(
-              closeOnClick = FALSE,
-              className = "runAnalysis",
-              position = "top-left",
-              session = session, input = input, id = uuid$UUIDgenerate(),
-              text = shiny$fluidRow(
-                shiny$column(
-                  12,
-                  shiny$tags$pre(
-                    as.character(err)
-                  ),
-                  shiny$tags$pre(
-                    glue$glue("Analysis failed for {analysisInput$analysis_name}")
-                  )
-                )
-              ),
-              autoClose = FALSE
-            )
-          }
+        analysis_name <- analysisInput$analysis_name
+        shiny$showNotification(ui = paste0(
+          "Generating data for ", analysis_name
+        ), id = analysis_name, closeButton = FALSE, duration = NULL)
+
+        results <- switch(analysis_name,
+          "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
+          "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
+          "aecnt" = analysis_aecnt$analysis_aecnt(analysisInput$analysis_data, variables),
+          "aegap" = analysis_aegap$analysis_aegap(analysisInput$analysis_data, variables)
         )
+        datatable$server_dt("statsResults", results)
+        shiny$removeNotification(id = analysis_name)
+        # bs4Dash$updateBox(id = "#analysisBox", action = "update", options = list(
+        #   closable = TRUE, status = "primary"
+        # ))
+        # bs4Dash$updateBox(id = ns("analysisBox"), action = "update", options = list(
+        #   closable = TRUE, status = "primary"
+        # ))
+        # bs4Dash$updateBox(id = paste0("#", ns("analysisBox")), action = "update", options = list(
+        #   closable = TRUE, status = "primary"
+        # ))
       })
     }
   )

@@ -22,6 +22,8 @@ ui_body <- function(id = "body") {
         ),
         shiny$fluidRow(
           bs4Dash$box(
+            id = ns("importBox"),
+            status = "primary",
             title = "Data Import", width = 12,
             metadata$ui_metadata(ns("metadata"), width = 12),
             file_upload$ui_file_upload(ns("file_upload"),
@@ -57,7 +59,9 @@ ui_body <- function(id = "body") {
         ),
         shiny$fluidRow(
           bs4Dash$box(
+            collapsed = TRUE,
             width = 12,
+            status = "primary",
             title = "Data Preview",
             shiny$div(id = "dataPreview")
           )
@@ -102,10 +106,16 @@ server_body <- function(id = "body", appSession) {
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
 
+
+      shiny$observeEvent(input$start, {
+        bs4Dash$updateBox(ns("importBox"), action = "update", options = list(
+          collapsed = TRUE
+        ))
+      })
+
       clean_config <- shiny$eventReactive(input$start, {
         shiny$req(metadata())
         shiny$req(config()())
-
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
         datatable$server_dt("clean_config", clean_config)
