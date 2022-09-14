@@ -30,6 +30,10 @@ ui_body <- function(id = "body") {
                 shiny$tags$p("Upload Disabled - Running in development mode.")
               }
             )
+          ),
+          shiny$column(12,
+            class = "text-right py-3",
+            bs4Dash$actionButton(ns("start"), "Start", status = "primary")
           )
         ),
         shiny$fluidRow(
@@ -51,8 +55,16 @@ ui_body <- function(id = "body") {
             collapsed = TRUE, width = 12
           )
         ),
-        shiny$div(id = "dataPreview"),
-        shiny$div(id = "uiAnalyses")
+        shiny$fluidRow(
+          bs4Dash$box(
+            width = 12,
+            title = "Data Preview",
+            shiny$div(id = "dataPreview")
+          )
+        ),
+        shiny$fluidRow(
+          shiny$div(id = "uiAnalyses")
+        )
       )
     )
   )
@@ -90,7 +102,7 @@ server_body <- function(id = "body", appSession) {
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
 
-      clean_config <- shiny$reactive({
+      clean_config <- shiny$eventReactive(input$start, {
         shiny$req(metadata())
         shiny$req(config()())
 
