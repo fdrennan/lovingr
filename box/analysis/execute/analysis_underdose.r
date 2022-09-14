@@ -1,61 +1,28 @@
-#' csm_underdose
-#'
-#' @description
-#'
-#' # Here are the columns available for flagging
-#'
-#' ```
-#' $ rowname           <chr> "0005"
-#' $ r                 <dbl> 3
-#' $ n                 <dbl> 3905
-#' $ ObsPer            <dbl> 0.07682458
-#' $ ExpPer            <dbl> 0.1247021
-#' $ pvalue            <dbl> 0.27493
-#' $ pvalueMethod      <chr> "BetaBinom"
-#' $ fence             <chr> "outer"
-#' $ cutoff_perplanned <dbl> 80
-#' $ obs_pct           <dbl> 0.07682458
-#' $ stdy_pct          <dbl> 0.1247021
-#' $ p_value           <dbl> 0.27493
-#' $ code              <chr> "flag = 1; if ((obs_pct-stdy_pct)<10 & p_value<0.15) {flag=1};"
-#' $ time              <dttm> 2021-03-25 03:48:20
-#' ```
-#' @family csm_analysis
-#' @family csm_analysis_loop
 #' @export analysis_underdose
 analysis_underdose <- function(dose_subj = NULL,
                                configuration = NULL) {
+  box::use(dplyr)
+  box::use(. / subfunction / TukeyOutliers / TukeyOutliers)
   cutdt <- unique(dose_subj$cutdt)
-  country_mapping <- distinct(select(dose_subj, studyid, country, site = siteid))
+  country_mapping <- dplyr$distinct(dplyr$select(dose_subj, studyid, country, site = siteid))
 
   dose_subj$siteid <- as.factor(dose_subj$siteid)
   dose_subj$subject <- as.factor(dose_subj$subject)
-  # Dose exposure analysis;
-  # = "csm_dev/datacollections/202102a_datamisc"
 
-  # source("Y:/cdmdev/bmn111/ach/111302/csm02011a/progclin/rfunction/CompareProportion.R")
-  # source("Y:/cdmdev/bmn111/ach/111302/csm02011a/progclin/rfunction/TukeyOutlier_fence.R")
-  # dose_subj <- read.sas7bdat(paste(datapath, "/csmexvis.sas7bdat", sep=""))
   names(dose_subj)
 
-  fence <- filter(configuration$parameters, parameter == "fence")$value
-  cutoff_perplanned <- as.numeric(filter(configuration$parameters, parameter == "cutoff_perplanned")$value)
-  tz_score <- as.numeric(filter(configuration$parameters, parameter == "t_zscore")$value)
-  DataCutDate <- tryCatch(
-    {
-      as.Date(dose_subj$cutdt[1], origin = "1960-1-1")
-    },
-    error = function(err) {
-      anydate(dose_subj$cutdt[1])
-    }
-  )
+  fence <- dplyr$filter(configuration$parameters, parameter == "fence")$value
+  cutoff_perplanned <- as.numeric(dplyr$filter(configuration$parameters, parameter == "cutoff_perplanned")$value)
+  tz_score <- as.numeric(dplyr$filter(configuration$parameters, parameter == "t_zscore")$value)
+  DataCutDate <- as.Date(dose_subj$cutdt[1], origin = "1960-1-1")
+
   dose <- dose_subj[dose_subj$exdose >= 0 & !is.na(dose_subj$exdose), ]
   diff <- dose$exdose - dose$expdose
   perdiff <- 100 * diff / dose$expdose
   dose <- data.frame(dose, diff, perdiff)
   n <- table(dose$siteid)
 
-  Outliers_info <- TukeyOutliers(dose$extdose, fence = fence)
+  Outliers_info <- TukeyOutliers$TukeyOutliers(dose$extdose, fence = fence)
   Outliers <- Outliers_info$outlier
   outliers_low <- Outliers[diff[Outliers] < 0 & dose[Outliers, ]$extdose < cutoff_perplanned]
   # OutliersHigh=Outliers[diff[Outliers]>0 & dose[Outliers,]$extdose > 100+ (100 - c1)]
