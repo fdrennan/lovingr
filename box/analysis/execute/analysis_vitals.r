@@ -105,12 +105,10 @@ RepValueinGroup.f <- function(Parname, data, padjmethod) {
   # apply flagging rules that based on padj, odds ration and the prevalence of the values;
   # configuration <- filter(configuration, signals == tolower(unique(Par)))
 
-  output$code <- data$code[[1]]
-
   output <-
     dplyr$rename(
       output,
-      adjusted_p_value = .data$adjustPval,
+      adjusted_p_value = adjustPval,
       site_value_cnt = Count_Site,
       stdy_value_cnt = Count_Study,
       site_value_pct = PerofSite,
@@ -120,18 +118,20 @@ RepValueinGroup.f <- function(Parname, data, padjmethod) {
     dplyr$mutate(
       diff_pct = site_value_pct - stdy_value_pct
     ) |>
-    dplyr$rename_all(str_to_lower)
+    dplyr$rename_all(stringr$str_to_lower)
 
 
   output
 }
 
 
-#' @export rep_test
+
+#' @export
 rep_test <- function(count, rowsum, colsum, total) {
   box::use(stats)
+  box::use(stringr, . / analysis_vitals)
   # perfroms fisher exact for association between a value and a particular site;
-
+  # box::use(stringr, . / analysis_vitals)
   stat <- c(count, rowsum, colsum, total)
   stat1 <- c(count, rowsum - count, colsum - count, total - rowsum - colsum + count)
   Pvalue <- stats$fisher.test(matrix(stat1, 2, 2, byrow = F))$p.value
