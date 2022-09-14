@@ -88,8 +88,8 @@ server_metadata <- function(id = "metadata") {
           ) |>
           dplyr$pull(analysis)
 
-        
-        if (!is.null(getOption('analysis_filter'))) analysis <- getOption('analysis_filter')
+
+        if (!is.null(getOption("analysis_filter"))) analysis <- getOption("analysis_filter")
         shiny$selectizeInput(ns("analysis"), "Analysis",
           choices = analysis,
           selected = analysis, multiple = TRUE

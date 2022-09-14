@@ -1,28 +1,22 @@
 #' @export analysis_aei
-analysis_aei <- function(
-  aei_data = NULL, 
-  program = NULL, 
-  analysis = "aei"
-) {
-  
-  box::use(dplyr)
+analysis_aei <- function(aei_data = NULL, variables) {
+  print(aei_data)
+  print(variables)
+  box::use(dplyr, purrr)
+  box::use(. / subfunction / compare_f)
   data_split <- split(aei_data, aei_data$paramcd)
-  
-  analysis_data <- dplyr$map_df(
+  #
+  analysis_data <- purrr$map_df(
     data_split,
     function(x) {
       current_signal <- unique(x$paramcd)
-      response <- compare_f(
+      response <- compare_f$compare_f(
         data = x,
-        variables = program$parameters,
-        analysis = analysis
+        variables = variables
       )
     }
   )
 
-
-  meta_data_join <- distinct(transmute(aei_data, site = siteid, country, cutdt))
-  analysis_data <- inner_join(analysis_data, meta_data_join)
 
   analysis_data
 }

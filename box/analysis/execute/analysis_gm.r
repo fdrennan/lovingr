@@ -69,7 +69,7 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
   # at least have 10 subject visits;
   # Let y=abs(perdiff) the absolute percentage difference between site and study for each growth measurement,
   # rule is: Max(y) >35 or Sum (the top two y) > 55  or sum (top three y) > 75
-  # browser()
+  #
 
 
   result <- mutate(result, signals = as.character(testname))
@@ -136,7 +136,7 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
     tops %>%
     mutate_if(is.numeric, ~ if_else(is.na(.), 0, .))
 
-  # browser()
+  #
 
   # tops$flag_site <- tops$max > 35 | tops$sum_max2 > 55 | tops$sum_max3 > 75
 

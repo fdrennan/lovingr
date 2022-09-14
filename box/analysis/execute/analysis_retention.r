@@ -55,7 +55,7 @@
 #' @export analysis_retention
 analysis_retention <- function(retention_data = NULL, program = NULL, analysis = "aei") {
   parent_environment("analysis_retention")
-  # browser()
+  #
   meta_data_join <- distinct(transmute(retention_data, site = siteid, country, cutdt))
 
   retention_data <- inner_join(
@@ -65,7 +65,7 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
     mutate(numsubj = ndenom)
 
 
-  # browser()
+  #
   # n_incidence_filter_data <- retention_data %>% group_by(paramcd) %>% summarise(n_incidence = sum(incidence))
   #
   # retention_data <- retention_data %>%
@@ -74,7 +74,7 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
   #   )
   #
   data_split <- split(retention_data, retention_data$paramcd)
-  # browser()
+  #
   analysis_data <- map_df(
     data_split,
     function(x) {
@@ -94,7 +94,7 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
     }
   )
 
-  # browser()
+  #
 
   analysis_data <- inner_join(analysis_data, meta_data_join) %>% mutate(analysis = "retention")
   analysis_data

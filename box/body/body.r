@@ -15,8 +15,8 @@ ui_body <- function(id = "body") {
     shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
       shiny$column(
-        8,
-        offset = 2,
+        10,
+        offset = 1,
         shiny$fluidRow(
           options$ui_options(ns("options"), width = 12)
         ),
@@ -34,7 +34,7 @@ ui_body <- function(id = "body") {
         ),
         shiny$fluidRow(
           bs4Dash$box(
-            title = "Raw Data", width = 12,
+            title = "Raw Data", width = 12, collapsed = TRUE,
             shiny$fluidRow(
               shiny$column(
                 12,
@@ -82,13 +82,13 @@ server_body <- function(id = "body", appSession) {
 
       metadata <- metadata$server_metadata("metadata")
 
-      shinyFiles$shinyFileChoose(
-        input, "files",
-        root = c(root = {
-          "."
-        }),
-        filetypes = c("xlsx")
-      )
+      # shinyFiles$shinyFileChoose(
+      #   input, "files",
+      #   root = c(root = {
+      #     "."
+      #   }),
+      #   filetypes = c("xlsx")
+      # )
 
 
       datapathUpload <- file_upload$server_file_upload("file_upload")
@@ -152,10 +152,10 @@ server_body <- function(id = "body", appSession) {
             analysis = gsub("box/analysis/execute/analysis_", "", path),
             analysis = fs$path_ext_remove(analysis)
           )
-        
+
         analysis_code <- dplyr$inner_join(analysis_code, clean_config)
         analysis_code <- split(analysis_code, analysis_code$analysis)
-        
+
         purrr$iwalk(analysis_code, function(analysis_data, name) {
           shiny$insertUI(
             "#uiAnalyses",
@@ -164,8 +164,11 @@ server_body <- function(id = "body", appSession) {
               ns(paste0("run_analysis", name)), analysis_data
             )
           )
+
+          variables <- dplyr$mutate_all(config()()[[1]]$data, tolower)
+          names(variables) <- tolower(names(variables))
           run_analysis$server_run_analysis(
-            paste0("run_analysis", name), analysis_data
+            paste0("run_analysis", name), analysis_data, variables
           )
         })
       })
