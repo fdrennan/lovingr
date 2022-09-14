@@ -32,14 +32,14 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
 
   for (i in 1:nparm)
   {
-    parname <- parm[i]
-    index <- (as.character(DatabyPar[, Var_by]) == parname)
+    paramcd <- parm[i]
+    index <- (as.character(DatabyPar[, Var_by]) == paramcd)
     ResI <- CompareProportion$CompareProportion(
       as.numeric(DatabyPar[index, Var_r]),
       as.numeric(DatabyPar[index, Var_n]),
       DatabyPar[index, Var_site], T_ZSCORE
     )
-    GMParameter <- rep(parname, dim(ResI)[1])
+    GMParameter <- rep(paramcd, dim(ResI)[1])
     ResI <- data.frame(GMParameter, ResI)
     result <- rbind(result, ResI)
   }

@@ -1,8 +1,8 @@
 #' @export
 analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
-  box::use(dplyr, stringr, purrr, . / analysis_vitals, furrr, future)
-  future$plan(future$multiprocess)
-  browser()
+  box::use(dplyr, stringr, purrr, . / analysis_vitals)
+  # future$plan(future$multiprocess)
+  # browser()
   if ("vsdv" %in% names(input_vs)) {
     split_vs <- input_vs |>
       dplyr$mutate(
@@ -25,9 +25,18 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
   out <- purrr$imap_dfr(
     split_vs,
     function(x, y) {
-      box::use(. / analysis_vitals, shiny)
-      shiny$showNotification(y)
-      analysis_vitals$rep_value_in_group(y, x)
+      box::use(. / analysis_vitals, shiny, glue)
+      vals <- names(split_vs)
+      index <- which(vals == y)
+      n_vals <- dplyr$n_distinct(vals)
+      shiny$showNotification(
+        id = "currentVitals",
+        duration = NULL, closeButton = FALSE,
+        glue$glue("paramcd: {y} - {index}/{n_vals}")
+      )
+      out <- analysis_vitals$rep_value_in_group(y, x)
+      shiny$removeNotification("currentVitals")
+      out
     }
   )
 
@@ -36,11 +45,11 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
 
 
 #' @export
-RepValueinGroup.f <- function(Parname, data, padjmethod) {
+RepValueinGroup.f <- function(paramcd, data, padjmethod) {
   box::use(dplyr, stringr, purrr, stats)
   box::use(. / analysis_vitals)
-  x <- as.character(data[data$paramcd == Parname, ]$avalc)
-  group <- as.character(data[data$paramcd == Parname, ]$siteid)
+  x <- as.character(data[data$paramcd == paramcd, ]$avalc)
+  group <- as.character(data[data$paramcd == paramcd, ]$siteid)
 
   # 1. Perform fisher exact tests of association for each value and site combinations
   # 2. pvalue adjustment
@@ -86,7 +95,7 @@ RepValueinGroup.f <- function(Parname, data, padjmethod) {
   # add information
   Values <- rep(as.character(rownames(sitefreq)), times = nGrp)
   Groups <- rep(as.character(colnames(sitefreq)), each = nVal)
-  Par <- rep(Parname, length(countSeq))
+  Par <- rep(paramcd, length(countSeq))
 
   # adjusting for multiple comparison;
   output$adjustPval <- stats$p.adjust(output$Pvalue, method = padjmethod)
@@ -138,13 +147,9 @@ rep_test <- function(count, rowsum, colsum, total) {
 
 
 #' @export
-rep_value_in_group <- function(signal_name = NULL, input_vs) {
-  box::use(stringr, . / analysis_vitals)
-  signal_name_original <- signal_name
-  if (stringr$str_detect(signal_name, "_")) {
-    signal_name <- stringr$str_split(signal_name, "_")[[1]][[2]]
-  }
-  response <- analysis_vitals$RepValueinGroup.f(signal_name, input_vs, "BY")
-  response$signal_name <- signal_name_original
+rep_value_in_group <- function(paramcd = NULL, input_vs) {
+  box::use(stringr, . / analysis_vitals, shiny)
+  response <- analysis_vitals$RepValueinGroup.f(paramcd, input_vs, "BY")
+  response$paramcd <- paramcd
   response
 }
