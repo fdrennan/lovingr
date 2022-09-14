@@ -88,11 +88,16 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       shiny$observeEvent(analysisInput(), {
         box::use(.. / .. / execute / analysis_aei)
         box::use(.. / .. / execute / analysis_rgv)
+        box::use(.. / .. / execute / analysis_aecnt)
         analysisInput <- analysisInput()
-        notifyUserOfEvent()
+        # notifyUserOfEvent()
         results <- switch(analysisInput$analysis_name,
           "aei" = analysis_aei$analysis_aei(analysisInput$analysis_data, variables),
-          "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables)
+          "rgv" = analysis_rgv$analysis_rgv(analysisInput$analysis_data, variables),
+          "aecnt" = {
+            browser()
+            analysis_aecnt$analysis_aecnt(analysisInput$analysis_data, variables)
+          }
         )
         datatable$server_dt("statsResults", results)
       })
