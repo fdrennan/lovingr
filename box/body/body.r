@@ -15,8 +15,8 @@ ui_body <- function(id = "body") {
     shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
       shiny$column(
-        10,
-        offset = 1,
+        12,
+        # offset = 1,
         shiny$fluidRow(
           options$ui_options(ns("options"), width = 12)
         ),
