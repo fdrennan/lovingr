@@ -45,18 +45,6 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
   flags
 }
 
-#' @export rep_value_in_group
-rep_value_in_group <- function(signal_name = NULL, input_vs) {
-  box::use(stringr, . / analysis_vitals)
-  signal_name_original <- signal_name
-  if (stringr$str_detect(signal_name, "_")) {
-    signal_name <- stringr$str_split(signal_name, "_")[[1]][[2]]
-  }
-  response <- analysis_vitals$RepValueinGroup.f(signal_name, input_vs, "BY")
-  response$signal_name <- signal_name_original
-  response
-}
-
 
 #' @export
 RepValueinGroup.f <- function(Parname, data, padjmethod) {
@@ -156,4 +144,18 @@ rep_test <- function(count, rowsum, colsum, total) {
   names(t) <- c("Count_Site", "nObs_Site", "PerofSite", "PerofValue", "Count_Study", "nObs_Study", "PerofStudy", "oddsRatio", "Pvalue")
 
   t
+}
+
+
+
+#' @export
+rep_value_in_group <- function(signal_name = NULL, input_vs) {
+  box::use(stringr, . / analysis_vitals)
+  signal_name_original <- signal_name
+  if (stringr$str_detect(signal_name, "_")) {
+    signal_name <- stringr$str_split(signal_name, "_")[[1]][[2]]
+  }
+  response <- analysis_vitals$RepValueinGroup.f(signal_name, input_vs, "BY")
+  response$signal_name <- signal_name_original
+  response
 }
