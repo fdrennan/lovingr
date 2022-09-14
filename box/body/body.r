@@ -43,7 +43,7 @@ ui_body <- function(id = "body") {
           bs4Dash$box(
             maximizable = TRUE,
             title = "Configuration", width = 6,
-            collapsed = TRUE,
+            collapsed = FALSE,
             status = "info",
             xlsx$ui_xlsx(ns("xlsx-server")),
             xlsx$ui_xlsx(ns("xlsx-local"))
