@@ -65,10 +65,13 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             datatable$ui_dt(
               ns("statsResults"),
               title = "Pre-Flagging",
-              collapsed = FALSE, width = 12
-            ),
-            shiny$tableOutput(ns('namesTable'))
-          )
+              collapsed = TRUE, 
+              width = 12
+            )
+          ),
+          shiny$uiOutput(ns('uiSummary'), container = function(...) {
+            shiny$fluidRow(shiny$column(12, ...))
+          })
         )
       })
 
@@ -121,9 +124,24 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
         doesNotContainName <- unique(doesNotContainName)
         flags_that_need_fixing = unique(doesNotContainName)
-        output$namesTable <- shiny$renderTable({
-          data.frame(flags_that_need_fixing = flags_that_need_fixing)
+        corrections_needed <- data.frame(flags_that_need_fixing = flags_that_need_fixing)
+        # browser()
+        analysis_data <- analysisInput()$analysis_data
+        names_statistics_input <- names(analysis_data)
+        names_statistics_output <- names(analysisStatistics)
+        output$uiSummary <- shiny$renderUI({
+          shiny$fluidRow(
+            shiny$h1('Inputs'),
+            lapply(names_statistics_input, function(x) {
+              shiny$column(2, x)
+            }),
+            shiny$h1('Outputs'),
+            lapply(names_statistics_output, function(x) {
+              shiny$column(2, x)
+            })
+          )
         })
+        # datatable$server_dt('namesTable', corrections_needed, title = 'Potential Issues')
       })
     }
   )
