@@ -15,7 +15,11 @@ options(cache_path = "./cache/data.rda")
 options(analysis_filter = {
   if (getOption("development")) {
     # c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
+<<<<<<< HEAD
     c("aei", "rgv", "aecnt", "aegap")
+=======
+    c("aei", "rgv")
+>>>>>>> dev-27
   } else {
   }
 })
