@@ -15,74 +15,59 @@ ui_body <- function(id = "body") {
   bs4Dash$dashboardBody(
     shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
-      shiny$column(
-        12,
-        id = "mainSort", sortable$sortable_js("mainSort"),
+      id = "mainSort", sortable$sortable_js("mainSort"),
+      options$ui_options(ns("options"), width = 12),
+      bs4Dash$box(
+        id = ns("importBox"),
+        status = "primary",
+        maximizable = TRUE,
+        title = "Data Import", width = 12,
         shiny$fluidRow(
-          options$ui_options(ns("options"), width = 12)
-        ),
-        shiny$fluidRow(
-          bs4Dash$box(
-            id = ns("importBox"),
-            status = "primary",
-            maximizable = TRUE,
-            title = "Data Import", width = 12,
+          shiny$div(
+            class = "col-xl-6 col-lg-12 col-md-12",
             shiny$fluidRow(
-              shiny$div(
-                class = "col-xl-6 col-lg-12 col-md-12",
-                shiny$fluidRow(
-                  metadata$ui_metadata(ns("metadata"), width = 12)
-                )
-              ),
-              shiny$div(
-                class = "col-xl-6 col-lg-12 col-md-12",
-                shiny$fluidRow(
-                  file_upload$ui_file_upload(ns("file_upload"),
-                    width = 12,
-                    footer = if (getOption("development")) {
-                      shiny$tags$p("Upload Disabled - Running in development mode.")
-                    }
-                  )
-                )
-              ),
-              shiny$column(12,
-                class = "text-right py-3",
-                bs4Dash$actionButton(ns("start"), "Start", status = "primary")
+              metadata$ui_metadata(ns("metadata"), width = 12)
+            )
+          ),
+          shiny$div(
+            class = "col-xl-6 col-lg-12 col-md-12",
+            shiny$fluidRow(
+              file_upload$ui_file_upload(ns("file_upload"),
+                width = 12,
+                footer = if (getOption("development")) {
+                  shiny$tags$p("Upload Disabled - Running in development mode.")
+                }
               )
             )
+          ),
+          shiny$column(12,
+            class = "text-right py-3",
+            bs4Dash$actionButton(ns("start"), "Start", status = "primary")
           )
-        ),
-        shiny$fluidRow(
-          bs4Dash$box(
-            collapsed = TRUE,
-            maximizable = TRUE,
-            width = 12,
-            status = "primary",
-            title = "Data Preview",
-            shiny$fluidRow(id = "dataPreview")
-          )
-        ),
-        shiny$fluidRow(
-          bs4Dash$box(
-            maximizable = TRUE,
-            title = "Configuration", width = 12,
-            collapsed = FALSE,
-            status = "info",
-            xlsx$ui_xlsx(ns("xlsx-local"))
-          )
-        ),
-        shiny$fluidRow(
-          datatable$ui_dt(
-            ns("clean_config"),
-            status = "info",
-            title = "Flagging Summary",
-            collapsed = TRUE, width = 12
-          )
-        ),
-        shiny$fluidRow(
-          shiny$column(12, id = "uiAnalyses")
         )
-      )
+      ),
+      bs4Dash$box(
+        maximizable = TRUE,
+        title = "Configuration", width = 12,
+        collapsed = FALSE,
+        status = "info",
+        shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
+      ),
+      bs4Dash$box(
+        collapsed = TRUE,
+        maximizable = TRUE,
+        width = 12,
+        status = "primary",
+        title = "Data Preview",
+        shiny$fluidRow(id = "dataPreview")
+      ),
+      datatable$ui_dt(
+        ns("clean_config"),
+        status = "info",
+        title = "Flagging Summary",
+        collapsed = TRUE, width = 12
+      ),
+      shiny$column(12, id = "uiAnalyses")
     )
   )
 }
