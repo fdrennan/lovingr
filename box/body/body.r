@@ -60,13 +60,15 @@ ui_body <- function(id = "body") {
       ),
       shiny$div(
         class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
-        bs4Dash$box(
-          collapsed = TRUE,
-          maximizable = TRUE,
-          width = 12,
-          status = "primary",
-          title = "Data Preview",
-          shiny$fluidRow(id = "dataPreview")
+        shiny$fluidRow(
+          bs4Dash$box(
+            collapsed = TRUE,
+            maximizable = TRUE,
+            width = 12,
+            status = "primary",
+            title = "Data Preview",
+            shiny$fluidRow(id = "dataPreview")
+          )
         )
       ),
       datatable$ui_dt(

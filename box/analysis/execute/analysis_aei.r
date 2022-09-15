@@ -16,6 +16,8 @@ analysis_aei <- function(aei_data = NULL, variables) {
         siteid = x$siteid,
         variables = variables
       )
+      response$paramcd <- current_signal
+      response
     }
   )
 

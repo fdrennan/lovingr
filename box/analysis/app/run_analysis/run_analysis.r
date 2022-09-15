@@ -73,7 +73,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
 
 
 
-      shiny$observeEvent(analysisInput(), {
+      analysisStatistics <- shiny$eventReactive(analysisInput(), {
         #
         box::use(.. / .. / execute / analysis_aei)
         box::use(.. / .. / execute / analysis_rgv)
@@ -81,6 +81,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / execute / analysis_aegap)
         box::use(.. / .. / execute / analysis_vitals)
         box::use(.. / .. / execute / analysis_underdose)
+        box::use(dplyr)
         analysisInput <- analysisInput()
 
         analysis_name <- analysisInput$analysis_name
@@ -95,19 +96,23 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
           "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
           "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables),
-          "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables)
+          "underdose" = {
+            analysis_underdose$analysis_underdose(analysis_data, variables)
+          }
         )
+        data <- dplyr$select(
+          data, study, month, paramcd, flagging_code
+        )
+        print(analysis_name)
+        print(names(results))
+        results <- dplyr$mutate(results, paramcd = tolower(paramcd))
+        results <- dplyr$inner_join(data, results)
         datatable$server_dt("statsResults", results)
         shiny$removeNotification(id = analysis_name)
-        # bs4Dash$updateBox(id = "#analysisBox", action = "update", options = list(
-        #   closable = TRUE, status = "primary"
-        # ))
-        # bs4Dash$updateBox(id = ns("analysisBox"), action = "update", options = list(
-        #   closable = TRUE, status = "primary"
-        # ))
-        # bs4Dash$updateBox(id = paste0("#", ns("analysisBox")), action = "update", options = list(
-        #   closable = TRUE, status = "primary"
-        # ))
+      })
+
+      shiny$observeEvent(analysisStatistics(), {
+        analysisStatistics <- analysisStatistics()
       })
     }
   )

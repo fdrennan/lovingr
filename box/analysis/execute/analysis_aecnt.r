@@ -13,7 +13,7 @@ analysis_aecnt <- function(data, configuration) {
         data, effect, siteid, dplyr$ends_with(signal_tag)
       )
       names(df) <- stringr$str_remove_all(names(df), signal_tag)
-      df$signals <- paste0(signal, "cnt")
+      df$paramcd <- paste0(signal, "cnt")
       df
     }
   )

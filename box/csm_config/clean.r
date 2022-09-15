@@ -29,7 +29,7 @@ clean_config <- function(config) {
     data.frame(
       analysis = tolower(x$Analysis),
       paramcd = tolower(strsplit(x$Signals[1], ", ")[[1]]),
-      flagging_specification = x$Flagging.Specification
+      flagging_code = x$Flagging.Specification
     )
   })
 
