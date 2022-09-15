@@ -46,20 +46,28 @@ ui_body <- function(id = "body") {
           )
         )
       ),
-      bs4Dash$box(
-        maximizable = TRUE,
-        title = "Configuration", width = 12,
-        collapsed = FALSE,
-        status = "info",
-        shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
+      shiny$div(
+        class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
+        shiny$fluidRow(
+          bs4Dash$box(
+            maximizable = TRUE,
+            title = "Configuration", width = 12,
+            collapsed = FALSE,
+            status = "info",
+            shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
+          )
+        )
       ),
-      bs4Dash$box(
-        collapsed = TRUE,
-        maximizable = TRUE,
-        width = 12,
-        status = "primary",
-        title = "Data Preview",
-        shiny$fluidRow(id = "dataPreview")
+      shiny$div(
+        class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
+        bs4Dash$box(
+          collapsed = TRUE,
+          maximizable = TRUE,
+          width = 12,
+          status = "primary",
+          title = "Data Preview",
+          shiny$fluidRow(id = "dataPreview")
+        )
       ),
       datatable$ui_dt(
         ns("clean_config"),
