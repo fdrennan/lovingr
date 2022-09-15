@@ -15,9 +15,10 @@ options(cache_path = "./cache/data.rda")
 options(analysis_filter = {
   if (getOption("development")) {
     # Cc("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
-    # c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
+    c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
     # c("aei", "rgv")
-    "rgv"
+    # "rgv"
+    # 'underdose'
   } else {
     c("aei")
     # c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")

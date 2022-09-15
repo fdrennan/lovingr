@@ -71,12 +71,12 @@ ui_body <- function(id = "body") {
           )
         )
       ),
-      datatable$ui_dt(
-        ns("clean_config"),
-        status = "info",
-        title = "Flagging Summary",
-        collapsed = TRUE, width = 12
-      ),
+      # datatable$ui_dt(
+      #   ns("clean_config"),
+      #   status = "info",
+      #   title = "Flagging Summary",
+      #   collapsed = TRUE, width = 12
+      # ),
       shiny$column(12, id = "uiAnalyses")
     )
   )
@@ -119,7 +119,7 @@ server_body <- function(id = "body", appSession) {
         shiny$req(config()())
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
-        datatable$server_dt("clean_config", clean_config)
+        # datatable$server_dt("clean_config", clean_config)
         clean_config
       })
 
