@@ -1,49 +1,54 @@
 
 #' @export
-ui_file_upload <- function(id = "file_upload") {
+ui_file_upload <- function(id = "file_upload",
+                           width = 6,
+                           label = "Upload a file",
+                           accept = "*",
+                           multiple = FALSE,
+                           ...) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  print(ns("fileUpload"))
   bs4Dash$box(
     title = "File Upload",
-    width = 12,
-    dropdownMenu = bs4Dash$boxDropdown(
-      icon = shiny$icon("info")
+    width = width,
+    status = "secondary",
+    shiny$fileInput(
+      inputId = ns("fileUpload"),
+      label = label,
+      accept = accept,
+      multiple = multiple
     ),
-    sidebar = bs4Dash$boxSidebar(
-      startOpen = FALSE
-    ),
-    shiny$fluidRow(
-      class = "p-2",
-      {
-        shiny$fileInput(
-          ns("fileUpload"),
-          "Choose CSV File",
-          accept = "*",
-          multiple = TRUE
-        )
-      },
-      shiny$tableOutput(ns("fileMetaData"))
-    )
+    shiny$tableOutput(ns("fileMetaData")),
+    ...
   )
 }
 
 #' @export
-server_file_upload <- function(id = "file_upload") {
+server_file_upload <- function(id = "file_upload",
+                               display_meta = FALSE) {
   box::use(shiny)
   shiny$moduleServer(
     id,
     function(input, output, session) {
-      ns <- session$ns
-      shiny$observe({
-        print(ns("fileUpload"))
-        print(shiny$reactiveValuesToList(input))
-      })
-      shiny$observeEvent(input$fileUpload, {
-        output$fileMetaData <- shiny$renderTable({
-          as.data.frame(input$fileUpload)
+      if (display_meta) {
+        shiny$observeEvent(input$fileUpload, {
+          output$fileMetaData <- shiny$renderTable({
+            as.data.frame(input$fileUpload)
+          })
         })
+      }
+
+      out <- shiny$reactive({
+        if (getOption("development")) {
+          out <- getOption("base_config")
+        } else {
+          shiny$req(input$fileUpload)
+          out <- input$fileUpload$datapath
+        }
+        out
       })
+
+      out
     }
   )
 }

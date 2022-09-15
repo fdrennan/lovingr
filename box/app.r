@@ -6,9 +6,14 @@ ui_app <- function() {
     . / body / body,
     . / sidebar / sidebar,
     . / controlbar / controlbar,
-    . / footer / footer,
+    . / footer / footer
   )
+
+
+
   bs4Dash$dashboardPage(
+    title = "CSM Management",
+    fullscreen = TRUE,
     header = header$ui_header(),
     body = body$ui_body(),
     sidebar = sidebar$ui_sidebar(),
@@ -19,10 +24,11 @@ ui_app <- function() {
 
 #' @export
 server_app <- function(session) {
-  box::use(shiny, bs4Dash)
   box::use(
-    bs4Dash,
-    . / body / body
+    . / body / body,
+    . / controlbar / controlbar
   )
-  body$server_body()
+
+  body$server_body(appSession = session)
+  controlbar$server_controlbar()
 }
