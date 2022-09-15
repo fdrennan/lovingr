@@ -16,7 +16,7 @@ options(analysis_filter = {
   if (getOption("development")) {
     # Cc("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
     # c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
-    c('aei', 'rgv')
+    c("aei", "rgv")
   } else {
     c("aei")
     # c("aei", "rgv", "vitals", "rgm", "underdose", "aegap", "aecnt")
