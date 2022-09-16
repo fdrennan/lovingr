@@ -21,3 +21,5 @@ options(analysis_filter = {
   }
 })
 options(ignoreConfigPath = TRUE)
+options(sample_frac = .02)
+options(sample_min = 1000)

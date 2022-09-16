@@ -11,13 +11,12 @@ clean_config <- function(config) {
 
   flagging_sheet <- purrr$keep(config, ~ .$sheetName == "Flagging")[[1]]
   # datapaths <- purrr$keep(config, ~ .$sheetName == "DataPaths")[[1]]
-
+  
   flagging_sheet <- flagging_sheet$data |>
-    dplyr$select(Analysis, Signals, Flagging.Specification) |>
+    dplyr$select(Analysis, Signals, Flagging.Specification, Flag) |>
     dplyr$filter(!is.na(Flagging.Specification)) |>
     dplyr$group_by_all() |>
     dplyr$mutate(cur_group_id = dplyr$cur_group_id())
-
 
   flagging_sheet <- split(
     flagging_sheet,
@@ -27,9 +26,11 @@ clean_config <- function(config) {
   flagging_sheet <- purrr$map_dfr(flagging_sheet, function(x) {
     x$Flagging.Specification <- unescape_html(x$Flagging.Specification)
     data.frame(
-      analysis = tolower(x$Analysis),
-      paramcd = tolower(strsplit(x$Signals[1], ", ")[[1]]),
-      flagging_code = x$Flagging.Specification
+      analysis = tolower(unique(x$Analysis)),
+      paramcd = tolower(strsplit(unique(x$Signals), ", ")[[1]]),
+      flagging_code = unique(x$Flagging.Specification),
+      flagging_true = as.numeric(unique(x$Flag)),
+      flagging_false = NA_integer_
     )
   })
 

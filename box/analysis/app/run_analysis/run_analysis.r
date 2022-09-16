@@ -9,7 +9,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
 
 #' @export
 server_run_analysis <- function(id = "run_analysis", data, variables) {
-  box::use(shiny, bs4Dash, shinyAce, readr)
+  box::use(shiny, bs4Dash, shinyAce, readr, dplyr)
   box::use(.. / .. / .. / utilities / chatty / chatty)
   box::use(.. / .. / .. / utilities / io / file_read_multi_ext)
   box::use(.. / .. / .. / utilities / tables / datatable)
@@ -33,6 +33,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           analysis_data = {
             analysis_data <- file_read_multi_ext$run(analysis_data_path)[[1]]$data
             names(analysis_data) <- tolower(names(analysis_data))
+            if(all(getOption('development'), nrow(analysis_data) > getOption('sample_min'))) {
+              analysis_data <- dplyr$sample_frac(analysis_data, getOption('sample_frac'))
+            }
             analysis_data
           }
         )
@@ -41,6 +44,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       output$app <- shiny$renderUI({
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
+        box::use(purrr)
         bs4Dash$box(
           closable = TRUE,
           status = "success",
@@ -67,11 +71,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
               width = 12
             )
           ),
-          shiny$uiOutput(ns("uiSummary"), container = function(...) {
-            shiny$fluidRow(shiny$column(12, ...))
-          }),
-          shiny$uiOutput(ns('flags'), container = function(...) {
-            shiny$fluidRow(shiny$column(12, ...))})
+          shiny$uiOutput(ns("uiSummary"), container = shiny$fluidRow),
+          shiny$uiOutput(ns('flags'), container = shiny$fluidRow)
         )
       })
 
@@ -105,7 +106,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           }
         )
         data <- dplyr$select(
-          data, study, month, paramcd, flagging_code
+          data, study, month, paramcd, flagging_code, flagging_true, flagging_false
         )
         print(analysis_name)
         print(names(results))
@@ -118,6 +119,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
 
 
       shiny$observeEvent(analysisStatistics(), {
+        box::use(dplyr, stats, purrr)
         analysisStatistics <- analysisStatistics()
         namesAnalysisStatistics <- names(analysisStatistics)
         doesNotContainName <- stringr::str_detect(analysisStatistics$flagging_code, namesAnalysisStatistics)
@@ -129,7 +131,18 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         names_statistics_input <- names(analysis_data)
         names_statistics_output <- names(analysisStatistics)
 
-        output$correctionsOutput <- shiny$renderTable({corrections_neededflags})
+        
+        fc_order <- unique(analysisStatistics$flagging_code)
+        tokens <- strsplit(fc_order, ' ')
+        
+        tokens <- purrr$map(tokens, unique)
+        
+        cols_detected <- purrr$map2_dfr(tokens,fc_order,  function(x, y) {
+          col_detected <- x %in% names_statistics_output
+          data.frame(col_name = x, col_detected = col_detected, code = y)
+        }) |> 
+          dplyr$arrange(col_detected, col_name)
+        
         
         output$uiSummary <- shiny$renderUI({
           shiny$fluidRow(
@@ -141,19 +154,24 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             lapply(names_statistics_output, function(x) {
               shiny$column(2, shiny$h4(x))
             }),
-            shiny$column(12, shiny$h1("Corrections Needed")),
-            shiny$tableOutput(ns("correctionsOutput"))
+            shiny$column(12, shiny$h1("Columns in Flagging")),
+            datatable$ui_dt(ns("colDetectedTable"))
           )
         })
+        datatable$server_dt('colDetectedTable', cols_detected)
+        
         output$flags <- shiny$renderUI({
-          browser()
-          # analysisStatistics |> 
-          #   dplyr$rowwise() |> 
-          #   dplyr$mutate(
-          #     flag = (function(x) {
-          #       browser()
-          #       })(flagging_code)
-          #   )
+          datatable$ui_dt(ns('flags'))
+        })
+        
+        try({
+          shiny$showNotification('Flagging Analysis')
+          analysisStatistics <- analysisStatistics |> 
+            dplyr$mutate(
+              is_flagged = eval(parse(text = flagging_code))
+            )
+          shiny$showNotification('Flagging Complete')
+          datatable$server_dt('flags', data = analysisStatistics)  
         })
       })
     }
