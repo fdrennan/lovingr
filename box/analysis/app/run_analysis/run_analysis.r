@@ -125,20 +125,25 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         doesNotContainName <- unique(doesNotContainName)
         flags_that_need_fixing = unique(doesNotContainName)
         corrections_needed <- data.frame(flags_that_need_fixing = flags_that_need_fixing)
-        # browser()
         analysis_data <- analysisInput()$analysis_data
         names_statistics_input <- names(analysis_data)
         names_statistics_output <- names(analysisStatistics)
+        
+        output$correctionsOutput <- shiny$renderTable({
+          corrections_needed
+        })
         output$uiSummary <- shiny$renderUI({
           shiny$fluidRow(
-            shiny$h1('Inputs'),
+            shiny$column(12, shiny$h1('Inputs')),
             lapply(names_statistics_input, function(x) {
-              shiny$column(2, x)
+              shiny$column(2, shiny$h4(x))
             }),
-            shiny$h1('Outputs'),
+            shiny$column(12, shiny$h1('Outputs')),
             lapply(names_statistics_output, function(x) {
-              shiny$column(2, x)
-            })
+              shiny$column(2, shiny$h4(x))
+            }),
+            shiny$column(12, shiny$h1('Corrections Needed')),
+            shiny$tableOutput(ns('correctionsOutput'))
           )
         })
         # datatable$server_dt('namesTable', corrections_needed, title = 'Potential Issues')

@@ -46,32 +46,9 @@ ui_body <- function(id = "body") {
           )
         )
       ),
-      shiny$div(
-        class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
-        shiny$fluidRow(
-          bs4Dash$box(closable=TRUE,
-            maximizable = TRUE,
-            title = "Configuration", width = 12,
-            collapsed = TRUE,
-            status = "info",
-            shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
-          )
-        )
-      ),
-      shiny$div(
-        class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
-        shiny$fluidRow(
-          bs4Dash$box(closable=TRUE,
-            collapsed = TRUE,
-            maximizable = TRUE,
-            width = 12,
-            status = "primary",
-            title = "Data Preview",
-            shiny$fluidRow(id = "dataPreview")
-          )
-        )
-      ),
-      shiny$column(12, id = "uiAnalyses")
+      shiny$uiOutput(ns('dataRaw'), container = function(...) {
+        shiny$column(12, ...)
+      })
     )
   )
 }
@@ -109,6 +86,39 @@ server_body <- function(id = "body", appSession) {
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
         clean_config
+      })
+      
+      output$dataRaw <- shiny$renderUI({
+        shiny$req(metadata())
+        shiny$req(clean_config()())
+        shiny$fluidRow(
+          shiny$div(
+            class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
+            shiny$fluidRow(
+              bs4Dash$box(closable=TRUE,
+                          maximizable = TRUE,
+                          title = "Configuration", width = 12,
+                          collapsed = TRUE,
+                          status = "info",
+                          shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
+              )
+            )
+          ),
+          shiny$div(
+            class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
+            shiny$fluidRow(
+              bs4Dash$box(closable=TRUE,
+                          collapsed = TRUE,
+                          maximizable = TRUE,
+                          width = 12,
+                          status = "primary",
+                          title = "Data Preview",
+                          shiny$fluidRow(id = "dataPreview")
+              )
+            )
+          ),
+          shiny$column(12, id = "uiAnalyses")
+        )
       })
 
       shiny$observeEvent(clean_config(), {
