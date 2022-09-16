@@ -1,5 +1,6 @@
 #' @export
-ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12, status = "secondary") {
+ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
+                  width = 12, status = "secondary") {
   box::use(shiny, DT, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
@@ -10,7 +11,7 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE, width = 12, status 
     solidHeader = TRUE,
     background = "white",
     title = title, collapsed = collapsed,
-    DT$DTOutput(ns("ui"))
+    shiny$fluidRow(shiny$column(12, DT$DTOutput(ns("ui"), width = "100%")))
   )
 }
 
@@ -38,7 +39,7 @@ server_dt <- function(id = "dt", data, pageLength = 10) {
           elementId = NULL,
           fillContainer = getOption("DT.fillContainer", NULL),
           autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
-          selection = c("multiple", "single", "none"),
+          selection = "none", #  c("multiple", "single", "none"),
           extensions = list(),
           plugins = NULL,
           editable = FALSE

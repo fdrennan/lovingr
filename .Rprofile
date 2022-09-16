@@ -16,10 +16,10 @@ options(analysis_filter = {
   if (getOption("development")) {
     c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
     # c("aei", "rgv", "aecnt", "aegap")
-    'vitals'
+    "vitals"
   } else {
   }
 })
 options(ignoreConfigPath = TRUE)
-options(sample_frac = .02)
+options(sample_frac = .01)
 options(sample_min = 1000)

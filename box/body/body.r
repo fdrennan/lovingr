@@ -94,7 +94,7 @@ server_body <- function(id = "body", appSession) {
         shiny$req(clean_config())
         shiny$fluidRow(
           shiny$div(
-            class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
+            class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -107,7 +107,7 @@ server_body <- function(id = "body", appSession) {
             )
           ),
           shiny$div(
-            class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
+            class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,

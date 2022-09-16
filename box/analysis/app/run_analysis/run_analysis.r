@@ -33,8 +33,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           analysis_data = {
             analysis_data <- file_read_multi_ext$run(analysis_data_path)[[1]]$data
             names(analysis_data) <- tolower(names(analysis_data))
-            if(all(getOption('development'), nrow(analysis_data) > getOption('sample_min'))) {
-              analysis_data <- dplyr$sample_frac(analysis_data, getOption('sample_frac'))
+            if (all(getOption("development"), nrow(analysis_data) > getOption("sample_min"))) {
+              analysis_data <- dplyr$sample_frac(analysis_data, getOption("sample_frac"))
             }
             analysis_data
           }
@@ -57,6 +57,10 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
               maximizable = TRUE,
               title = "Code Review", status = "info",
               width = 12, collapsed = TRUE,
+              shiny$uiOutput(ns("uiSummary"), container = function(...) {
+                # shiny$column(12, ...)
+                shiny$fluidRow(...)
+              }),
               shinyAce$aceEditor(
                 outputId = ns("myEditor"),
                 value = analysisInput$analysis_file,
@@ -69,17 +73,17 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
               title = "Pre-Flagging",
               collapsed = TRUE,
               width = 12
+            ),
+            datatable$ui_dt(
+              ns("flags"), "Flags"
             )
-          ),
-          shiny$uiOutput(ns("uiSummary"), container = shiny$fluidRow),
-          shiny$uiOutput(ns('flags'), container = shiny$fluidRow)
+          )
         )
       })
 
 
 
       analysisStatistics <- shiny$eventReactive(analysisInput(), {
-        #
         box::use(.. / .. / execute / analysis_aei)
         box::use(.. / .. / execute / analysis_rgv)
         box::use(.. / .. / execute / analysis_aecnt)
@@ -106,7 +110,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           }
         )
         data <- dplyr$select(
-          data, study, month, paramcd, flagging_code, flagging_true, flagging_false
+          data, study, month, paramcd, flagging_code, flag_value
         )
         print(analysis_name)
         print(names(results))
@@ -122,7 +126,10 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(dplyr, stats, purrr)
         analysisStatistics <- analysisStatistics()
         namesAnalysisStatistics <- names(analysisStatistics)
-        doesNotContainName <- stringr::str_detect(analysisStatistics$flagging_code, namesAnalysisStatistics)
+        doesNotContainName <- stringr::str_detect(
+          analysisStatistics$flagging_code,
+          namesAnalysisStatistics
+        )
         doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
         doesNotContainName <- unique(doesNotContainName)
         flags_that_need_fixing <- unique(doesNotContainName)
@@ -131,48 +138,49 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         names_statistics_input <- names(analysis_data)
         names_statistics_output <- names(analysisStatistics)
 
-        
-        fc_order <- unique(analysisStatistics$flagging_code)
-        tokens <- strsplit(fc_order, ' ')
-        
-        tokens <- purrr$map(tokens, unique)
-        
-        cols_detected <- purrr$map2_dfr(tokens,fc_order,  function(x, y) {
-          col_detected <- x %in% names_statistics_output
-          data.frame(col_name = x, col_detected = col_detected, code = y)
-        }) |> 
-          dplyr$arrange(col_detected, col_name)
-        
-        
+
         output$uiSummary <- shiny$renderUI({
-          shiny$fluidRow(
-            shiny$column(12, shiny$h1("Inputs")),
-            lapply(names_statistics_input, function(x) {
-              shiny$column(2, shiny$h4(x))
-            }),
-            shiny$column(12, shiny$h1("Outputs")),
-            lapply(names_statistics_output, function(x) {
-              shiny$column(2, shiny$h4(x))
-            }),
-            shiny$column(12, shiny$h1("Columns in Flagging")),
-            datatable$ui_dt(ns("colDetectedTable"))
+          bs4Dash$box(
+            width = 12,
+            title = "Columns",
+            shiny$fluidRow(
+              shiny$column(12, shiny$h1("Inputs")),
+              shiny$column(12, shiny$fluidRow(
+                lapply(names_statistics_input, function(x) {
+                  shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
+                })
+              )),
+              shiny$column(12, shiny$h1("Outputs")),
+              shiny$column(12, shiny$fluidRow(
+                lapply(names_statistics_output, function(x) {
+                  shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
+                })
+              ))
+            )
           )
         })
-        datatable$server_dt('colDetectedTable', cols_detected)
-        
-        output$flags <- shiny$renderUI({
-          datatable$ui_dt(ns('flags'))
-        })
-        
-        try({
-          shiny$showNotification('Flagging Analysis')
-          analysisStatistics <- analysisStatistics |> 
-            dplyr$mutate(
-              is_flagged = eval(parse(text = flagging_code))
-            )
-          shiny$showNotification('Flagging Complete')
-          datatable$server_dt('flags', data = analysisStatistics)  
-        })
+
+        # fc_order <- unique(analysisStatistics$flagging_code)
+        # fc_value <- unique(analysisStatistics$flag_value)
+        # tokens <- strsplit(fc_order, " ")
+        #
+        # tokens <- purrr$map(tokens, unique)
+        #
+        # cols_detected <- purrr$map2_dfr(tokens, fc_value, function(x, y) {
+        #   col_detected <- x %in% names_statistics_output
+        #   data.frame(col_name = x, col_detected = col_detected, code = y)
+        # }) |>
+        #   dplyr$filter(col_name %in% names_statistics_output) |>
+        #   dplyr$distinct()
+
+        analysisStatistics <- analysisStatistics |>
+          dplyr$mutate(
+            is_flagged = eval(parse(text = flagging_code))
+          ) |>
+          dplyr$filter(is_flagged) |>
+          dplyr$distinct()
+
+        datatable$server_dt("flags", data = analysisStatistics)
       })
     }
   )
