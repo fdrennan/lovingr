@@ -90,7 +90,7 @@ server_body <- function(id = "body", appSession) {
       
       output$dataRaw <- shiny$renderUI({
         shiny$req(metadata())
-        shiny$req(clean_config()())
+        shiny$req(clean_config())
         shiny$fluidRow(
           shiny$div(
             class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
