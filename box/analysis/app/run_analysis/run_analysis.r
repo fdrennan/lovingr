@@ -45,13 +45,15 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       output$app <- shiny$renderUI({
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
-        bs4Dash$box(closable=TRUE,
+        bs4Dash$box(
+          closable = TRUE,
           status = "success",
           id = ns("analysisBox"),
           width = 12,
           title = shiny$h1(analysisInput$analysis_name), collapsed = TRUE,
           shiny$fluidRow(
-            bs4Dash$box(closable=TRUE,
+            bs4Dash$box(
+              closable = TRUE,
               maximizable = TRUE,
               title = "Code Review", status = "info",
               width = 12, collapsed = TRUE,
@@ -65,11 +67,11 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             datatable$ui_dt(
               ns("statsResults"),
               title = "Pre-Flagging",
-              collapsed = TRUE, 
+              collapsed = TRUE,
               width = 12
             )
           ),
-          shiny$uiOutput(ns('uiSummary'), container = function(...) {
+          shiny$uiOutput(ns("uiSummary"), container = function(...) {
             shiny$fluidRow(shiny$column(12, ...))
           })
         )
@@ -115,35 +117,35 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         shiny$removeNotification(id = analysis_name)
         results
       })
-      
-      
+
+
       shiny$observeEvent(analysisStatistics(), {
         analysisStatistics <- analysisStatistics()
         namesAnalysisStatistics <- names(analysisStatistics)
         doesNotContainName <- stringr::str_detect(analysisStatistics$flagging_code, namesAnalysisStatistics)
         doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
         doesNotContainName <- unique(doesNotContainName)
-        flags_that_need_fixing = unique(doesNotContainName)
+        flags_that_need_fixing <- unique(doesNotContainName)
         corrections_needed <- data.frame(flags_that_need_fixing = flags_that_need_fixing)
         analysis_data <- analysisInput()$analysis_data
         names_statistics_input <- names(analysis_data)
         names_statistics_output <- names(analysisStatistics)
-        
+
         output$correctionsOutput <- shiny$renderTable({
           corrections_needed
         })
         output$uiSummary <- shiny$renderUI({
           shiny$fluidRow(
-            shiny$column(12, shiny$h1('Inputs')),
+            shiny$column(12, shiny$h1("Inputs")),
             lapply(names_statistics_input, function(x) {
               shiny$column(2, shiny$h4(x))
             }),
-            shiny$column(12, shiny$h1('Outputs')),
+            shiny$column(12, shiny$h1("Outputs")),
             lapply(names_statistics_output, function(x) {
               shiny$column(2, shiny$h4(x))
             }),
-            shiny$column(12, shiny$h1('Corrections Needed')),
-            shiny$tableOutput(ns('correctionsOutput'))
+            shiny$column(12, shiny$h1("Corrections Needed")),
+            shiny$tableOutput(ns("correctionsOutput"))
           )
         })
         # datatable$server_dt('namesTable', corrections_needed, title = 'Potential Issues')

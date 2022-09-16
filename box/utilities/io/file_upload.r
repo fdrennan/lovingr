@@ -8,7 +8,8 @@ ui_file_upload <- function(id = "file_upload",
                            ...) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  bs4Dash$box(closable=TRUE,
+  bs4Dash$box(
+    closable = TRUE,
     title = "File Upload",
     width = width,
     status = "secondary",

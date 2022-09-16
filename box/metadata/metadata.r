@@ -5,7 +5,8 @@ ui_metadata <- function(id = "metadata", width = 6) {
   input_container <- function(...) {
     shiny$column(6, ...)
   }
-  bs4Dash$box(closable=TRUE,
+  bs4Dash$box(
+    closable = TRUE,
     title = "Select Study Information",
     width = width,
     status = "secondary",

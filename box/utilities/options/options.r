@@ -2,7 +2,8 @@
 ui_options <- function(id = "options", width = 6) {
   box::use(shiny, bs4Dash, shinyToastify)
   ns <- shiny$NS(id)
-  bs4Dash$box(closable=TRUE,
+  bs4Dash$box(
+    closable = TRUE,
     maximizable = TRUE,
     collapsed = TRUE, status = "warning",
     title = "Options and General Settings",

@@ -114,7 +114,7 @@ RepValueinGroup.f <- function(paramcd, data, padjmethod) {
     ) |>
     dplyr$mutate(
       diff_pct = site_value_pct - stdy_value_pct
-    ) 
+    )
 
 
   output
