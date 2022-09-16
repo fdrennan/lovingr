@@ -1,5 +1,3 @@
-
-
 #' @export
 ui_run_analysis <- function(id = "run_analysis", data) {
   box::use(shiny, bs4Dash)
@@ -8,8 +6,6 @@ ui_run_analysis <- function(id = "run_analysis", data) {
     shiny$fluidRow(...)
   })
 }
-
-
 
 #' @export
 server_run_analysis <- function(id = "run_analysis", data, variables) {
@@ -73,7 +69,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           ),
           shiny$uiOutput(ns("uiSummary"), container = function(...) {
             shiny$fluidRow(shiny$column(12, ...))
-          })
+          }),
+          shiny$uiOutput(ns('flags'), container = function(...) {
+            shiny$fluidRow(shiny$column(12, ...))})
         )
       })
 
@@ -131,9 +129,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         names_statistics_input <- names(analysis_data)
         names_statistics_output <- names(analysisStatistics)
 
-        output$correctionsOutput <- shiny$renderTable({
-          corrections_needed
-        })
+        output$correctionsOutput <- shiny$renderTable({corrections_neededflags})
+        
         output$uiSummary <- shiny$renderUI({
           shiny$fluidRow(
             shiny$column(12, shiny$h1("Inputs")),
@@ -148,7 +145,16 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             shiny$tableOutput(ns("correctionsOutput"))
           )
         })
-        # datatable$server_dt('namesTable', corrections_needed, title = 'Potential Issues')
+        output$flags <- shiny$renderUI({
+          browser()
+          # analysisStatistics |> 
+          #   dplyr$rowwise() |> 
+          #   dplyr$mutate(
+          #     flag = (function(x) {
+          #       browser()
+          #       })(flagging_code)
+          #   )
+        })
       })
     }
   )
