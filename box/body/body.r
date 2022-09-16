@@ -17,7 +17,7 @@ ui_body <- function(id = "body") {
     shiny$fluidRow(
       id = "mainSort", sortable$sortable_js("mainSort"),
       options$ui_options(ns("options"), width = 12),
-      bs4Dash$box(
+      bs4Dash$box(closable=TRUE,
         id = ns("importBox"),
         status = "primary",
         maximizable = TRUE,
@@ -49,10 +49,10 @@ ui_body <- function(id = "body") {
       shiny$div(
         class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
         shiny$fluidRow(
-          bs4Dash$box(
+          bs4Dash$box(closable=TRUE,
             maximizable = TRUE,
             title = "Configuration", width = 12,
-            collapsed = FALSE,
+            collapsed = TRUE,
             status = "info",
             shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
           )
@@ -61,7 +61,7 @@ ui_body <- function(id = "body") {
       shiny$div(
         class = "col-xl-6 xol-lg-6 col-md-12 col-sm-12",
         shiny$fluidRow(
-          bs4Dash$box(
+          bs4Dash$box(closable=TRUE,
             collapsed = TRUE,
             maximizable = TRUE,
             width = 12,
@@ -71,12 +71,6 @@ ui_body <- function(id = "body") {
           )
         )
       ),
-      # datatable$ui_dt(
-      #   ns("clean_config"),
-      #   status = "info",
-      #   title = "Flagging Summary",
-      #   collapsed = TRUE, width = 12
-      # ),
       shiny$column(12, id = "uiAnalyses")
     )
   )
@@ -99,15 +93,10 @@ server_body <- function(id = "body", appSession) {
     id,
     function(input, output, session) {
       ns <- session$ns
-
       shiny$observe(chatty$chatty(session, input))
-
       opts <- options$server_options("options")
-
       metadata <- metadata$server_metadata("metadata")
-
       datapathUpload <- file_upload$server_file_upload("file_upload")
-
 
       config <- shiny$eventReactive(datapathUpload, {
         datapathUpload <- datapathUpload()
@@ -119,7 +108,6 @@ server_body <- function(id = "body", appSession) {
         shiny$req(config()())
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
-        # datatable$server_dt("clean_config", clean_config)
         clean_config
       })
 
@@ -129,7 +117,6 @@ server_body <- function(id = "body", appSession) {
         import_files <- dplyr$distinct(clean_config(), analysis, filepath)
         uuid <- uuid::UUIDgenerate()
 
-
         shiny$removeUI(
           "#dataPreviewElements"
         )
@@ -138,7 +125,7 @@ server_body <- function(id = "body", appSession) {
           "#dataPreview",
           "afterBegin",
           shiny$div(
-            class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
+            class = "col-xl-12 col-lg-12 col-md-12 col-sm-12",
             id = "dataPreviewElements"
           )
         )

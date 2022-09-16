@@ -25,14 +25,15 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
     function(data, paramcd) {
       box::use(. / analysis_vitals, shiny, glue)
       vals <- names(split_vs)
-      index <- which(vals == y)
+      index <- which(vals == paramcd)
       n_vals <- dplyr$n_distinct(vals)
       shiny$showNotification(
         id = "currentVitals",
         duration = NULL, closeButton = FALSE,
-        glue$glue("paramcd: {y} - {index}/{n_vals}")
+        glue$glue("paramcd: {paramcd} - {index}/{n_vals}")
       )
       out <- analysis_vitals$RepValueinGroup.f(paramcd, data, "BY")
+      out$paramcd <- paramcd
       shiny$removeNotification("currentVitals")
       out
     }
@@ -46,7 +47,6 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
 RepValueinGroup.f <- function(paramcd, data, padjmethod) {
   box::use(dplyr, stringr, purrr, stats)
   box::use(. / analysis_vitals)
-  browser()
   x <- as.character(data[data$paramcd == paramcd, ]$avalc)
   group <- as.character(data[data$paramcd == paramcd, ]$siteid)
 

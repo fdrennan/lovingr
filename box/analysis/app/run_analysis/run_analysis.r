@@ -45,13 +45,13 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       output$app <- shiny$renderUI({
         shiny$req(analysisInput())
         analysisInput <- analysisInput()
-        bs4Dash$box(
+        bs4Dash$box(closable=TRUE,
           status = "success",
           id = ns("analysisBox"),
           width = 12,
           title = shiny$h1(analysisInput$analysis_name), collapsed = TRUE,
           shiny$fluidRow(
-            bs4Dash$box(
+            bs4Dash$box(closable=TRUE,
               maximizable = TRUE,
               title = "Code Review", status = "info",
               width = 12, collapsed = TRUE,
@@ -66,7 +66,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
               ns("statsResults"),
               title = "Pre-Flagging",
               collapsed = FALSE, width = 12
-            )
+            ),
+            shiny$tableOutput(ns('namesTable'))
           )
         )
       })
@@ -109,10 +110,20 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         results <- dplyr$inner_join(data, results)
         datatable$server_dt("statsResults", results)
         shiny$removeNotification(id = analysis_name)
+        results
       })
-
+      
+      
       shiny$observeEvent(analysisStatistics(), {
         analysisStatistics <- analysisStatistics()
+        namesAnalysisStatistics <- names(analysisStatistics)
+        doesNotContainName <- stringr::str_detect(analysisStatistics$flagging_code, namesAnalysisStatistics)
+        doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
+        doesNotContainName <- unique(doesNotContainName)
+        flags_that_need_fixing = unique(doesNotContainName)
+        output$namesTable <- shiny$renderTable({
+          data.frame(flags_that_need_fixing = flags_that_need_fixing)
+        })
       })
     }
   )
