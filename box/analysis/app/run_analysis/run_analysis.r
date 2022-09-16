@@ -125,6 +125,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       shiny$observeEvent(analysisStatistics(), {
         box::use(dplyr, stats, purrr)
         analysisStatistics <- analysisStatistics()
+        analysisInput <- analysisInput()
+        analysis_name <- analysisInput$analysis_name
+        
         namesAnalysisStatistics <- names(analysisStatistics)
         doesNotContainName <- stringr::str_detect(
           analysisStatistics$flagging_code,
@@ -173,14 +176,17 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         #   dplyr$filter(col_name %in% names_statistics_output) |>
         #   dplyr$distinct()
 
-        analysisStatistics <- analysisStatistics |>
-          dplyr$mutate(
-            is_flagged = eval(parse(text = flagging_code))
-          ) |>
-          dplyr$filter(is_flagged) |>
-          dplyr$distinct()
-
-        datatable$server_dt("flags", data = analysisStatistics)
+        tryCatch({
+          analysisStatistics <- analysisStatistics |>
+            dplyr$mutate(
+              is_flagged = eval(parse(text = flagging_code))
+            ) |>
+            dplyr$filter(is_flagged) |>
+            dplyr$distinct()
+          
+          datatable$server_dt("flags", data = analysisStatistics)
+        }, error = function(err) {
+          shiny$showNotification(paste0('Flagging failed for ', analysis_name))})
       })
     }
   )
