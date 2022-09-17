@@ -282,7 +282,10 @@ server_body <- function(id = "body", appSession) {
       shiny$observeEvent(
         input$getResults,
         {
-          scoreboardSheet <- config()()[[3]]$data
+          scoreboardSheet <- config()()[[3]]$data |> 
+            dplyr$rename(analysis = Analysis.Type,
+                   flagging_value = Signal.Flag.Value) |> 
+            dplyr$mutate(analysis = tolower(analysis))
           dataForScoreboard <- dataForScoreboard()
           # browser()
           dataForScoreboardSummary <-
@@ -290,18 +293,20 @@ server_body <- function(id = "body", appSession) {
               out <- data$analysisStatistics
               out$analysis <- analysis
               out
-            }) |>
-            dplyr$group_by(analysis, paramcd, flagging_code, flagging_value) |>
-            dplyr$count()
-
+            })  
+          
+          scoreboardSheet <- dplyr$inner_join(
+            dataForScoreboardSummary,scoreboardSheet
+          )
+          
           output$scoreboard <- shiny$renderUI({
             shiny$fluidRow(
-              datatable$ui_dt(ns("dataForScoreboardSummary"), "Flags"),
               datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
             )
           })
-          datatable$server_dt("dataForScoreboardSummary", data = dataForScoreboardSummary)
-          datatable$server_dt("scoreboardConfiguration", data = scoreboardSheet)
+          datatable$server_dt(
+            "scoreboardConfiguration", data = scoreboardSheet
+          )
         }
       )
     }
