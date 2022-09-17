@@ -91,7 +91,10 @@ ui_body <- function(id = "body") {
 
 #' @export
 server_body <- function(id = "body", appSession) {
-  box::use(shiny, uuid, bs4Dash, dplyr, shinyFiles, fs, utils, purrr, shinyAce)
+  box::use(
+    shiny, uuid, bs4Dash, dplyr, shinyFiles,
+    fs, utils, purrr, shinyAce, jsonlite
+  )
   box::use(.. / utilities / chatty / chatty)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / read / xlsx)
@@ -188,7 +191,8 @@ server_body <- function(id = "body", appSession) {
             width = 12,
             title = "Flagging Results and Review",
             shiny$div(id = "uiAnalyses")
-          )
+          ),
+          shiny$actionButton(ns("getResults"), "Get Results")
         )
       })
 
@@ -241,6 +245,7 @@ server_body <- function(id = "body", appSession) {
         analysis_code <- dplyr$inner_join(analysis_code, clean_config)
         analysis_code <- split(analysis_code, analysis_code$analysis)
         n_increments <- length(analysis_code)
+
         purrr$iwalk(
           analysis_code,
           function(analysis_data, name) {
@@ -259,6 +264,46 @@ server_body <- function(id = "body", appSession) {
             )
           }
         )
+      })
+
+      shiny$observeEvent(input$getResults, {
+        clean_config <- clean_config()
+        analysis_code <- fs$dir_info("box/analysis/execute")
+        analysis_code <- analysis_code |>
+          dplyr$select(path) |>
+          dplyr$mutate(
+            analysis = gsub("box/analysis/execute/analysis_", "", path),
+            analysis = fs$path_ext_remove(analysis)
+          )
+
+        analysis_code <- dplyr$inner_join(analysis_code, clean_config)
+        analysis_code <- split(analysis_code, analysis_code$analysis)
+        n_increments <- length(analysis_code)
+
+        output <- purrr$imap(
+          analysis_code,
+          function(analysis_data, name) {
+            shiny$insertUI(
+              "#uiAnalyses",
+              "afterBegin",
+              run_analysis$ui_run_analysis(
+                ns(paste0("run_analysis", name)), analysis_data
+              )
+            )
+
+            variables <- dplyr$mutate_all(config()()[[1]]$data, tolower)
+            names(variables) <- tolower(names(variables))
+            # browser()
+            # shiny$reactiveValuesToList()
+            output <- run_analysis$server_run_analysis(
+              paste0("run_analysis", name), analysis_data, variables
+            )
+
+            shiny$reactiveValuesToList(output())
+          }
+        )
+
+        print(jsonlite$toJSON(output, pretty = TRUE))
       })
     }
   )

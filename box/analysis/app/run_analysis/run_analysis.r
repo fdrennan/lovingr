@@ -161,7 +161,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         datatable$server_dt("flags", data = analysisSummary$analysisStatistics)
       })
 
-      shiny$observeEvent(analysisSummary(), {
+      analysisSummaryToScoreboard <- shiny$eventReactive(analysisSummary(), {
         box::use(dplyr, stats, purrr)
         analysisSummary <- analysisSummary()
         output$uiSummary <- shiny$renderUI({
@@ -194,6 +194,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           )
         })
       })
+
+      analysisSummaryToScoreboard
     }
   )
 }
