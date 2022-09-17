@@ -282,9 +282,11 @@ server_body <- function(id = "body", appSession) {
       shiny$observeEvent(
         input$getResults,
         {
-          scoreboardSheet <- config()()[[3]]$data |> 
-            dplyr$rename(analysis = Analysis.Type,
-                   flagging_value = Signal.Flag.Value) |> 
+          scoreboardSheet <- config()()[[3]]$data |>
+            dplyr$rename(
+              analysis = Analysis.Type,
+              flagging_value = Signal.Flag.Value
+            ) |>
             dplyr$mutate(analysis = tolower(analysis))
           dataForScoreboard <- dataForScoreboard()
           # browser()
@@ -293,19 +295,20 @@ server_body <- function(id = "body", appSession) {
               out <- data$analysisStatistics
               out$analysis <- analysis
               out
-            })  
-          
+            })
+
           scoreboardSheet <- dplyr$inner_join(
-            dataForScoreboardSummary,scoreboardSheet
+            dataForScoreboardSummary, scoreboardSheet
           )
-          
+
           output$scoreboard <- shiny$renderUI({
             shiny$fluidRow(
               datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
             )
           })
           datatable$server_dt(
-            "scoreboardConfiguration", data = scoreboardSheet
+            "scoreboardConfiguration",
+            data = scoreboardSheet
           )
         }
       )
