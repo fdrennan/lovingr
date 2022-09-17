@@ -36,7 +36,10 @@ ui_body <- function(id = "body") {
           shiny$column(
             4,
             shiny$wellPanel(
-              shiny$numericInput(ns("widthOfCols"), label = "Col Width", value = 4, min = 1, max = 12, step = 1)
+              shiny$numericInput(
+                ns("widthOfCols"), label = "Col Width", 
+                value = 4, min = 1, max = 12, step = 1
+              )
             )
           ),
           shiny$uiOutput(ns("codeUIEditor"), container = function(...) {
