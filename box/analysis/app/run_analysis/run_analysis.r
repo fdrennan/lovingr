@@ -83,7 +83,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / execute / analysis_aegap)
         box::use(.. / .. / execute / analysis_vitals)
         box::use(.. / .. / execute / analysis_underdose)
-        box::use(dplyr)
+        box::use(dplyr, purrr)
         analysisInput <- analysisInput()
 
         analysis_name <- analysisInput$analysis_name
@@ -157,12 +157,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       )
 
       shiny$observeEvent(analysisSummary(), {
-        analysisSummary <- analysisSummary()
-        datatable$server_dt("flags", data = analysisSummary$analysisStatistics)
-      })
-
-      analysisSummaryToScoreboard <- shiny$eventReactive(analysisSummary(), {
-        box::use(dplyr, stats, purrr)
+        box::use(purrr)
         analysisSummary <- analysisSummary()
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
@@ -193,6 +188,13 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             )
           )
         })
+        datatable$server_dt("flags", data = analysisSummary$analysisStatistics)
+      })
+
+      analysisSummaryToScoreboard <- shiny$eventReactive(analysisSummary(), {
+        box::use(dplyr, stats, purrr)
+        analysisSummary <- analysisSummary()
+        analysisSummary
       })
 
       analysisSummaryToScoreboard

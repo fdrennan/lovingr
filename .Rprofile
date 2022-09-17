@@ -19,10 +19,10 @@ options(analysis_filter = {
     # "vitals"
     # "aei"
     # 'rgv'
-    c("aecnt", "aegap", "aei", "rgv", "vitals")
+    c("aecnt", "aegap", "aei")
   } else {
   }
 })
 options(ignoreConfigPath = TRUE)
-options(sample_frac = 0.01)
-options(sample_min = 200)
+options(sample_frac = 1)
+options(sample_min = 2000000000)
