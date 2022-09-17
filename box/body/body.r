@@ -322,10 +322,10 @@ server_body <- function(id = "body", appSession) {
               out <- data$analysisStatistics
               out$analysis <- analysis
               out
-            }) |> 
-            dplyr$group_by(analysis, paramcd, flagging_code, flagging_value) |> 
+            }) |>
+            dplyr$group_by(analysis, paramcd, flagging_code, flagging_value) |>
             dplyr$count()
-          
+
           output$scoreboard <- shiny$renderUI({
             shiny$fluidRow(
               datatable$ui_dt(ns("dataForScoreboardSummary"), "Flags"),
