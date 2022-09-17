@@ -9,7 +9,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
 
 #' @export
 server_run_analysis <- function(id = "run_analysis", data, variables) {
-  box::use(shiny, bs4Dash, shinyAce, readr, dplyr)
+  box::use(shiny, bs4Dash, shinyAce, readr, dplyr, shinyAce)
   box::use(.. / .. / .. / utilities / chatty / chatty)
   box::use(.. / .. / .. / utilities / io / file_read_multi_ext)
   box::use(.. / .. / .. / utilities / tables / datatable)
@@ -22,7 +22,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       analysisInput <- shiny$reactive({
         shiny$req(data)
         shiny$req(variables)
-
+        
         analysis_name <- unique(data$analysis)
         analysis_code_path <- unique(data$path)
         analysis_data_path <- unique(data$filepath)
@@ -52,30 +52,23 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           width = 12,
           title = shiny$h2("Flagging Results for ", toupper(analysisInput$analysis_name)), collapsed = TRUE,
           shiny$fluidRow(
-            bs4Dash$box(
-              closable = TRUE,
-              maximizable = TRUE,
-              title = "Code Review", status = "info",
-              width = 12, collapsed = TRUE,
+            shiny$column(
+              12,
               shiny$uiOutput(ns("uiSummary"), container = function(...) {
                 # shiny$column(12, ...)
                 shiny$fluidRow(...)
               }),
-              shinyAce$aceEditor(
-                outputId = ns("myEditor"),
-                value = analysisInput$analysis_file,
-                mode = "r",
-                theme = "ambiance"
+              shiny$fluidRow(
+                datatable$ui_dt(
+                  ns("statsResults"),
+                  title = "Pre-Flagging",
+                  collapsed = TRUE,
+                  width = 12
+                ),
+                datatable$ui_dt(
+                  ns("flags"), "Flags"
+                )
               )
-            ),
-            datatable$ui_dt(
-              ns("statsResults"),
-              title = "Pre-Flagging",
-              collapsed = TRUE,
-              width = 12
-            ),
-            datatable$ui_dt(
-              ns("flags"), "Flags"
             )
           )
         )
@@ -147,8 +140,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
 
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
+            collapsed = TRUE, closable = TRUE, maximizable = TRUE,
             width = 12,
-            title = "Columns",
+            title = "Columns and Flags",
             shiny$fluidRow(
               shiny$column(12, shiny$h1("Inputs")),
               shiny$column(12, shiny$fluidRow(
@@ -174,19 +168,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           )
         })
 
-        # fc_order <- unique(analysisStatistics$flagging_code)
-        # fc_value <- unique(analysisStatistics$flagging_value)
-        # tokens <- strsplit(fc_order, " ")
-        #
-        # tokens <- purrr$map(tokens, unique)
-        #
-        # cols_detected <- purrr$map2_dfr(tokens, fc_value, function(x, y) {
-        #   col_detected <- x %in% names_statistics_output
-        #   data.frame(col_name = x, col_detected = col_detected, code = y)
-        # }) |>
-        #   dplyr$filter(col_name %in% names_statistics_output) |>
-        #   dplyr$distinct()
-        # browser()
         tryCatch(
           {
             analysisStatistics <-

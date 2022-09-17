@@ -17,12 +17,12 @@ options(analysis_filter = {
     # c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
     # c("aei", "rgv", "aecnt", "aegap")
     # "vitals"
-    # 'aei'
+    'aei'
     # 'rgv'
-    c("aecnt", "aegap", "underdose")
+    # c("aecnt", "aegap", "underdose", "aei", "rgv", "vitals")
   } else {
   }
 })
 options(ignoreConfigPath = TRUE)
-options(sample_frac = .01)
-options(sample_min = 1000)
+options(sample_frac = 1)
+options(sample_min = 1e10)

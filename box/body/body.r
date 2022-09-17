@@ -2,21 +2,47 @@
 
 #' @export
 ui_body <- function(id = "body") {
-  box::use(shiny, bs4Dash, shinyFiles)
+  box::use(shiny, bs4Dash, shinyFiles, fs)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / options / options)
   box::use(.. / utilities / read / xlsx)
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
+
   box::use(sortable)
-
-
+  analysis_code_files <- fs$dir_ls(
+    "box/analysis/execute", recurse = TRUE, type = 'file'
+  )
   ns <- shiny$NS(id)
   bs4Dash$dashboardBody(
     shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
       id = "mainSort", sortable$sortable_js("mainSort"),
       options$ui_options(ns("options"), width = 12),
+      bs4Dash$box(
+        title = 'Code Review', width = 12, closable = TRUE, collapsed = TRUE,
+        collapsible = TRUE, maximizable = TRUE,
+        shiny$fluidRow(
+          shiny$column(
+            8,
+            shiny$wellPanel(
+              shiny$selectizeInput(
+                ns('filePathForDisplay'), 'File', 
+                choices = analysis_code_files, selected = NULL, multiple = TRUE
+              )
+            )
+          ),
+          shiny$column(
+            4, 
+            shiny$wellPanel(
+              shiny$numericInput(ns('widthOfCols'), label = 'Col Width', value = 4, min = 1, max = 12, step = 1)
+            )
+          ),
+          shiny$uiOutput(ns('codeUIEditor'), container = function(...) {
+            shiny$column(12, shiny$fluidRow(...))
+          })
+        )
+      ),
       bs4Dash$box(
         closable = TRUE,
         id = ns("importBox"),
@@ -25,13 +51,13 @@ ui_body <- function(id = "body") {
         title = "Data Import", width = 12,
         shiny$fluidRow(
           shiny$div(
-            class = "col-xl-6 col-lg-12 col-md-12",
+            class = "col-xl-6 col-lg-6 col-md-12",
             shiny$fluidRow(
               metadata$ui_metadata(ns("metadata"), width = 12)
             )
           ),
           shiny$div(
-            class = "col-xl-6 col-lg-12 col-md-12",
+            class = "col-xl-6 col-lg-6 col-md-12",
             shiny$fluidRow(
               file_upload$ui_file_upload(ns("file_upload"),
                 width = 12,
@@ -47,6 +73,9 @@ ui_body <- function(id = "body") {
           )
         )
       ),
+      shiny$uiOutput(ns('codeUI'), container = function(...) {
+        shiny$column(12, ...)
+      }),
       shiny$uiOutput(ns("dataRaw"), container = function(...) {
         shiny$column(12, ...)
       })
@@ -57,7 +86,7 @@ ui_body <- function(id = "body") {
 
 #' @export
 server_body <- function(id = "body", appSession) {
-  box::use(shiny, bs4Dash, dplyr, shinyFiles, fs, utils, purrr)
+  box::use(shiny,uuid, bs4Dash, dplyr, shinyFiles, fs, utils, purrr, shinyAce)
   box::use(.. / utilities / chatty / chatty)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / read / xlsx)
@@ -65,12 +94,40 @@ server_body <- function(id = "body", appSession) {
   box::use(.. / analysis / app / run_analysis / run_analysis)
   box::use(.. / utilities / tables / datatable)
   box::use(.. / metadata / metadata)
+  box::use(.. / utilities / io / file_read_multi_ext)
   box::use(.. / utilities / options / options)
   box::use(.. / utilities / read / xlsx)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
+ 
+      output$codeUIEditor <- shiny$renderUI({
+        shiny$req(input$filePathForDisplay)
+        lapply(
+          input$filePathForDisplay,
+          function(path) {
+            shiny$column(
+              input$widthOfCols, 
+              shiny$tags$p(fs$path_file(path)),
+              shinyAce$aceEditor(
+                outputId = uuid$UUIDgenerate(),
+                value = file_read_multi_ext$run(path),
+                mode = "r",
+                hotkeys = list(
+                  helpKey = "F1",
+                  runKey = list(
+                    win = "Ctrl-R|Ctrl-Shift-Enter",
+                    mac = "CMD-ENTER|CMD-SHIFT-ENTER"
+                  )
+                ),
+                wordWrap = TRUE, debounce = 10
+              )
+            )
+          }
+        )
+      })
+      
       shiny$observe(chatty$chatty(session, input))
       opts <- options$server_options("options")
       metadata <- metadata$server_metadata("metadata")
@@ -93,8 +150,9 @@ server_body <- function(id = "body", appSession) {
         shiny$req(metadata())
         shiny$req(clean_config())
         shiny$fluidRow(
+          shiny$div(class = "col-xl-1 col-lg-1"),
           shiny$div(
-            class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
+            class = "col-xl-5 col-lg-5 col-md-12 col-sm-12",
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -102,12 +160,12 @@ server_body <- function(id = "body", appSession) {
                 title = "Configuration", width = 12,
                 collapsed = TRUE,
                 status = "info",
-                shiny$fluidRow(xlsx$ui_xlsx(ns("xlsx-local")))
+                xlsx$ui_xlsx(ns("xlsx-local"))
               )
             )
           ),
           shiny$div(
-            class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
+            class = "col-xl-5 col-lg-5 col-md-12 col-sm-12",
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -120,7 +178,12 @@ server_body <- function(id = "body", appSession) {
               )
             )
           ),
-          shiny$column(12, id = "uiAnalyses")
+          shiny$div(class = "col-xl-1 col-lg-1"),
+          bs4Dash$box(
+            width = 12,
+            title = "Flagging Results and Review",
+            shiny$div(id = "uiAnalyses")
+          )
         )
       })
 
@@ -161,8 +224,6 @@ server_body <- function(id = "body", appSession) {
       })
 
       shiny$observeEvent(clean_config(), {
-
-        # shiny$req(clean_config())
         clean_config <- clean_config()
         analysis_code <- fs$dir_info("box/analysis/execute")
         analysis_code <- analysis_code |>
