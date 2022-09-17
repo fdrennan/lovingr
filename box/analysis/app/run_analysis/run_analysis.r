@@ -50,7 +50,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           status = "success",
           id = ns("analysisBox"),
           width = 12,
-          title = shiny$h1(analysisInput$analysis_name), collapsed = TRUE,
+          title = shiny$h2('Flagging Results for ', toupper(analysisInput$analysis_name)), collapsed = TRUE,
           shiny$fluidRow(
             bs4Dash$box(
               closable = TRUE,
@@ -175,9 +175,11 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         # }) |>
         #   dplyr$filter(col_name %in% names_statistics_output) |>
         #   dplyr$distinct()
-
+          # browser()
         tryCatch({
-          analysisStatistics <- analysisStatistics |>
+          analysisStatistics <- 
+            analysisStatistics |>
+            dplyr$rowwise() |> 
             dplyr$mutate(
               is_flagged = eval(parse(text = flagging_code))
             ) |>
@@ -186,7 +188,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           
           datatable$server_dt("flags", data = analysisStatistics)
         }, error = function(err) {
-          shiny$showNotification(paste0('Flagging failed for ', analysis_name))})
+          shiny$showNotification(closeButton = TRUE, duration = NULL,
+            paste0('Flagging failed for ', analysis_name), 
+          )})
       })
     }
   )

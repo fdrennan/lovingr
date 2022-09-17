@@ -20,9 +20,13 @@ analysis_aei <- function(aei_data = NULL, variables) {
       response
     }
   )
+  
+  analysis_data |> 
+    dplyr$rename(
+      
+    )
 
 
-  analysis_data
 }
 
 
