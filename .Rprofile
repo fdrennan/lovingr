@@ -18,7 +18,8 @@ options(analysis_filter = {
     # c("aei", "rgv", "aecnt", "aegap")
     # "vitals"
     # 'aei'
-    'rgv'
+    # 'rgv'
+    c('vitals', 'aei', 'rgv')
   } else {
   }
 })

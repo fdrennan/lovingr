@@ -32,7 +32,7 @@ clean_config <- function(config) {
       analysis = tolower(unique(x$Analysis)),
       paramcd = tolower(strsplit(unique(x$Signals), ", ")[[1]]),
       flagging_code = unique(x$Flagging.Specification),
-      flag_value = as.numeric(unique(x$Flag))
+      flagging_value = as.numeric(unique(x$Flag))
     )
   })
 

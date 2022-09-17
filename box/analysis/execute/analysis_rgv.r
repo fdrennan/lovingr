@@ -9,5 +9,6 @@ analysis_rgv <- function(rgv_data = NULL, variables) {
     configuration = variables
   )
   
+  
 
 }

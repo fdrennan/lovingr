@@ -110,7 +110,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           }
         )
         data <- dplyr$select(
-          data, study, month, paramcd, flagging_code, flag_value
+          data, study, month, paramcd, flagging_code, flagging_value
         )
         print(analysis_name)
         print(names(results))
@@ -127,6 +127,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         analysisStatistics <- analysisStatistics()
         analysisInput <- analysisInput()
         analysis_name <- analysisInput$analysis_name
+        flaggingSummary <- dplyr$distinct(analysisStatistics, flagging_value, flagging_code)
+        flagging_value <- flaggingSummary$flagging_value
+        flagging_code <- flaggingSummary$flagging_code
         
         namesAnalysisStatistics <- names(analysisStatistics)
         doesNotContainName <- stringr::str_detect(
@@ -158,13 +161,21 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
                 lapply(names_statistics_output, function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
-              ))
+              )),
+              shiny$column(12, shiny$h1("Flags")),
+              shiny$column(12, purrr$map2(flagging_value, flagging_code, function(x, y) {
+                shiny$fluidRow(
+                  shiny$column(2, x, class='d-flex justify-content-center align-items-center'),
+                  shiny$column(10, shiny$tags$pre(y), class='d-flex justify-content-start align-items-center'),
+                  shiny$tags$hr()
+                )
+              }))
             )
           )
         })
 
         # fc_order <- unique(analysisStatistics$flagging_code)
-        # fc_value <- unique(analysisStatistics$flag_value)
+        # fc_value <- unique(analysisStatistics$flagging_value)
         # tokens <- strsplit(fc_order, " ")
         #
         # tokens <- purrr$map(tokens, unique)
