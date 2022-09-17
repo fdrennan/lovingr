@@ -14,10 +14,11 @@ options(base_directory = paste0(
 options(cache_path = "./cache/data.rda")
 options(analysis_filter = {
   if (getOption("development")) {
-    c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
+    # c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
+    c("underdose")
     # c("aei", "rgv", "aecnt", "aegap")
     # "vitals"
-    "aei"
+    # "aei"
     # 'rgv'
     # c("aecnt", "aegap", "aei")
   } else {
