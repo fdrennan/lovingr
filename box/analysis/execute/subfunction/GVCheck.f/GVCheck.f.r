@@ -53,14 +53,14 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
   }
 
   # browser()
-  out <- 
-    out |> 
+  out <-
+    out |>
     dplyr$rename(
       paramcd = GMParameter,
       site_pct = ObsPer,
       stdy_pct = ExpPer,
       p_value = .data$pvalue
-    ) |> 
+    ) |>
     dplyr$mutate(
       diff_pct = site_pct - stdy_pct
     )

@@ -1,13 +1,9 @@
 #' @export
 analysis_aegap <- function(aegap, variables) {
   box::use(. / analysis_aegap)
-  analysis_aegap$map_aegap_statistics(analysis_aegap$clean(aegap))
-}
-
-#' @export
-map_aegap_statistics <- function(df, configuration) {
   box::use(purrr, dplyr)
   box::use(. / subfunction / CompareMean / CompareMean)
+  df <- analysis_aegap$clean(aegap)
   split_aegap <- split(df, df$paramcd)
   purrr$map_dfr(
     split_aegap, (
@@ -30,8 +26,9 @@ map_aegap_statistics <- function(df, configuration) {
                 paramcd = unique(x$paramcd),
                 grp_mean = exp(grp_mean),
                 grandmean = exp(grandmean),
-                diff = grp_mean - grandmean
-              )
+                diff_avg = grp_mean - grandmean
+              ) |>
+              dplyr$mutate(p_value = pvalue)
 
             rslt
           },
@@ -49,6 +46,8 @@ map_aegap_statistics <- function(df, configuration) {
       })
   )
 }
+
+
 
 
 #' @export

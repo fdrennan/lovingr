@@ -50,7 +50,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           status = "success",
           id = ns("analysisBox"),
           width = 12,
-          title = shiny$h2('Flagging Results for ', toupper(analysisInput$analysis_name)), collapsed = TRUE,
+          title = shiny$h2("Flagging Results for ", toupper(analysisInput$analysis_name)), collapsed = TRUE,
           shiny$fluidRow(
             bs4Dash$box(
               closable = TRUE,
@@ -130,7 +130,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         flaggingSummary <- dplyr$distinct(analysisStatistics, flagging_value, flagging_code)
         flagging_value <- flaggingSummary$flagging_value
         flagging_code <- flaggingSummary$flagging_code
-        
+
         namesAnalysisStatistics <- names(analysisStatistics)
         doesNotContainName <- stringr::str_detect(
           analysisStatistics$flagging_code,
@@ -165,8 +165,8 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
               shiny$column(12, shiny$h1("Flags")),
               shiny$column(12, purrr$map2(flagging_value, flagging_code, function(x, y) {
                 shiny$fluidRow(
-                  shiny$column(2, x, class='d-flex justify-content-center align-items-center'),
-                  shiny$column(10, shiny$tags$pre(y), class='d-flex justify-content-start align-items-center'),
+                  shiny$column(2, x, class = "d-flex justify-content-center align-items-center"),
+                  shiny$column(10, shiny$tags$pre(y), class = "d-flex justify-content-start align-items-center"),
                   shiny$tags$hr()
                 )
               }))
@@ -186,22 +186,27 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         # }) |>
         #   dplyr$filter(col_name %in% names_statistics_output) |>
         #   dplyr$distinct()
-          # browser()
-        tryCatch({
-          analysisStatistics <- 
-            analysisStatistics |>
-            dplyr$rowwise() |> 
-            dplyr$mutate(
-              is_flagged = eval(parse(text = flagging_code))
-            ) |>
-            dplyr$filter(is_flagged) |>
-            dplyr$distinct()
-          
-          datatable$server_dt("flags", data = analysisStatistics)
-        }, error = function(err) {
-          shiny$showNotification(closeButton = TRUE, duration = NULL,
-            paste0('Flagging failed for ', analysis_name), 
-          )})
+        # browser()
+        tryCatch(
+          {
+            analysisStatistics <-
+              analysisStatistics |>
+              dplyr$rowwise() |>
+              dplyr$mutate(
+                is_flagged = eval(parse(text = flagging_code))
+              ) |>
+              dplyr$filter(is_flagged) |>
+              dplyr$distinct()
+
+            datatable$server_dt("flags", data = analysisStatistics)
+          },
+          error = function(err) {
+            shiny$showNotification(
+              closeButton = TRUE, duration = NULL,
+              paste0("Flagging failed for ", analysis_name),
+            )
+          }
+        )
       })
     }
   )

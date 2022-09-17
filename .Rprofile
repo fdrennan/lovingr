@@ -19,7 +19,7 @@ options(analysis_filter = {
     # "vitals"
     # 'aei'
     # 'rgv'
-    c('vitals', 'aei', 'rgv')
+    c("aecnt", "aegap", "underdose")
   } else {
   }
 })

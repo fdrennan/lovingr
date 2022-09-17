@@ -23,7 +23,8 @@ analysis_aecnt <- function(data, configuration) {
     stdy_cnt = avgcnt - diff,
     site_cnt = avgcnt,
     diff_cnt = diff
-  )
+  ) |>
+    dplyr$rename(adjusted_p_value = adjp)
 
   count_long
 }

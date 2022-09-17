@@ -63,7 +63,7 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
     transmute(program$configuration, paramcd = signals, code)
   ) |>
     mutate(numsubj = ndenom)
- 
+
   data_split <- split(retention_data, retention_data$paramcd)
   #
   analysis_data <- map_df(

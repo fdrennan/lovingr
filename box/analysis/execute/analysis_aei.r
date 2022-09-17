@@ -20,10 +20,10 @@ analysis_aei <- function(aei_data = NULL, variables) {
       response
     }
   )
-  
+
   # This exists because I want to touch CompareProportion as little as possible.
-  analysis_data <- 
-    analysis_data |> 
+  analysis_data <-
+    analysis_data |>
     dplyr$transmute(
       paramcd,
       site = .data$rowname,
@@ -38,7 +38,6 @@ analysis_aei <- function(aei_data = NULL, variables) {
       stdy_r,
       stdy_n
     )
- 
 }
 
 
