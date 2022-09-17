@@ -195,7 +195,9 @@ server_body <- function(id = "body", appSession) {
             title = "Flagging Results and Review",
             shiny$div(id = "uiAnalyses")
           ),
-          shiny$actionButton(ns("getResults"), "Get Results")
+          shiny$column(class='d-flex justify-content-end',
+            12, shiny$actionButton(ns("getResults"), "Get Results")
+          )
         )
       })
 
