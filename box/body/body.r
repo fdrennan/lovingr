@@ -154,7 +154,7 @@ server_body <- function(id = "body", appSession) {
         shiny$req(config()())
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
-        browser()
+        #
         clean_config
       })
 
@@ -314,18 +314,26 @@ server_body <- function(id = "body", appSession) {
       shiny$observeEvent(
         input$getResults,
         {
-          scoreboardSheet <- config()()[[3]]
+          scoreboardSheet <- config()()[[3]]$data
           dataForScoreboard <- dataForScoreboard()
-          analysisStatistics <-
-            purrr$map_dfr(dataForScoreboard, ~ .$analysisStatistics)
+
+          dataForScoreboardSummary <-
+            purrr$imap_dfr(dataForScoreboard, function(data, analysis) {
+              out <- data$analysisStatistics
+              out$analysis <- analysis
+              out
+            }) |> 
+            dplyr$group_by(analysis, paramcd, flagging_code, flagging_value) |> 
+            dplyr$count()
+          
           output$scoreboard <- shiny$renderUI({
             shiny$fluidRow(
-              datatable$ui_dt(ns("analysisStatistics"), "Flags"),
+              datatable$ui_dt(ns("dataForScoreboardSummary"), "Flags"),
               datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
             )
           })
-          datatable$server_dt("analysisStatistics", data = analysisStatistics)
-          datatable$server_dt("scoreboardConfiguration", data = dataForScoreboard)
+          datatable$server_dt("dataForScoreboardSummary", data = dataForScoreboardSummary)
+          datatable$server_dt("scoreboardConfiguration", data = scoreboardSheet)
         }
       )
     }
