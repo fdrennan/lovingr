@@ -37,7 +37,8 @@ ui_body <- function(id = "body") {
             4,
             shiny$wellPanel(
               shiny$numericInput(
-                ns("widthOfCols"), label = "Col Width", 
+                ns("widthOfCols"),
+                label = "Col Width",
                 value = 4, min = 1, max = 12, step = 1
               )
             )

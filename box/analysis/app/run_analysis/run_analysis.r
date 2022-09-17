@@ -114,30 +114,56 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         results
       })
 
+      analysisSummary <- shiny$eventReactive(
+        analysisStatistics(),
+        {
+          box::use(dplyr, stats, purrr)
+          analysisStatistics <- analysisStatistics()
+          analysisInput <- analysisInput()
+          analysis_name <- analysisInput$analysis_name
+          flaggingSummary <- dplyr$distinct(analysisStatistics, flagging_value, flagging_code)
+          flagging_value <- flaggingSummary$flagging_value
+          flagging_code <- flaggingSummary$flagging_code
 
-      shiny$observeEvent(analysisStatistics(), {
+          namesAnalysisStatistics <- names(analysisStatistics)
+          doesNotContainName <- stringr::str_detect(
+            analysisStatistics$flagging_code,
+            namesAnalysisStatistics
+          )
+          doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
+          doesNotContainName <- unique(doesNotContainName)
+          flags_that_need_fixing <- unique(doesNotContainName)
+          corrections_needed <- data.frame(flags_that_need_fixing = flags_that_need_fixing)
+          analysis_data <- analysisInput()$analysis_data
+          names_statistics_input <- names(analysis_data)
+          names_statistics_output <- names(analysisStatistics)
+          analysisStatistics <-
+            analysisStatistics |>
+            dplyr$rowwise() |>
+            dplyr$mutate(
+              is_flagged = eval(parse(text = flagging_code))
+            ) |>
+            dplyr$filter(is_flagged) |>
+            dplyr$distinct()
+
+          list(
+            analysisStatistics = analysisStatistics,
+            names_statistics_input = names_statistics_input,
+            names_statistics_output = names_statistics_output,
+            flagging_value = flagging_value,
+            flagging_code = flagging_code
+          )
+        }
+      )
+
+      shiny$observeEvent(analysisSummary(), {
+        analysisSummary <- analysisSummary()
+        datatable$server_dt("flags", data = analysisSummary$analysisStatistics)
+      })
+
+      shiny$observeEvent(analysisSummary(), {
         box::use(dplyr, stats, purrr)
-        analysisStatistics <- analysisStatistics()
-        analysisInput <- analysisInput()
-        analysis_name <- analysisInput$analysis_name
-        flaggingSummary <- dplyr$distinct(analysisStatistics, flagging_value, flagging_code)
-        flagging_value <- flaggingSummary$flagging_value
-        flagging_code <- flaggingSummary$flagging_code
-
-        namesAnalysisStatistics <- names(analysisStatistics)
-        doesNotContainName <- stringr::str_detect(
-          analysisStatistics$flagging_code,
-          namesAnalysisStatistics
-        )
-        doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
-        doesNotContainName <- unique(doesNotContainName)
-        flags_that_need_fixing <- unique(doesNotContainName)
-        corrections_needed <- data.frame(flags_that_need_fixing = flags_that_need_fixing)
-        analysis_data <- analysisInput()$analysis_data
-        names_statistics_input <- names(analysis_data)
-        names_statistics_output <- names(analysisStatistics)
-
-
+        analysisSummary <- analysisSummary()
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
             collapsed = TRUE, closable = TRUE, maximizable = TRUE,
@@ -146,18 +172,18 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             shiny$fluidRow(
               shiny$column(12, shiny$h1("Inputs")),
               shiny$column(12, shiny$fluidRow(
-                lapply(names_statistics_input, function(x) {
+                lapply(analysisSummary$names_statistics_input, function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
               )),
               shiny$column(12, shiny$h1("Outputs")),
               shiny$column(12, shiny$fluidRow(
-                lapply(names_statistics_output, function(x) {
+                lapply(analysisSummary$names_statistics_output, function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
               )),
               shiny$column(12, shiny$h1("Flags")),
-              shiny$column(12, purrr$map2(flagging_value, flagging_code, function(x, y) {
+              shiny$column(12, purrr$map2(analysisSummary$flagging_value, analysisSummary$flagging_code, function(x, y) {
                 shiny$fluidRow(
                   shiny$column(2, x, class = "d-flex justify-content-center align-items-center"),
                   shiny$column(10, shiny$tags$pre(y), class = "d-flex justify-content-start align-items-center"),
@@ -167,27 +193,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             )
           )
         })
-
-        tryCatch(
-          {
-            analysisStatistics <-
-              analysisStatistics |>
-              dplyr$rowwise() |>
-              dplyr$mutate(
-                is_flagged = eval(parse(text = flagging_code))
-              ) |>
-              dplyr$filter(is_flagged) |>
-              dplyr$distinct()
-
-            datatable$server_dt("flags", data = analysisStatistics)
-          },
-          error = function(err) {
-            shiny$showNotification(
-              closeButton = TRUE, duration = NULL,
-              paste0("Flagging failed for ", analysis_name),
-            )
-          }
-        )
       })
     }
   )
