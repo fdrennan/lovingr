@@ -22,7 +22,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       analysisInput <- shiny$reactive({
         shiny$req(data)
         shiny$req(variables)
-        
+
         analysis_name <- unique(data$analysis)
         analysis_code_path <- unique(data$path)
         analysis_data_path <- unique(data$filepath)
