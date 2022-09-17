@@ -239,7 +239,8 @@ server_body <- function(id = "body", appSession) {
         )
       })
 
-      shiny$observeEvent(clean_config(), {
+      dataForScoreboard <- shiny$reactive({
+        shiny$req(clean_config())
         clean_config <- clean_config()
         analysis_code <- fs$dir_info("box/analysis/execute")
         analysis_code <- analysis_code |>
@@ -253,42 +254,8 @@ server_body <- function(id = "body", appSession) {
         analysis_code <- split(analysis_code, analysis_code$analysis)
         n_increments <- length(analysis_code)
 
-        purrr$iwalk(
-          analysis_code,
-          function(analysis_data, name) {
-            shiny$insertUI(
-              "#uiAnalyses",
-              "afterBegin",
-              run_analysis$ui_run_analysis(
-                ns(paste0("run_analysis", name)), analysis_data
-              )
-            )
-
-            variables <- dplyr$mutate_all(config()()[[1]]$data, tolower)
-            names(variables) <- tolower(names(variables))
-            run_analysis$server_run_analysis(
-              paste0("run_analysis", name), analysis_data, variables
-            )
-          }
-        )
-      })
-
-      dataForScoreboard <-
-        shiny$reactive({
-          clean_config <- clean_config()
-          analysis_code <- fs$dir_info("box/analysis/execute")
-          analysis_code <- analysis_code |>
-            dplyr$select(path) |>
-            dplyr$mutate(
-              analysis = gsub("box/analysis/execute/analysis_", "", path),
-              analysis = fs$path_ext_remove(analysis)
-            )
-
-          analysis_code <- dplyr$inner_join(analysis_code, clean_config)
-          analysis_code <- split(analysis_code, analysis_code$analysis)
-          n_increments <- length(analysis_code)
-
-          output <- purrr$imap(
+        output <-
+          purrr$imap(
             analysis_code,
             function(analysis_data, name) {
               shiny$insertUI(
@@ -308,15 +275,16 @@ server_body <- function(id = "body", appSession) {
             }
           )
 
-          output
-        })
+        output
+      })
+
 
       shiny$observeEvent(
         input$getResults,
         {
           scoreboardSheet <- config()()[[3]]$data
           dataForScoreboard <- dataForScoreboard()
-
+          # browser()
           dataForScoreboardSummary <-
             purrr$imap_dfr(dataForScoreboard, function(data, analysis) {
               out <- data$analysisStatistics
