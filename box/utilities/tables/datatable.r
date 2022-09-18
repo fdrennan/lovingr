@@ -22,16 +22,17 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
 
 #' @export
 server_dt <- function(id = "dt", data, pageLength = 3) {
-  box::use(shiny, DT, bs4Dash, dplyr, shinyWidgets, readr)
+  box::use(shiny, DT, bs4Dash, dplyr, shinyWidgets, readr, writexl)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
+      
       output$filters <- shiny$renderUI({
         shiny$fluidRow(
           shiny$column(
-            6,
+            12,
             shinyWidgets$pickerInput(
               inputId = ns("columnsFilter"),
               label = "Select Columns",
@@ -50,12 +51,12 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
 
       output$downloadData <-
         shiny$downloadHandler(
-          contentType = "text/csv",
+          contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           filename = function() {
-            paste0("data-", Sys.Date(), ".csv")
+            paste0(id, ".xlsx")
           },
           content = function(file) {
-            readr$write_csv(cleanedData(), file)
+            writexl$write_xlsx(cleanedData(), file)
           }
         )
 
@@ -86,7 +87,7 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
             elementId = NULL,
             fillContainer = getOption("DT.fillContainer", NULL),
             autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
-            selection = "none", #  c("multiple", "single", "none"),
+            selection = "multiple", #  c("multiple", "single", "none"),
             extensions = list(),
             plugins = NULL,
             editable = FALSE
