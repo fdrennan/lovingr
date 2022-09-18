@@ -5,8 +5,8 @@ get_data <- function() {
     openxlsx, fs, dplyr, purrr, stringr,
     lubridate, cli, tictoc, stats, shiny, glue
   )
-  file_regex <- "csm[0-9]{6}[a|b|c]/datamisc$"
-  base_directory <- "/sassys/cdm/cdmdev/bmn111/ach"
+  file_regex <- getOption('file_regex')
+  base_directory <- getOption('base_directory')
   cli$cli_alert("Pattern: {.path {file_regex}}")
   cli$cli_alert("Directory: {.path {base_directory}}")
   tictoc$tic()
@@ -17,8 +17,10 @@ get_data <- function() {
     regexp = file_regex,
     type = "directory"
   )
+  datamisc_folders <- dplyr$filter(datamisc_folders, !stringr$str_detect(path, 'blinded'))
   cli$cli_alert("Grabbing datamisc files")
   tictoc$toc()
+  # 
   datamisc_files <- purrr$map_dfr(
     split(datamisc_folders, datamisc_folders$path),
     function(path) {

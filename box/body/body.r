@@ -145,6 +145,7 @@ server_body <- function(id = "body", appSession) {
       datapathUpload <- file_upload$server_file_upload("file_upload")
 
       config <- shiny$eventReactive(datapathUpload, {
+        
         datapathUpload <- datapathUpload()
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
@@ -152,9 +153,9 @@ server_body <- function(id = "body", appSession) {
       clean_config <- shiny$eventReactive(input$start, {
         shiny$req(metadata())
         shiny$req(config()())
+        
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
-        #
         clean_config
       })
 
@@ -289,9 +290,12 @@ server_body <- function(id = "body", appSession) {
             ) |>
             dplyr$mutate(analysis = tolower(analysis))
           dataForScoreboard <- dataForScoreboard()
+          #
           # browser()
           dataForScoreboardSummary <-
             purrr$imap_dfr(dataForScoreboard, function(data, analysis) {
+              print(analysis)
+              print(lapply(data, typeof))
               out <- data$analysisStatistics
               out$analysis <- analysis
               out

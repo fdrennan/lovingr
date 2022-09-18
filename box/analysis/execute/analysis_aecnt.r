@@ -4,7 +4,7 @@ analysis_aecnt <- function(data, configuration) {
   split_names <- stringr$str_split(names(data), "_")
   types <- purrr$keep(split_names, ~ length(..1) > 1)
   types <- unique(purrr$map_chr(types, ~ ..1[[2]]))
-
+  data <- dplyr$mutate(data, siteid = as.character(siteid))
   count_long <- purrr$map_dfr(
     types,
     function(signal) {

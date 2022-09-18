@@ -107,6 +107,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         )
         print(analysis_name)
         print(names(results))
+        # browser()
         results <- dplyr$mutate(results, paramcd = tolower(paramcd))
         results <- dplyr$inner_join(data, results)
         datatable$server_dt("statsResults", results)
@@ -118,6 +119,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         analysisStatistics(),
         {
           box::use(dplyr, stats, purrr)
+          # rowser()
           analysisStatistics <- analysisStatistics()
           analysisInput <- analysisInput()
           analysis_name <- analysisInput$analysis_name
@@ -125,15 +127,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           flagging_value <- flaggingSummary$flagging_value
           flagging_code <- flaggingSummary$flagging_code
 
-          namesAnalysisStatistics <- names(analysisStatistics)
-          doesNotContainName <- stringr::str_detect(
-            analysisStatistics$flagging_code,
-            namesAnalysisStatistics
-          )
-          doesNotContainName <- analysisStatistics$flagging_code[doesNotContainName]
-          doesNotContainName <- unique(doesNotContainName)
-          flags_that_need_fixing <- unique(doesNotContainName)
-          corrections_needed <- data.frame(flags_that_need_fixing = flags_that_need_fixing)
           analysis_data <- analysisInput()$analysis_data
           names_statistics_input <- names(analysis_data)
           names_statistics_output <- names(analysisStatistics)

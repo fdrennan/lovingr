@@ -43,6 +43,7 @@ server_metadata <- function(id = "metadata") {
 
       datafiles <- shiny$reactive({
         box::use(.. / caching / cache)
+        # 
         datafiles <- cache$check()
         datafiles
       })
@@ -53,7 +54,7 @@ server_metadata <- function(id = "metadata") {
         study <- datafiles$study
         shiny$selectizeInput(ns("study"), shiny$h5("Study"),
           choices = unique(study),
-          selected = "111302",
+          selected = unique(study)[[1]],
           multiple = FALSE
         )
       })
@@ -114,6 +115,7 @@ server_metadata <- function(id = "metadata") {
       filteredData <- shiny$eventReactive(
         input$analysis,
         {
+          
           datafiles <- datafiles()
           files <- datafiles |>
             dplyr$filter(
@@ -128,9 +130,9 @@ server_metadata <- function(id = "metadata") {
               filepath = path
             )
 
-          if (nchar(getOption("datamisc_cache_path")) > 0) {
-            files$filepath <- paste0(getOption("datamisc_cache_path"), files$filepath)
-          }
+          # if (nchar(getOption("datamisc_cache_path")) > 0) {
+          #   files$filepath <- paste0(getOption("datamisc_cache_path"), files$filepath)
+          # }
 
           files
         }

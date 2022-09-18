@@ -70,7 +70,7 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it=TRUE) {
       output$downloadData <-
         shiny$downloadHandler(
           contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          filename = 'Config.xlsx',
+          filename = 'output.xlsx',
           content = function(file) {
             writexl$write_xlsx(cleanedData(), file)
           }
@@ -82,12 +82,12 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it=TRUE) {
       })
       
       # shiny$observeEvent(cleanedData(), {
-      #   browser()
+      #   
       #   data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns('data'))
       #   esquisse$esquisse_server('esquisse',data_rv)
       # })
       
-      # browser()
+      # 
       output$ui <- DT$renderDT(
         server = TRUE,
         {
