@@ -11,8 +11,10 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
     solidHeader = TRUE,
     title = title, collapsed = collapsed,
     shiny$fluidRow(
-      shiny$uiOutput(ns('filters')),
-      shiny$column(12, shiny$downloadButton(ns('download'), 'Download')),
+      shiny$uiOutput(ns("filters"), container = function(...) {
+        shiny$column(12, ...)
+      }),
+      shiny$column(12, shiny$downloadButton(ns("downloadData"), "Download")),
       shiny$column(12, DT$DTOutput(ns("ui"), width = "100%"))
     )
   )
@@ -20,42 +22,55 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
 
 #' @export
 server_dt <- function(id = "dt", data, pageLength = 3) {
-  box::use(shiny, DT, bs4Dash, dplyr, shinyWidgets)
+  box::use(shiny, DT, bs4Dash, dplyr, shinyWidgets, readr)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
-      
+
       output$filters <- shiny$renderUI({
-        shinyWidgets$pickerInput(
-          inputId = ns("columnsFilter"), 
-          label = "Select Columns", 
-          choices = names(data),  
-          selected = names(data),
-          options = list(
-            `actions-box` = TRUE, 
-            size = 10,
-            `selected-text-format` = "count > 3"
-          ), 
-          multiple = TRUE
+        shiny$fluidRow(
+          shiny$column(
+            6,
+            shinyWidgets$pickerInput(
+              inputId = ns("columnsFilter"),
+              label = "Select Columns",
+              choices = names(data),
+              selected = names(data),
+              options = list(
+                `actions-box` = TRUE,
+                size = 10,
+                `selected-text-format` = "count > 3"
+              ),
+              multiple = TRUE
+            )
+          )
         )
       })
-      
-      output$downloadData <- shiny$downloadHandler(
-        filename = function() {
-          paste("data-", Sys.Date(), ".rda", sep="")
-        },
-        content = function(file) {
-          saveRDS(data, file)
-        }
-      )
-      
+
+      output$downloadData <-
+        shiny$downloadHandler(
+          contentType = "text/csv",
+          filename = function() {
+            paste0("data-", Sys.Date(), ".csv")
+          },
+          content = function(file) {
+            readr$write_csv(cleanedData(), file)
+          }
+        )
+
+      cleanedData <- shiny$reactive({
+        shiny$req(input$columnsFilter)
+        data <- data[, input$columnsFilter]
+      })
+
+
+
       output$ui <- DT$renderDT(
         server = TRUE,
         {
-          shiny$req(input$columnsFilter)
-          data <- data[, input$columnsFilter]
-          DT::datatable(data,
+          shiny$req(cleanedData())
+          DT::datatable(cleanedData(),
             options = list(
               scrollX = TRUE,
               pageLength = pageLength,
