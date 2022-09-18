@@ -1,10 +1,10 @@
-#' @export analysis_aei
-analysis_aei <- function(aei_data = NULL, variables) {
-  print(aei_data)
+#' @export analysis_missdiet
+analysis_missdiet <- function(missdiet_data = NULL, variables) {
+  print(missdiet_data)
   print(variables)
   box::use(dplyr, purrr)
   box::use(. / subfunction / compare_f)
-  data_split <- split(aei_data, aei_data$paramcd)
+  data_split <- split(missdiet_data, missdiet_data$paramcd)
 
   analysis_data <- purrr$map_df(
     data_split,
@@ -39,4 +39,3 @@ analysis_aei <- function(aei_data = NULL, variables) {
       stdy_n
     )
 }
-
