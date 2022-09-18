@@ -5,8 +5,8 @@ get_data <- function() {
     openxlsx, fs, dplyr, purrr, stringr,
     lubridate, cli, tictoc, stats, shiny, glue
   )
-  file_regex <- getOption('file_regex')
-  base_directory <- getOption('base_directory')
+  file_regex <- getOption("file_regex")
+  base_directory <- getOption("base_directory")
   cli$cli_alert("Pattern: {.path {file_regex}}")
   cli$cli_alert("Directory: {.path {base_directory}}")
   tictoc$tic()
@@ -17,10 +17,10 @@ get_data <- function() {
     regexp = file_regex,
     type = "directory"
   )
-  datamisc_folders <- dplyr$filter(datamisc_folders, !stringr$str_detect(path, 'blinded'))
+  datamisc_folders <- dplyr$filter(datamisc_folders, !stringr$str_detect(path, "blinded"))
   cli$cli_alert("Grabbing datamisc files")
   tictoc$toc()
-  # 
+  #
   datamisc_files <- purrr$map_dfr(
     split(datamisc_folders, datamisc_folders$path),
     function(path) {
@@ -41,7 +41,7 @@ get_data <- function() {
     dplyr$inner_join(
       datamisc_files,
       {
-        base_config <- getOption('base_config')
+        base_config <- getOption("base_config")
         cli$cli_alert("Reading {base_config} for analysis to filename match.")
         metapaths <- openxlsx$read.xlsx(base_config, 4)[, c("analysis", "filename")]
       },

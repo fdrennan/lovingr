@@ -145,7 +145,6 @@ server_body <- function(id = "body", appSession) {
       datapathUpload <- file_upload$server_file_upload("file_upload")
 
       config <- shiny$eventReactive(datapathUpload, {
-        
         datapathUpload <- datapathUpload()
         xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
       })
@@ -153,7 +152,7 @@ server_body <- function(id = "body", appSession) {
       clean_config <- shiny$eventReactive(input$start, {
         shiny$req(metadata())
         shiny$req(config()())
-        
+
         clean_config <- clean$clean_config(config()())
         clean_config <- dplyr$left_join(metadata(), clean_config)
         clean_config
@@ -163,7 +162,8 @@ server_body <- function(id = "body", appSession) {
         shiny$req(metadata())
         shiny$req(clean_config())
         shiny$fluidRow(
-          shiny$column(12,
+          shiny$column(
+            12,
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -175,7 +175,8 @@ server_body <- function(id = "body", appSession) {
               )
             )
           ),
-          shiny$column(12,
+          shiny$column(
+            12,
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -229,14 +230,15 @@ server_body <- function(id = "body", appSession) {
               xlsx$ui_xlsx(ns(uuid))
             )
             output <- xlsx$server_xlsx(
-              uuid,esquisse_it=FALSE,
+              uuid,
+              esquisse_it = FALSE,
               datapath = path,
               ui_id = "#dataPreviewElements", width = 12
             )
             output()
           }
         )
-        
+
         output
       })
 

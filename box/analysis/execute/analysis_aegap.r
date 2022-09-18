@@ -21,7 +21,7 @@ analysis_aegap <- function(aegap, variables) {
               mean_data, "logAEGAP", "siteid",
               seed = 3
             )
-            
+
             mean_data$siteid <- original_site_id
 
             rslt <-

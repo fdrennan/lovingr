@@ -5,7 +5,7 @@ options(development = FALSE)
 options(base_config = "Config2.xlsx")
 options(cache = FALSE)
 options(file_regex = "csm[0-9]{6}[a|b|c|x]/datamisc$")
-options(bmrn_base_dir='/sassys/cdm/cdmdev/pegpal/pku/165306/csm202201x')
+options(bmrn_base_dir = "/sassys/cdm/cdmdev/pegpal/pku/165306/csm202201x")
 options(datamisc_cache_path = "./datamisc") # use locally
 
 # options(bmrn_base_dir = "/sassys/cdm/cdmdev/bmn111/ach")
@@ -20,7 +20,7 @@ options(analysis_filter = {
     # c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
     c("underdose")
     # c("aei", "rgv", "aecnt", "aegap")
-    c('aecnt', 'vitals')
+    c("aecnt", "vitals")
     # "vitals"
     # "aei"
     # 'rgv'
@@ -34,4 +34,3 @@ options(analysis_filter = {
 options(ignoreConfigPath = TRUE)
 options(sample_frac = 1)
 options(sample_min = 2000000000)
-

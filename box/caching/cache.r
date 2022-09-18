@@ -14,7 +14,7 @@ check <- function() {
     box::use(.. / cdm / meta)
     # browser()
     data <- meta$get_data()
-    # 
+    #
     readr$write_rds(data, cache_path)
     data
   }

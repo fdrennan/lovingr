@@ -43,7 +43,7 @@ server_metadata <- function(id = "metadata") {
 
       datafiles <- shiny$reactive({
         box::use(.. / caching / cache)
-        # 
+        #
         datafiles <- cache$check()
         datafiles
       })
@@ -115,7 +115,6 @@ server_metadata <- function(id = "metadata") {
       filteredData <- shiny$eventReactive(
         input$analysis,
         {
-          
           datafiles <- datafiles()
           files <- datafiles |>
             dplyr$filter(
