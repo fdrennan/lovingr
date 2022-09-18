@@ -197,8 +197,9 @@ server_body <- function(id = "body", appSession) {
             shiny$div(id = "uiAnalyses")
           ),
           shiny$column(
-            class = "d-flex justify-content-end",
-            12, shiny$actionButton(ns("getResults"), "Get Results")
+            class = "d-flex justify-content-end align-items-center p-2",
+            12,
+            bs4Dash$actionButton(ns("getResults"), "Get Results")
           )
         )
       })

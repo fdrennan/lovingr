@@ -1,13 +1,13 @@
 #' @export
 ui_devop <- function(id = "devop") {
-  box::use(shiny)
+  box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   shiny$inputPanel(
-    shiny$actionButton(
+    bs4Dash$actionButton(
       "deleteDevelopmentFolder",
       "Delete Develoment Folder"
     ),
-    shiny$actionButton(
+    bs4Dash$actionButton(
       "createDevelopmentFolder",
       "Create Develoment Folder"
     )
