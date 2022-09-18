@@ -162,9 +162,7 @@ server_body <- function(id = "body", appSession) {
         shiny$req(metadata())
         shiny$req(clean_config())
         shiny$fluidRow(
-          shiny$div(class = "col-xl-1 col-lg-1"),
-          shiny$div(
-            class = "col-xl-5 col-lg-5 col-md-12 col-sm-12",
+          shiny$column(12,
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -176,8 +174,7 @@ server_body <- function(id = "body", appSession) {
               )
             )
           ),
-          shiny$div(
-            class = "col-xl-5 col-lg-5 col-md-12 col-sm-12",
+          shiny$column(12,
             shiny$fluidRow(
               bs4Dash$box(
                 closable = TRUE,
@@ -190,7 +187,6 @@ server_body <- function(id = "body", appSession) {
               )
             )
           ),
-          shiny$div(class = "col-xl-1 col-lg-1"),
           bs4Dash$box(
             width = 12,
             title = "Flagging Results and Review",
@@ -223,7 +219,7 @@ server_body <- function(id = "body", appSession) {
           )
         )
 
-        lapply(
+        output <- lapply(
           import_files$filepath,
           function(path) {
             shiny$insertUI(
@@ -231,13 +227,16 @@ server_body <- function(id = "body", appSession) {
               "afterBegin",
               xlsx$ui_xlsx(ns(uuid))
             )
-            xlsx$server_xlsx(
-              uuid,
+            output <- xlsx$server_xlsx(
+              uuid,esquisse_it=FALSE,
               datapath = path,
               ui_id = "#dataPreviewElements", width = 12
             )
+            output()
           }
         )
+        
+        output
       })
 
       dataForScoreboard <- shiny$reactive({

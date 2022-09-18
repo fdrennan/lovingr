@@ -16,7 +16,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
       shiny$uiOutput(ns("month"), container = input_container),
       shiny$uiOutput(ns("analysis"), container = input_container),
       shiny$column(
-        12, shiny$downloadButton(ns('downloadData'), "Download Example")
+        12, shiny$downloadButton(ns("downloadData"), "Download Example")
       )
     )
   )
@@ -29,10 +29,8 @@ server_metadata <- function(id = "metadata") {
   shiny$moduleServer(
     id,
     function(input, output, session) {
-      
       ns <- session$ns
 
-      
       output$downloadData <- shiny$downloadHandler(
         contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename = function() {
@@ -42,8 +40,7 @@ server_metadata <- function(id = "metadata") {
           file.copy("www/Config.xlsx", file)
         }
       )
-      
-      
+
       datafiles <- shiny$reactive({
         box::use(.. / caching / cache)
         datafiles <- cache$check()

@@ -12,7 +12,7 @@ sass:
 
 push: 
 	git add --all
-	git commit -m 'stored and shit'
+	git commit -m 'lazy save'
 	git push origin $$(git rev-parse --abbrev-ref HEAD)
 
 
