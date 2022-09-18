@@ -28,7 +28,7 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
     function(input, output, session) {
       ns <- session$ns
 
-      
+
       output$filters <- shiny$renderUI({
         shiny$fluidRow(
           shiny$column(
