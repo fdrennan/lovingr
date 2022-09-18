@@ -26,7 +26,14 @@ clean_config <- function(config) {
   flagging_sheet <- purrr$map_dfr(flagging_sheet, function(x) {
     x$Flagging.Specification <- unescape_html(x$Flagging.Specification)
     print(x$Flagging.Specification)
-    x$Flagging.Specification <- styler$style_text(x$Flagging.Specification)
+    tryCatch({
+      x$Flagging.Specification <- styler$style_text(x$Flagging.Specification)
+    }, error = function(err) {
+      shiny$showModal(shiny$modalDialog(
+        shiny$tags$pre(as.character(err), class='p-3')
+      ))
+      Sys.sleep(15)
+    })
     print(x$Flagging.Specification)
     data.frame(
       analysis = tolower(unique(x$Analysis)),
