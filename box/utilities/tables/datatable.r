@@ -30,7 +30,8 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
         shinyWidgets$pickerInput(
           inputId = ns("columnsFilter"), 
           label = "Select Columns", 
-          choices = names(data), 
+          choices = names(data),  
+          selected = names(data),
           options = list(
             `actions-box` = TRUE, 
             size = 10,
