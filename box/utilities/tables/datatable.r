@@ -52,9 +52,7 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
       output$downloadData <-
         shiny$downloadHandler(
           contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          filename = function() {
-            paste0(id, ".xlsx")
-          },
+          filename = 'Config.xlsx',
           content = function(file) {
             writexl$write_xlsx(cleanedData(), file)
           }
