@@ -6,6 +6,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
     shiny$column(6, ...)
   }
   bs4Dash$box(
+    closable = TRUE,
     title = "Select Study Information",
     width = width,
     status = "secondary",
@@ -13,7 +14,10 @@ ui_metadata <- function(id = "metadata", width = 6) {
       shiny$uiOutput(ns("study"), container = input_container),
       shiny$uiOutput(ns("year"), container = input_container),
       shiny$uiOutput(ns("month"), container = input_container),
-      shiny$uiOutput(ns("analysis"), container = input_container)
+      shiny$uiOutput(ns("analysis"), container = input_container),
+      shiny$column(
+        12, shiny$downloadButton(ns("downloadData"), "Download Example")
+      )
     )
   )
 }
@@ -26,6 +30,16 @@ server_metadata <- function(id = "metadata") {
     id,
     function(input, output, session) {
       ns <- session$ns
+
+      output$downloadData <- shiny$downloadHandler(
+        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename = function() {
+          "Config.xlsx"
+        },
+        content = function(file) {
+          file.copy("www/Config.xlsx", file)
+        }
+      )
 
       datafiles <- shiny$reactive({
         box::use(.. / caching / cache)

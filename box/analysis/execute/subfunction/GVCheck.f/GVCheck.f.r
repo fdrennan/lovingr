@@ -3,8 +3,17 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
                       name, configuration = NULL) {
   box::use(.. / CompareProportion / CompareProportion)
   box::use(dplyr, stats, purrr)
-  T_ZSCORE <- as.numeric(dplyr$filter(configuration, parameter == "t_zscore")$value)
-  DataComb <- stats$aggregate(GVData[, c(Var_r, Var_n)], by = list(GVData[, Var_site])[[1]], sum)
+
+  T_ZSCORE <- as.numeric(
+    dplyr$filter(configuration, parameter == "t_zscore")$value
+  )
+
+  DataComb <- stats$aggregate(
+    GVData[, c(Var_r, Var_n)],
+    by = list(GVData[, Var_site])[[1]],
+    sum
+  )
+
   names(DataComb)[1] <- Var_site
 
   ResComb <- CompareProportion$CompareProportion(
@@ -16,8 +25,8 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
   GMParameter <- rep("Combined", dim(ResComb)[1])
   ResComb <- data.frame(GMParameter, ResComb)
 
-  result <- ResComb
-  # aggreate r and n across subjects for each parameter;
+  out <- ResComb
+
   DatabyPar <- stats$aggregate(
     GVData[, c(Var_r, Var_n)],
     by = purrr$map_dfc(list(GVData[, Var_site], GVData[, Var_by]), ~.),
@@ -28,7 +37,6 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
 
   parm <- as.character(unique(DatabyPar[, Var_by]))
   nparm <- length(parm)
-
 
   for (i in 1:nparm)
   {
@@ -41,10 +49,21 @@ GVCheck.f <- function(GVData, Var_site, Var_by, Var_n, Var_r,
     )
     GMParameter <- rep(paramcd, dim(ResI)[1])
     ResI <- data.frame(GMParameter, ResI)
-    result <- rbind(result, ResI)
+    out <- rbind(out, ResI)
   }
 
-  GVmethod <- rep(name, dim(result)[1])
+  #
+  out <-
+    out |>
+    dplyr$rename(
+      paramcd = GMParameter,
+      site_pct = ObsPer,
+      stdy_pct = ExpPer,
+      p_value = .data$pvalue
+    ) |>
+    dplyr$mutate(
+      diff_pct = site_pct - stdy_pct
+    )
 
-  result
+  out
 }

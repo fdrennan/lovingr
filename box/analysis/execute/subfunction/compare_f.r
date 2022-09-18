@@ -16,6 +16,4 @@ compare_f <- function(r, n, siteid = NULL, subfix = NULL, variables = NULL) {
     min_n_value = min_n_value,
     min_n_number_betabinom = min_n_number_betabinom
   )
-
-  aei_statistics
 }

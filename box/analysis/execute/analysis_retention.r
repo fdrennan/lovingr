@@ -64,15 +64,6 @@ analysis_retention <- function(retention_data = NULL, program = NULL, analysis =
   ) |>
     mutate(numsubj = ndenom)
 
-
-  #
-  # n_incidence_filter_data <- retention_data |> group_by(paramcd) |> summarise(n_incidence = sum(incidence))
-  #
-  # retention_data <- retention_data |>
-  #   filter(
-  #     paramcd %in% filter(n_incidence_filter_data, n_incidence > 2)$paramcd
-  #   )
-  #
   data_split <- split(retention_data, retention_data$paramcd)
   #
   analysis_data <- map_df(

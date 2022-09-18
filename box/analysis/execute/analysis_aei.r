@@ -16,11 +16,28 @@ analysis_aei <- function(aei_data = NULL, variables) {
         siteid = x$siteid,
         variables = variables
       )
+      response$paramcd <- current_signal
+      response
     }
   )
 
-
-  analysis_data
+  # This exists because I want to touch CompareProportion as little as possible.
+  analysis_data <-
+    analysis_data |>
+    dplyr$transmute(
+      paramcd,
+      site = .data$rowname,
+      r = .data$r,
+      n = .data$n,
+      n_subj = .data$n,
+      site_pct = ObsPer,
+      stdy_pct = ExpPer,
+      diff_pct = site_pct - stdy_pct,
+      p_value = .data$pvalue,
+      method = pvalueMethod,
+      stdy_r,
+      stdy_n
+    )
 }
 
 

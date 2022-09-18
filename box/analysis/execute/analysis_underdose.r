@@ -6,7 +6,9 @@ analysis_underdose <- function(dose_subj = NULL,
   box::use(. / subfunction / CompareProportion / CompareProportion)
   cutdt <- unique(dose_subj$cutdt)
   #
-  country_mapping <- dplyr$distinct(dplyr$select(dose_subj, studyid, country, site = siteid))
+  country_mapping <- dplyr$distinct(
+    dplyr$select(dose_subj, studyid, country, site = siteid)
+  )
 
   dose_subj$siteid <- as.factor(dose_subj$siteid)
   dose_subj$subject <- as.factor(dose_subj$subject)
@@ -78,7 +80,6 @@ analysis_underdose <- function(dose_subj = NULL,
     )
 
   SITE_RESULT$p_value <- SITE_RESULT$pvalue
-  SITE_RESULT <- split(SITE_RESULT, 1:nrow(SITE_RESULT))
 
   additional_summaries <- list(
     SUBJECT_UNDERDOSE = SUBJECT_UNDERDOSE,

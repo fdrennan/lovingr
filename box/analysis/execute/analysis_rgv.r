@@ -8,6 +8,4 @@ analysis_rgv <- function(rgv_data = NULL, variables) {
     rgv_data, "siteid", "paramcd", "numgv", "numrepgv", "GV",
     configuration = variables
   )
-
-  data
 }

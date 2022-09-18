@@ -12,6 +12,7 @@ ui_app <- function() {
 
 
   bs4Dash$dashboardPage(
+    dark = TRUE, scrollToTop = TRUE,
     title = "CSM Management",
     fullscreen = TRUE,
     header = header$ui_header(),

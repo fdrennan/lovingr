@@ -1,8 +1,6 @@
 #' @export
 analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
   box::use(dplyr, stringr, purrr, . / analysis_vitals)
-  # future$plan(future$multiprocess)
-  #
   if ("vsdv" %in% names(input_vs)) {
     split_vs <- input_vs |>
       dplyr$mutate(
@@ -24,17 +22,18 @@ analysis_vitals <- function(input_vs = NULL, configuration = NULL) {
 
   out <- purrr$imap_dfr(
     split_vs,
-    function(x, y) {
+    function(data, paramcd) {
       box::use(. / analysis_vitals, shiny, glue)
       vals <- names(split_vs)
-      index <- which(vals == y)
+      index <- which(vals == paramcd)
       n_vals <- dplyr$n_distinct(vals)
       shiny$showNotification(
         id = "currentVitals",
         duration = NULL, closeButton = FALSE,
-        glue$glue("paramcd: {y} - {index}/{n_vals}")
+        glue$glue("paramcd: {paramcd} - {index}/{n_vals}")
       )
-      out <- analysis_vitals$rep_value_in_group(y, x)
+      out <- analysis_vitals$RepValueinGroup.f(paramcd, data, "BY")
+      out$paramcd <- paramcd
       shiny$removeNotification("currentVitals")
       out
     }
@@ -115,8 +114,7 @@ RepValueinGroup.f <- function(paramcd, data, padjmethod) {
     ) |>
     dplyr$mutate(
       diff_pct = site_value_pct - stdy_value_pct
-    ) |>
-    dplyr$rename_all(stringr$str_to_lower)
+    )
 
 
   output
@@ -142,14 +140,4 @@ rep_test <- function(count, rowsum, colsum, total) {
   names(t) <- c("Count_Site", "nObs_Site", "PerofSite", "PerofValue", "Count_Study", "nObs_Study", "PerofStudy", "oddsRatio", "Pvalue")
 
   t
-}
-
-
-
-#' @export
-rep_value_in_group <- function(paramcd = NULL, input_vs) {
-  box::use(stringr, . / analysis_vitals, shiny)
-  response <- analysis_vitals$RepValueinGroup.f(paramcd, input_vs, "BY")
-  response$paramcd <- paramcd
-  response
 }
