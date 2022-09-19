@@ -101,9 +101,8 @@ server_body <- function(id = "body", appSession) {
             id = "dataPreviewElements"
           )
         )
-
-
-        output <- purrr$map(
+        
+        purrr$walk(
           import_files$filepath,
           function(path) {
             shiny$insertUI(
@@ -112,13 +111,12 @@ server_body <- function(id = "body", appSession) {
               xlsx$ui_xlsx(ns(uuid))
             )
 
-            output <- xlsx$server_xlsx(
+            xlsx$server_xlsx(
               uuid,
               esquisse_it = FALSE,
               datapath = path,
               ui_id = "#dataPreviewElements"
             )
-            output()
           }
         )
 

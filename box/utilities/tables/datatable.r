@@ -15,8 +15,11 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
         shiny$column(12, ...)
       }),
       shiny$column(12, shiny$downloadButton(ns("downloadData"), "Download")),
-      bs4Dash$box(title='Table', collapsed = TRUE, width=12, DT$DTOutput(ns("ui"), width = "100%")),
-      bs4Dash$box(title='Plotting', width = 12, collapsed=TRUE, esquisse$esquisse_ui(ns("esquisse"), header = FALSE))
+      bs4Dash$box(title='Table',collapsible = TRUE, collapsed = TRUE, width=12, 
+        DT$DTOutput(ns("ui"), width = "100%")
+      ),
+      bs4Dash$box(title='Plotting', collapsible = TRUE, width = 12, collapsed=TRUE, header = FALSE,
+                  esquisse$esquisse_ui(ns("esquisse")))
     )
   )
 }

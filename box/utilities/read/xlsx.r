@@ -4,7 +4,6 @@ ui_xlsx <- function(id = "xlsx") {
   box::use(shiny, .. / tables / datatable, sortable)
   ns <- shiny$NS(id)
   shiny$fluidRow(
-    shiny$column(12, shiny$selectizeInput(ns("dataWidth"), "Resize Tables", selected = 12, choices = c("Extra Small" = 3, "Small" = 4, "Medium" = 6, "Large" = 12))),
     shiny$column(12, shiny$fluidRow(id = "sheets")),
     sortable$sortable_js(css_id = "sheets")
   )
@@ -51,7 +50,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
       })
 
 
-      xlsx_out <- shiny$eventReactive(xlsx_data(), {
+      shiny$observeEvent(xlsx_data(), {
         xlsx_data <- xlsx_data()
         lapply(
           xlsx_data,
@@ -61,19 +60,17 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
               ui_id,
               "afterBegin",
               datatable$ui_dt(
-                ns(uuid),
+                ns(uuid), width = width,
                 title = data$sheetName,
                 esquisse_it = esquisse_it
               )
             )
-            # browser()
-            results <- datatable$server_dt(uuid, data$data, esquisse_it = esquisse_it)
-            results
+            datatable$server_dt(uuid, data$data, esquisse_it = esquisse_it)
           }
         )
       })
 
-      xlsx_out
+      xlsx_data
     }
   )
 }
