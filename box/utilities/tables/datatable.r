@@ -15,17 +15,8 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
         shiny$column(12, ...)
       }),
       shiny$column(12, shiny$downloadButton(ns("downloadData"), "Download")),
-      shiny$column(12, DT$DTOutput(ns("ui"), width = "100%")),
-      shiny$column(
-        12,
-        {
-          if (esquisse_it) {
-            esquisse$esquisse_ui(ns("esquisse"), header = FALSE)
-          } else {
-            shiny$div()
-          }
-        }
-      )
+      bs4Dash$box(title='Table', collapsed = TRUE, width=12, DT$DTOutput(ns("ui"), width = "100%")),
+      bs4Dash$box(title='Plotting', width = 12, collapsed=TRUE, esquisse$esquisse_ui(ns("esquisse"), header = FALSE))
     )
   )
 }
@@ -39,7 +30,6 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
       ns <- session$ns
 
       output$filters <- shiny$renderUI({
-        browser()
         shiny$fluidRow(
           shiny$column(
             12,
@@ -69,7 +59,6 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
         )
 
       cleanedData <- shiny$reactive({
-        # browser()
         shiny$req(input$columnsFilter)
         data <- data[, input$columnsFilter]
       })
@@ -79,7 +68,6 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
         esquisse$esquisse_server("esquisse", data_rv)
       })
 
-      #
       shiny$observeEvent(
         cleanedData(),
         {
