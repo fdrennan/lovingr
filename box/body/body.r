@@ -43,7 +43,7 @@ ui_body <- function(id = "body") {
 server_body <- function(id = "body", appSession) {
   # Imports
   {
-    box::use(shiny, uuid, bs4Dash, dplyr, shinyFiles, fs, utils, purrr, shinyAce, jsonlite)
+    box::use(shiny, uuid, bs4Dash, glue, dplyr, shinyFiles, fs, utils, purrr, shinyAce, jsonlite)
     box::use(.. / utilities / chatty / chatty)
     box::use(.. / utilities / read / xlsx)
     box::use(.. / analysis / app / run_analysis / run_analysis)
@@ -160,6 +160,20 @@ server_body <- function(id = "body", appSession) {
               datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
             )
           })
+
+
+          scoreboardSheet <- readRDS("scoreboardSheet.rda")
+          scoreboardSheet <-
+            scoreboardSheet |>
+            dplyr$glimpse() |>
+            dplyr$mutate_if(is.numeric, function(x) round(x, 2)) |>
+            dplyr$transmute(
+              StudyStatResult = glue$glue(StudyStat),
+              SiteStatResult = glue$glue(SiteStat)
+            )
+
+
+
           datatable$server_dt(
             "scoreboardConfiguration",
             data = scoreboardSheet
