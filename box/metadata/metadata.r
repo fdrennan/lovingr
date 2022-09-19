@@ -159,12 +159,15 @@ server_metadata <- function(id = "metadata") {
         shiny$fluidRow(
           shiny$column(
             12,
-            shiny$h3("2. Download and Set up Configuration."),
-            shinyWidgets$prettySwitch(ns("internalConfig"),
+            shiny$h3("2. Download and Set up Configuration.")
+          ),
+          shiny$column(
+            6, shinyWidgets$prettySwitch(ns("internalConfig"),
               "Use Internal Configuration",
               value = TRUE
-            ), shiny$downloadButton(ns("downloadData"), "Download Configuration Template")
+            )
           ),
+          shiny$column(6, shiny$downloadButton(ns("downloadData"), "Download Configuration Template")),
           shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
             shiny$column(12, ...)
           }),
