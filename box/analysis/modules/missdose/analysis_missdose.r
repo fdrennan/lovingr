@@ -3,7 +3,7 @@ analysis_missdose <- function(missdose_data = NULL, variables) {
   print(missdose_data)
   print(variables)
   box::use(dplyr, purrr)
-  box::use(.. / ../ stats / CompareProportion /compare_f)
+  box::use(.. / .. / stats / CompareProportion / compare_f)
   data_split <- split(missdose_data, missdose_data$paramcd)
 
   analysis_data <- purrr$map_df(

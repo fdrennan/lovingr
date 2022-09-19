@@ -103,7 +103,6 @@ server_body <- function(id = "body", appSession) {
       })
 
       dataForScoreboard <- shiny$eventReactive(metadata(), {
-        
         clean_metadata <- metadata()$clean
         raw_metadata <- metadata()$raw
         clean_metadata <- split(clean_metadata, clean_metadata$analysis)
@@ -152,7 +151,6 @@ server_body <- function(id = "body", appSession) {
               out$analysis <- analysis
               out
             })
-
           scoreboardSheet <- dplyr$inner_join(
             dataForScoreboardSummary, scoreboardSheet
           )

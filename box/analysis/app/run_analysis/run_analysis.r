@@ -20,10 +20,9 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       ns <- session$ns
 
       analysisInput <- shiny$reactive({
-        
         shiny$req(data)
         shiny$req(variables)
-        
+
         analysis_name <- unique(data$analysis)
         analysis_code_path <- list.files(unique(data$analysis_code_path), full.names = T)
         analysis_data_path <- unique(data$filepath)
@@ -82,7 +81,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(.. / .. / modules / vitals / analysis_vitals)
         box::use(.. / .. / modules / underdose / analysis_underdose)
         box::use(dplyr, purrr)
-        
+
         analysisInput <- analysisInput()
         analysis_name <- analysisInput$analysis_name
         shiny$showNotification(ui = paste0(
@@ -90,6 +89,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         ), id = analysis_name, closeButton = FALSE, duration = NULL)
 
         analysis_data <- analysisInput$analysis_data
+
         results <- switch(analysis_name,
           "aei" = analysis_aei$analysis_aei(analysis_data, variables),
           "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),

@@ -54,7 +54,5 @@ clean_config <- function(config) {
       flagging_value = as.numeric(unique(x$Flag))
     )
   })
-
-  # flagging_sheet <- dplyr$inner_join(flagging_sheet, datapaths$data)
   flagging_sheet
 }

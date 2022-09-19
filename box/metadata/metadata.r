@@ -45,7 +45,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
 #' @export
 server_metadata <- function(id = "metadata") {
   box::use(.. / utilities / read / xlsx)
-  box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx)
+  box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx, shinyWidgets)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / csm_config / clean)
   shiny$moduleServer(
@@ -156,11 +156,30 @@ server_metadata <- function(id = "metadata") {
             12,
             shiny$p(
               shiny$h3("2. Download and Set up Configuration."),
+              shinyWidgets$prettyToggle(ns("internalConfig"),
+                "Use Internal Configuration",
+                shape = "square",
+                label_on = "Use",
+                label_off = "Ignore",
+                icon_on = shiny$icon("thumbs-up"),
+                icon_off = shiny$icon("thumbs-down"),
+                status_on = "default", status_off = "default",
+                value = TRUE
+              ),
               shiny$downloadButton(ns("downloadData"), "Download Configuration Template")
             )
           ),
-          shiny$column(
-            12,
+          shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
+            shiny$column(12, ...)
+          }),
+          shiny$column(12, shiny$actionButton(ns("startAnalysis"), "Begin"))
+        )
+      })
+
+      shiny$observeEvent(input$internalConfig, {
+        output$configurationUploadToggle <- shiny$renderUI({
+          # shiny$req(input$internalConfig)
+          if (!isTRUE(input$internalConfig)) {
             shiny$p(
               shiny$h3("3. Upload a configuration file."),
               shiny$fileInput(
@@ -170,8 +189,8 @@ server_metadata <- function(id = "metadata") {
                 multiple = TRUE
               )
             )
-          )
-        )
+          }
+        })
       })
 
       output$downloadData <- shiny$downloadHandler(
@@ -182,12 +201,15 @@ server_metadata <- function(id = "metadata") {
         }
       )
 
-      config <- shiny$reactive({
-        shiny$req(input$fileUpload)
-        shiny$req(filteredData())
-        # debug(xlsx$server_xlsx)
-        #
-        configPath <- input$fileUpload$datapath
+      config <- shiny$eventReactive(input$startAnalysis, {
+        # shiny$req(input$internalConfig)
+        # shiny$req(filteredData())
+
+        if (input$internalConfig) {
+          configPath <- getOption("internal_config_path")
+        } else {
+          configPath <- input$fileUpload$datapath
+        }
         sheetNames <- openxlsx$getSheetNames(configPath)
         out <- lapply(sheetNames, function(sheetName) {
           list(
@@ -195,12 +217,18 @@ server_metadata <- function(id = "metadata") {
             data = openxlsx$read.xlsx(configPath, sheetName)
           )
         })
-
+        clean_data <- clean$clean_config(out)
+        clean_data <- dplyr$inner_join(clean_data, filteredData())
+        if (nrow(clean_data) == 0) {
+          shiny$showModal(shiny$modalDialog(
+            "No analysis possible. Data not available for configuration in chosen directory."
+          ))
+          shiny$req(nrow(clean_data) > 0)
+        }
         out <- list(
-          clean = dplyr$inner_join(clean$clean_config(out), filteredData()),
+          clean = clean_data,
           raw = out
         )
-
         out
       })
 

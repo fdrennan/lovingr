@@ -1,10 +1,10 @@
-#' @export analysis_missdiet
-analysis_missdiet <- function(missdiet_data = NULL, variables) {
-  print(missdiet_data)
+#' @export analysis_diet
+analysis_diet <- function(diet_data = NULL, variables) {
+  print(diet_data)
   print(variables)
   box::use(dplyr, purrr)
-  box::use(.. / ../ stats /CompareProportion / compare_f)
-  data_split <- split(missdiet_data, missdiet_data$paramcd)
+  box::use(.. / .. / stats / CompareProportion / compare_f)
+  data_split <- split(diet_data, diet_data$paramcd)
 
   analysis_data <- purrr$map_df(
     data_split,

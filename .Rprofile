@@ -5,22 +5,23 @@ options(bmrn_base_dir = "/sassys/cdm/cdmdev/pegpal/pku/165306/csm202201x")
 options(csm_version = "0.0.9000")
 options(
   analysis_dataset_names = c(
-    aei = "csmaesttrt.sas7bdat",
-    aei = "csmaest.sas7bdat" # old
-    # rgm = "csmgmsum.sas7bdat",
-    # rgv = "csmrgvst.sas7bdat",
-    # vitals = "csmvs.sas7bdat",
-    # missdose = "csmmdosest.sas7bdat",
-    # aegap = "csmaetrt.sas7bdat",
-    # aegap = "csmae.sas7bdat", # old
-    # underdose = "csmexvis.sas7bdat",
-    # aecnt = "csm_aecnt.csv",
-    # diet = "csmdiet.sas7bdat",
-    # meta = "csmpt.sas7bdat"
+    # aei = "csmaesttrt.sas7bdat",
+    # aei = "csmaest.sas7bdat" # old
+    rgm = "csmgmsum.sas7bdat",
+    rgv = "csmrgvst.sas7bdat",
+    vitals = "csmvs.sas7bdat",
+    missdose = "csmmdosest.sas7bdat",
+    diet = "csmdiet.sas7bdat",
+    aegap = "csmaetrt.sas7bdat",
+    aegap = "csmae.sas7bdat", # old
+    underdose = "csmexvis.sas7bdat",
+    aecnt = "csm_aecnt.csv",
+    diet = "csmdiet.sas7bdat",
+    meta = "csmpt.sas7bdat"
   )
 )
 options(dir_chooser_directories = c(`Local Cache` = "./datamisc", `Working Directory` = getwd(), Root = "/"))
-
+options(internal_config_path = "Config3.xlsx")
 
 # aei	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmaest.sas7bdat
 # rgm	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmgmsum.sas7bdat

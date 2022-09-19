@@ -50,7 +50,7 @@ get_data <- function(base_directory = getwd()) {
         current_time = Sys.time()
       )
   }
-  # 
+  # browser()
   subfiles <- dplyr$inner_join(subfiles, analysis_code_files)
   subfiles
 }
