@@ -65,15 +65,7 @@ server_body <- function(id = "body", appSession) {
         output$dataRaw <- shiny$renderUI({
           shiny$req(metadata())
           shiny$fluidRow(
-            bs4Dash$box(
-              closable = TRUE,
-              collapsed = TRUE,
-              maximizable = TRUE,
-              width = 12,
-              status = "primary",
-              title = "Data Preview",
-              shiny$fluidRow(id = "dataPreview")
-            ),
+            shiny$column(12, id = "dataPreview"),
             bs4Dash$box(
               width = 12,
               title = "Flagging Results and Review",
@@ -94,32 +86,21 @@ server_body <- function(id = "body", appSession) {
 
         shiny$removeUI("#dataPreviewElements")
 
-        shiny$insertUI(
-          "#dataPreview", "afterBegin",
-          shiny$div(
-            class = "col-xl-12 col-lg-12 col-md-12 col-sm-12",
+        shiny$insertUI("#dataPreview", "afterBegin",
+          shiny$column(12,
             id = "dataPreviewElements"
           )
         )
 
-        purrr$walk(
+        output <- purrr$map(
           import_files$filepath,
           function(path) {
-            shiny$insertUI(
-              "#dataPreviewElements",
-              "afterBegin",
-              xlsx$ui_xlsx(ns(uuid))
-            )
-
-            xlsx$server_xlsx(
-              uuid,
-              esquisse_it = FALSE,
-              datapath = path,
-              ui_id = "#dataPreviewElements"
-            )
+            shiny$insertUI("#dataPreviewElements", "afterBegin", xlsx$ui_xlsx(ns(uuid)))
+            out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreviewElements")
+            out()
           }
         )
-
+        # browser()
         output
       })
 

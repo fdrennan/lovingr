@@ -10,7 +10,7 @@ ui_xlsx <- function(id = "xlsx") {
 }
 
 #' @export
-server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", esquisse_it = FALSE) {
+server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
   box::use(shiny, openxlsx, fs, glue, uuid)
   box::use(shiny, .. / tables / datatable, haven, readr)
   shiny$moduleServer(
@@ -56,17 +56,16 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
           xlsx_data,
           function(data) {
             uuid <- uuid::UUIDgenerate()
-            shiny$insertUI(
-              ui_id,
+            shiny$insertUI(ui_id,
               "afterBegin",
               datatable$ui_dt(
                 ns(uuid),
                 width = width,
-                title = data$sheetName,
-                esquisse_it = esquisse_it
+                title = data$sheetName
               )
             )
-            datatable$server_dt(uuid, data$data, esquisse_it = esquisse_it)
+            datatable$server_dt(uuid, data$data)
+            
           }
         )
       })

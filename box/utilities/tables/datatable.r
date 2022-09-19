@@ -11,6 +11,7 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
     solidHeader = TRUE,
     title = title, collapsed = collapsed,
     shiny$fluidRow(
+      
       shiny$uiOutput(ns("filters"), container = function(...) {
         shiny$column(12, ...)
       }),
@@ -65,46 +66,45 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
         )
 
       cleanedData <- shiny$reactive({
-        shiny$req(input$columnsFilter)
-        data <- data[, input$columnsFilter]
-      })
-
-      shiny$observeEvent(cleanedData(), {
-        data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
-        esquisse$esquisse_server("esquisse", data_rv)
-      })
-
-      shiny$observeEvent(
-        cleanedData(),
-        {
-          output$ui <- DT$renderDT(
-            server = TRUE,
-            {
-              DT::datatable(cleanedData(),
-                options = list(
-                  scrollX = TRUE,
-                  pageLength = pageLength,
-                  filter = "top"
-                ),
-                class = "compact",
-                caption = NULL,
-                filter = c("top"),
-                escape = TRUE,
-                style = "bootstrap4",
-                width = NULL,
-                height = NULL,
-                elementId = NULL,
-                fillContainer = getOption("DT.fillContainer", NULL),
-                autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
-                selection = "multiple", #  c("multiple", "single", "none"),
-                extensions = list(),
-                plugins = NULL,
-                editable = FALSE
-              )
-            }
-          )
+        # browser()
+        # shiny$req(input$columnsFilter)
+        if (!is.null(input$columnsFilter)) {
+          data <- data[, input$columnsFilter]
         }
-      )
+        
+        output$ui <- DT$renderDT(
+          server = TRUE,
+          {
+            DT::datatable(data,
+                          options = list(
+                            scrollX = TRUE,
+                            pageLength = pageLength,
+                            filter = "top"
+                          ),
+                          class = "compact",
+                          caption = NULL,
+                          filter = c("top"),
+                          escape = TRUE,
+                          style = "bootstrap4",
+                          width = NULL,
+                          height = NULL,
+                          elementId = NULL,
+                          fillContainer = getOption("DT.fillContainer", NULL),
+                          autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
+                          selection = "multiple", #  c("multiple", "single", "none"),
+                          extensions = list(),
+                          plugins = NULL,
+                          editable = FALSE
+            )
+          }
+        )
+        
+        
+        data
+      })
+    
+      data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
+      esquisse$esquisse_server("esquisse", data_rv)
 
       cleanedData()
     }

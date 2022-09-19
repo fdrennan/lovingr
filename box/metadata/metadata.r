@@ -188,7 +188,7 @@ server_metadata <- function(id = "metadata") {
         shiny$req(input$fileUpload)
         shiny$req(filteredData())
         # debug(xlsx$server_xlsx)
-        # browser()
+        # 
         configPath <- input$fileUpload$datapath
         sheetNames <- openxlsx$getSheetNames(configPath)
         out <- lapply(sheetNames, function(sheetName) {
@@ -197,7 +197,7 @@ server_metadata <- function(id = "metadata") {
             data = openxlsx$read.xlsx(configPath, sheetName)
           )
         })
-        # browser()
+        # 
         out <- dplyr$inner_join(clean$clean_config(out), filteredData())
         out
       })
