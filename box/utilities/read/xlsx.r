@@ -4,6 +4,7 @@ ui_xlsx <- function(id = "xlsx") {
   box::use(shiny, .. / tables / datatable, sortable)
   ns <- shiny$NS(id)
   shiny$fluidRow(
+    shiny$column(12, shiny$selectizeInput(ns("dataWidth"), "Resize Tables", selected = 12, choices = c("Extra Small" = 3, "Small" = 4, "Medium" = 6, "Large" = 12))),
     shiny$column(12, shiny$fluidRow(id = "sheets")),
     sortable$sortable_js(css_id = "sheets")
   )
@@ -17,9 +18,11 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
     id,
     function(input, output, session) {
       ns <- session$ns
+
       xlsx_data <- shiny$reactive({
+        shiny$req(datapath)
         datapath_ext <- fs$path_ext(datapath)
-        switch(datapath_ext,
+        out <- switch(datapath_ext,
           "xlsx" = {
             sheetNames <- openxlsx$getSheetNames(datapath)
             lapply(sheetNames, function(sheetName) {
@@ -44,9 +47,11 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
             )
           }
         )
+        out
       })
 
-      shiny$observeEvent(xlsx_data(), {
+
+      xlsx_out <- shiny$eventReactive(xlsx_data(), {
         xlsx_data <- xlsx_data()
         lapply(
           xlsx_data,
@@ -55,14 +60,20 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
             shiny$insertUI(
               ui_id,
               "afterBegin",
-              datatable$ui_dt(ns(uuid), title = data$sheetName, width = width, esquisse_it = esquisse_it)
+              datatable$ui_dt(
+                ns(uuid),
+                title = data$sheetName,
+                esquisse_it = esquisse_it
+              )
             )
-            datatable$server_dt(uuid, data$data, esquisse_it = esquisse_it)
+            # browser()
+            results <- datatable$server_dt(uuid, data$data, esquisse_it = esquisse_it)
+            results
           }
         )
       })
 
-      xlsx_data
+      xlsx_out
     }
   )
 }

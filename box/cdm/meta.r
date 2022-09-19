@@ -1,13 +1,13 @@
 #' @export get_data
-get_data <- function(base_directory) {
-  message("Loading Libraries")
+get_data <- function(base_directory = getwd()) {
   box::use(
     openxlsx, fs, dplyr, purrr, stringr,
     lubridate, cli, tictoc, stats, shiny, glue
   )
 
+  analysis_dataset_names <- getOption("analysis_dataset_names")
   analysis_dataset_regex <- {
-    adn <- getOption("analysis_dataset_names")
+    adn <- analysis_dataset_names
     adn <- paste0(adn, collapse = "|")
     adn <- gsub("\\.", "\\\\.", adn)
     adn <- paste0("(", adn, ")")
@@ -20,10 +20,10 @@ get_data <- function(base_directory) {
     type = "file",
     regexp = analysis_dataset_regex
   )
+
   subfiles <-
     subfiles |>
-    dplyr$mutate(
-      period = stringr$str_extract(path, "csm[0-9]{6}[a|b|c]"),
+    dplyr$transmute(
       date = stringr$str_remove(stringr$str_extract(path, "csm[0-9]{6}"), "csm"),
       year = stringr$str_sub(date, 1, 4),
       month = stringr$str_sub(date, 5, 6),
@@ -31,9 +31,26 @@ get_data <- function(base_directory) {
       size_hr = fs$fs_bytes(size),
       filename = fs$path_file(path),
       date = lubridate$make_date(year, month),
-      study = stringr$str_extract(path, "/[0-9]{6}/"),
-      study = stringr$str_remove_all(study, "/")
+      study = stringr$str_remove_all(stringr$str_extract(path, "/[0-9]{6}/"), "/"),
+      path
     )
+  subfiles$analysis <- names(analysis_dataset_names[match(subfiles$filename, analysis_dataset_names)])
 
-  subfiles
+  # Attach information about code to be executed with the analysis
+  {
+    analysis_code_files <- fs$dir_info(
+      "box/analysis/modules",
+      recurse = FALSE,
+      type = "directory"
+    ) |>
+      dplyr$transmute(
+        analysis = fs$path_file(path),
+        analysis_code_path = path,
+        csm_version = options("csm_version"),
+        current_time = Sys.time()
+      )
+  }
+
+  subfiles <- dplyr$inner_join(subfiles, analysis_code_files)
+  dplyr$glimpse(subfiles)
 }

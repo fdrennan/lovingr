@@ -2,24 +2,11 @@
 #' @export
 ui_file_upload <- function(id = "file_upload",
                            width = 6,
-                           label = "Upload a file",
-                           accept = "*",
+                           label = NULL,
+                           accept = "xlsx",
                            multiple = FALSE) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  bs4Dash$box(
-    closable = TRUE,
-    title = "File Upload",
-    width = width,
-    status = "secondary",
-    shiny$fileInput(
-      inputId = ns("fileUpload"),
-      label = label,
-      accept = accept,
-      multiple = multiple
-    ),
-    shiny$tableOutput(ns("fileMetaData"))
-  )
 }
 
 #' @export
@@ -36,13 +23,6 @@ server_file_upload <- function(id = "file_upload",
           })
         })
       }
-
-      out <- shiny$reactive({
-        shiny$req(input$fileUpload)
-        out <- input$fileUpload$datapath
-      })
-
-      out
     }
   )
 }

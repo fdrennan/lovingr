@@ -1,3 +1,6 @@
+box::use(reactlog)
+# reactlog$reactlog_enable()
+
 ui <- function() {
   box::use(. / box / app)
   app$ui_app()
@@ -9,4 +12,6 @@ server <- function(input, output, session) {
 }
 
 box::use(shiny)
-shiny$shinyApp(ui, server)
+app <- shiny$shinyApp(ui, server)
+# shiny$runApp(app)
+# shiny$reactlogShow()

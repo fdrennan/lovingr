@@ -20,8 +20,6 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
         12,
         {
           if (esquisse_it) {
-            print("ui")
-            print(ns("esquisse"))
             esquisse$esquisse_ui(ns("esquisse"), header = FALSE)
           } else {
             shiny$div()
@@ -40,14 +38,8 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
     function(input, output, session) {
       ns <- session$ns
 
-      if (esquisse_it) {
-        print("server")
-        data_rv <- shiny$reactiveValues(data = data, name = ns("esquissedata"))
-        print(ns("esquisse"))
-        esquisse$esquisse_server("esquisse", data_rv)
-      }
-
       output$filters <- shiny$renderUI({
+        browser()
         shiny$fluidRow(
           shiny$column(
             12,
@@ -77,44 +69,50 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
         )
 
       cleanedData <- shiny$reactive({
+        # browser()
         shiny$req(input$columnsFilter)
         data <- data[, input$columnsFilter]
       })
 
-      # shiny$observeEvent(cleanedData(), {
-      #
-      #   data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns('data'))
-      #   esquisse$esquisse_server('esquisse',data_rv)
-      # })
+      shiny$observeEvent(cleanedData(), {
+        data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
+        esquisse$esquisse_server("esquisse", data_rv)
+      })
 
       #
-      output$ui <- DT$renderDT(
-        server = TRUE,
+      shiny$observeEvent(
+        cleanedData(),
         {
-          # shiny$req(cleanedData())
-          DT::datatable(cleanedData(),
-            options = list(
-              scrollX = TRUE,
-              pageLength = pageLength,
-              filter = "top"
-            ),
-            class = "compact",
-            caption = NULL,
-            filter = c("top"),
-            escape = TRUE,
-            style = "bootstrap4",
-            width = NULL,
-            height = NULL,
-            elementId = NULL,
-            fillContainer = getOption("DT.fillContainer", NULL),
-            autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
-            selection = "multiple", #  c("multiple", "single", "none"),
-            extensions = list(),
-            plugins = NULL,
-            editable = FALSE
+          output$ui <- DT$renderDT(
+            server = TRUE,
+            {
+              DT::datatable(cleanedData(),
+                options = list(
+                  scrollX = TRUE,
+                  pageLength = pageLength,
+                  filter = "top"
+                ),
+                class = "compact",
+                caption = NULL,
+                filter = c("top"),
+                escape = TRUE,
+                style = "bootstrap4",
+                width = NULL,
+                height = NULL,
+                elementId = NULL,
+                fillContainer = getOption("DT.fillContainer", NULL),
+                autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
+                selection = "multiple", #  c("multiple", "single", "none"),
+                extensions = list(),
+                plugins = NULL,
+                editable = FALSE
+              )
+            }
           )
         }
       )
+
+      cleanedData()
     }
   )
 }

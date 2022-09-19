@@ -22,22 +22,31 @@ clean_config <- function(config) {
     flagging_sheet,
     with(flagging_sheet, cur_group_id)
   )
-  print(dplyr$glimpse(flagging_sheet))
   flagging_sheet <- purrr$map_dfr(flagging_sheet, function(x) {
     x$Flagging.Specification <- unescape_html(x$Flagging.Specification)
-    print(x$Flagging.Specification)
     tryCatch(
       {
         x$Flagging.Specification <- styler$style_text(x$Flagging.Specification)
       },
       error = function(err) {
         shiny$showModal(shiny$modalDialog(
-          shiny$tags$pre(as.character(err), class = "p-3")
+          size = "xl", easyClose = FALSE, fade = FALSE,
+          shiny$fluidRow(
+            shiny$column(12,
+              class = "text-center",
+              shiny$h4("Error in flagging code, please correct and try again.")
+            ),
+            shiny$column(
+              12,
+              shiny$tags$p(
+                shiny$tags$pre(err$message, class = "p-3")
+              )
+            )
+          )
         ))
         Sys.sleep(15)
       }
     )
-    print(x$Flagging.Specification)
     data.frame(
       analysis = tolower(unique(x$Analysis)),
       paramcd = tolower(strsplit(unique(x$Signals), ", ")[[1]]),
