@@ -1,8 +1,9 @@
 #' @export
-ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
-                  width = 12, status = "secondary", esquisse_it = TRUE) {
+ui_dt <- function(id = "dt", title = NULL, collapsed = FALSE,
+                  width = 12, status = "secondary") {
   box::use(shiny, DT, bs4Dash, esquisse)
   ns <- shiny$NS(id)
+  print(ns("testing-ui"))
   bs4Dash$box(
     closable = TRUE,
     maximizable = TRUE,
@@ -11,17 +12,16 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
     solidHeader = TRUE,
     title = title, collapsed = collapsed,
     shiny$fluidRow(
-      
       shiny$uiOutput(ns("filters"), container = function(...) {
         shiny$column(12, ...)
       }),
       shiny$column(12, shiny$downloadButton(ns("downloadData"), "Download")),
       bs4Dash$box(
-        title = "Table", collapsible = TRUE, collapsed = TRUE, width = 12,
+        title = "Table", collapsible = TRUE, collapsed = FALSE, width = 12,
         DT$DTOutput(ns("ui"), width = "100%")
       ),
       bs4Dash$box(
-        title = "Plotting", collapsible = TRUE, width = 12, collapsed = TRUE, header = FALSE,
+        title = "Plotting", collapsible = TRUE, width = 12, collapsed = FALSE, header = FALSE,
         esquisse$esquisse_ui(ns("esquisse"))
       )
     )
@@ -29,14 +29,15 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
 }
 
 #' @export
-server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
+server_dt <- function(id = "dt", data, pageLength = 3) {
   box::use(shiny, DT, esquisse, bs4Dash, dplyr, shinyWidgets, readr, writexl)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
-
+      print(ns("testing-server"))
       output$filters <- shiny$renderUI({
+        # browser()
         shiny$fluidRow(
           shiny$column(
             12,
@@ -66,43 +67,41 @@ server_dt <- function(id = "dt", data, pageLength = 3, esquisse_it = TRUE) {
         )
 
       cleanedData <- shiny$reactive({
-        # browser()
-        # shiny$req(input$columnsFilter)
         if (!is.null(input$columnsFilter)) {
           data <- data[, input$columnsFilter]
         }
-        
+
         output$ui <- DT$renderDT(
           server = TRUE,
           {
             DT::datatable(data,
-                          options = list(
-                            scrollX = TRUE,
-                            pageLength = pageLength,
-                            filter = "top"
-                          ),
-                          class = "compact",
-                          caption = NULL,
-                          filter = c("top"),
-                          escape = TRUE,
-                          style = "bootstrap4",
-                          width = NULL,
-                          height = NULL,
-                          elementId = NULL,
-                          fillContainer = getOption("DT.fillContainer", NULL),
-                          autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
-                          selection = "multiple", #  c("multiple", "single", "none"),
-                          extensions = list(),
-                          plugins = NULL,
-                          editable = FALSE
+              options = list(
+                scrollX = TRUE,
+                pageLength = pageLength,
+                filter = "top"
+              ),
+              class = "compact",
+              caption = NULL,
+              filter = c("top"),
+              escape = TRUE,
+              style = "bootstrap4",
+              width = NULL,
+              height = NULL,
+              elementId = NULL,
+              fillContainer = getOption("DT.fillContainer", NULL),
+              autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
+              selection = "multiple", #  c("multiple", "single", "none"),
+              extensions = list(),
+              plugins = NULL,
+              editable = FALSE
             )
           }
         )
-        
-        
+
+
         data
       })
-    
+
       data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
       esquisse$esquisse_server("esquisse", data_rv)
 

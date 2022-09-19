@@ -15,6 +15,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
   box::use(shiny, .. / tables / datatable, haven, readr)
   shiny$moduleServer(
     id,
+    # session = parentSession,
     function(input, output, session) {
       ns <- session$ns
 
@@ -55,8 +56,10 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
         lapply(
           xlsx_data,
           function(data) {
+            browser()
             uuid <- uuid::UUIDgenerate()
-            shiny$insertUI(ui_id,
+            shiny$insertUI(
+              ui_id,
               "afterBegin",
               datatable$ui_dt(
                 ns(uuid),
@@ -64,8 +67,9 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
                 title = data$sheetName
               )
             )
-            datatable$server_dt(uuid, data$data)
-            
+           
+            out <- datatable$server_dt(uuid, data$data)
+            out
           }
         )
       })

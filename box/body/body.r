@@ -83,9 +83,7 @@ server_body <- function(id = "body", appSession) {
         metadata <- metadata()
         import_files <- dplyr$distinct(metadata(), analysis, filepath)
         uuid <- uuid::UUIDgenerate()
-
         shiny$removeUI("#dataPreviewElements")
-
         shiny$insertUI("#dataPreview", "afterBegin",
           shiny$column(12,
             id = "dataPreviewElements"
@@ -97,7 +95,6 @@ server_body <- function(id = "body", appSession) {
           function(path) {
             shiny$insertUI("#dataPreviewElements", "afterBegin", xlsx$ui_xlsx(ns(uuid)))
             out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreviewElements")
-            out()
           }
         )
         # browser()
