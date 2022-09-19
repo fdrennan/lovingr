@@ -65,11 +65,7 @@ server_body <- function(id = "body", appSession) {
         output$dataRaw <- shiny$renderUI({
           shiny$req(metadata())
           shiny$fluidRow(
-            bs4Dash$box(
-              closable = TRUE, maximizable = TRUE, width = 12, collapsed = TRUE,
-              title = "Configuration",
-              xlsx$ui_xlsx(ns("xlsx-local"))
-            ),
+
             bs4Dash$box(
               closable = TRUE,
               collapsed = TRUE,

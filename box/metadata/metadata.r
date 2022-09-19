@@ -45,7 +45,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
 #' @export
 server_metadata <- function(id = "metadata") {
   box::use(.. / utilities / read / xlsx)
-  box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles)
+  box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / csm_config / clean)
   shiny$moduleServer(
@@ -187,10 +187,18 @@ server_metadata <- function(id = "metadata") {
       config <- shiny$reactive({
         shiny$req(input$fileUpload)
         shiny$req(filteredData())
-        debug(xlsx$server_xlsx)
-        browser()
-        out <- xlsx$server_xlsx("xlsx-local", input$fileUpload$datapath)
-        out <- dplyr$inner_join(clean$clean_config(out()), filteredData())
+        # debug(xlsx$server_xlsx)
+        # browser()
+        configPath <- input$fileUpload$datapath
+        sheetNames <- openxlsx$getSheetNames(configPath)
+        out <- lapply(sheetNames, function(sheetName) {
+          list(
+            sheetName = sheetName,
+            data = openxlsx$read.xlsx(configPath, sheetName)
+          )
+        })
+        # browser()
+        out <- dplyr$inner_join(clean$clean_config(out), filteredData())
         out
       })
 
