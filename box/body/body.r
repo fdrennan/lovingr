@@ -162,17 +162,19 @@ server_body <- function(id = "body", appSession) {
           })
 
 
-          scoreboardSheet <- readRDS("scoreboardSheet.rda")
           scoreboardSheet <-
             scoreboardSheet |>
-            dplyr$glimpse() |>
             dplyr$mutate_if(is.numeric, function(x) round(x, 2)) |>
             dplyr$transmute(
+              analysis, paramcd, Potential.Issue, Potential.Issue.Subfix,
+              flagging_value,
+              Max.Number.Signal.Summary, sitediff.vs.study, Signal.Prefix, Signal.Subfix,
+              Name.of.endpoint.of.interest,
               StudyStatResult = glue$glue(StudyStat),
-              SiteStatResult = glue$glue(SiteStat)
+              SiteStatResult = glue$glue(SiteStat),
+              csm_version,
+              site
             )
-
-
 
           datatable$server_dt(
             "scoreboardConfiguration",
