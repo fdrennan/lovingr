@@ -7,43 +7,21 @@ ui_metadata <- function(id = "metadata", width = 6) {
   }
 
   bs4Dash$box(
-    closable = TRUE,
-    title = "Select Study Information",
-    width = width,
-    status = "secondary",
+    title = "File Aggregation", width = 6,
     shiny$fluidRow(
-      shiny$div(
-        class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
-        shiny$fluidRow(
-          bs4Dash$bs4Card(
-            title = "File Aggregation", width = 12,
-            shinyFiles$shinyDirButton(ns("inputDir"),
-              "Input Directory",
-              "Please select a folder", FALSE,
-              class = "btn btn-primary"
-            ),
-            # shiny$textInput(
-            #   ns("file_regex"),
-            #   "file_regex",
-            #   "csm[0-9]{6}[a|b|c]/datamisc$"
-            # ),
-            shiny$textInput(
-              ns("base_dir"),
-              "base_dir",
-              paste0(
-                getOption("datamisc_cache_path")
-              )
-            ),
-            shiny$actionButton(ns("pull"), "Pull")
-          )
+      shiny$column(12,
+        shiny$wellPanel(
+          shinyFiles$shinyDirButton(ns("inputDir"),
+                                    "Input Directory",
+                                    "Please select a folder", FALSE,
+                                    class = "btn btn-primary"
+          ),
+          shiny$uiOutput(ns("study"), container = input_container),
+          shiny$uiOutput(ns("year"), container = input_container),
+          shiny$uiOutput(ns("month"), container = input_container),
+          shiny$uiOutput(ns("analysis"), container = input_container),
+          shiny$downloadButton(ns("downloadData"), "Download Example")
         )
-      ),
-      shiny$uiOutput(ns("study"), container = input_container),
-      shiny$uiOutput(ns("year"), container = input_container),
-      shiny$uiOutput(ns("month"), container = input_container),
-      shiny$uiOutput(ns("analysis"), container = input_container),
-      shiny$column(
-        12, shiny$downloadButton(ns("downloadData"), "Download Example")
       )
     )
   )
@@ -70,16 +48,19 @@ server_metadata <- function(id = "metadata") {
 
       shinyFiles$shinyDirChoose(input, id = "inputDir", roots = c(`Working Directory` = getwd(), Root = "/"))
 
-      datafiles <- shiny$eventReactive(input$pull, {
-        shiny$req(input$inputDir$path[[2]])
+      datafiles <- shiny$eventReactive(input$inputDir, {
+        shiny$req(!inherits(input$inputDir, 'shinyActionButtonValue'))
+        
         base_directory <- input$inputDir$path[[2]]
         box::use(.. / cdm / meta)
+        
         datafiles <- meta$get_data(base_directory)
         datafiles
       })
 
       output$study <- shiny$renderUI({
         shiny$req(datafiles())
+        
         datafiles <- datafiles()
         study <- datafiles$study
         shiny$selectizeInput(ns("study"), shiny$h5("Study"),
@@ -91,6 +72,7 @@ server_metadata <- function(id = "metadata") {
 
       output$year <- shiny$renderUI({
         shiny$req(input$study)
+        
         datafiles <- datafiles()
         year <- datafiles |>
           dplyr$filter(study %in% input$study) |>
@@ -124,6 +106,7 @@ server_metadata <- function(id = "metadata") {
 
       output$analysis <- shiny$renderUI({
         shiny$req(input$monthName)
+        shiny$req(datafiles())
         datafiles <- datafiles()
 
         analysis <- datafiles |>

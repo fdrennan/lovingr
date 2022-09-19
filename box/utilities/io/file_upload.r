@@ -4,8 +4,7 @@ ui_file_upload <- function(id = "file_upload",
                            width = 6,
                            label = "Upload a file",
                            accept = "*",
-                           multiple = FALSE,
-                           ...) {
+                           multiple = FALSE) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   bs4Dash$box(
@@ -19,8 +18,7 @@ ui_file_upload <- function(id = "file_upload",
       accept = accept,
       multiple = multiple
     ),
-    shiny$tableOutput(ns("fileMetaData")),
-    ...
+    shiny$tableOutput(ns("fileMetaData"))
   )
 }
 
@@ -40,13 +38,8 @@ server_file_upload <- function(id = "file_upload",
       }
 
       out <- shiny$reactive({
-        if (getOption("development")) {
-          out <- getOption("base_config")
-        } else {
-          shiny$req(input$fileUpload)
-          out <- input$fileUpload$datapath
-        }
-        out
+        shiny$req(input$fileUpload)
+        out <- input$fileUpload$datapath
       })
 
       out

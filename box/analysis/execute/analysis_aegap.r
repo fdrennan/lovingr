@@ -13,7 +13,7 @@ analysis_aegap <- function(aegap, variables) {
             mean_data <- x[!is.na(x$amount), ]
             mean_data <- x[x$amount > 0, ] # added by freddy
             mean_data$logAEGAP <- log(mean_data$amount)
-            # browser()
+            # 
             original_site_id <- mean_data$siteid
             mean_data$siteid <- factor(mean_data$siteid)
 
