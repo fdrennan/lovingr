@@ -22,7 +22,10 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = FALSE,
       ),
       bs4Dash$box(
         title = "Plotting", collapsible = TRUE, width = 12, collapsed = FALSE, header = FALSE,
-        esquisse$esquisse_ui(ns("esquisse"))
+        esquisse$esquisse_ui({
+          print(ns("esquisse"))
+          ns("esquisse")
+        })
       )
     )
   )
@@ -103,6 +106,10 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
       })
 
       data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
+      {
+        print(ns("esquisse"))
+        ns("esquisse")
+      }
       esquisse$esquisse_server("esquisse", data_rv)
 
       cleanedData()
