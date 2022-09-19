@@ -57,26 +57,6 @@ server_options <- function(id = "options") {
                   )
                 )
               )
-            ),
-            shiny$div(
-              class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
-              shiny$fluidRow(
-                bs4Dash$bs4Card(
-                  title = "File Aggregation", width = 12,
-                  shiny$textInput(
-                    ns("file_regex"),
-                    "file_regex",
-                    "csm[0-9]{6}[a|b|c]/datamisc$"
-                  ),
-                  shiny$textInput(
-                    ns("base_dir"),
-                    "base_dir",
-                    paste0(
-                      getOption("datamisc_cache_path")
-                    )
-                  )
-                )
-              )
             )
           )
         )
@@ -93,16 +73,6 @@ server_options <- function(id = "options") {
         chatty$chatty(session, input)
       })
 
-      shiny$observeEvent(input$file_regex, {
-        options(file_regex = input$file_regex)
-        chatty$chatty(session, input)
-      })
-
-
-      shiny$observeEvent(input$base_dir, {
-        options(base_dir = input$base_dir)
-        chatty$chatty(session, input)
-      })
 
 
       input

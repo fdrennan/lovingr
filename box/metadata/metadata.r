@@ -1,16 +1,43 @@
 #' @export
 ui_metadata <- function(id = "metadata", width = 6) {
-  box::use(shiny, bs4Dash)
+  box::use(shiny, bs4Dash, shinyFiles)
   ns <- shiny$NS(id)
   input_container <- function(...) {
     shiny$column(6, ...)
   }
+
   bs4Dash$box(
     closable = TRUE,
     title = "Select Study Information",
     width = width,
     status = "secondary",
     shiny$fluidRow(
+      shiny$div(
+        class = "col-xl-6 col-lg-6 col-md-12 col-sm-12",
+        shiny$fluidRow(
+          bs4Dash$bs4Card(
+            title = "File Aggregation", width = 12,
+            shinyFiles$shinyDirButton(ns("inputDir"),
+              "Input Directory",
+              "Please select a folder", FALSE,
+              class = "btn btn-primary"
+            ),
+            shiny$textInput(
+              ns("file_regex"),
+              "file_regex",
+              "csm[0-9]{6}[a|b|c]/datamisc$"
+            ),
+            shiny$textInput(
+              ns("base_dir"),
+              "base_dir",
+              paste0(
+                getOption("datamisc_cache_path")
+              )
+            ),
+            shiny$actionButton(ns("pull"), "Pull")
+          )
+        )
+      ),
       shiny$uiOutput(ns("study"), container = input_container),
       shiny$uiOutput(ns("year"), container = input_container),
       shiny$uiOutput(ns("month"), container = input_container),
@@ -25,7 +52,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
 
 #' @export
 server_metadata <- function(id = "metadata") {
-  box::use(shiny, dplyr, stats, bs4Dash, fs)
+  box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles)
   shiny$moduleServer(
     id,
     function(input, output, session) {
@@ -41,10 +68,16 @@ server_metadata <- function(id = "metadata") {
         }
       )
 
-      datafiles <- shiny$reactive({
-        box::use(.. / caching / cache)
-        #
-        datafiles <- cache$check()
+      shinyFiles$shinyDirChoose(input, id = "inputDir", roots = c(`Working Directory` = getwd(), Root = "/"))
+
+
+
+
+      datafiles <- shiny$eventReactive(input$pull, {
+        shiny$req(input$inputDir$path[[2]])
+        base_directory <- input$inputDir$path[[2]]
+        box::use(.. / cdm / meta)
+        datafiles <- meta$get_data(base_directory, input$file_regex)
         datafiles
       })
 
@@ -105,7 +138,6 @@ server_metadata <- function(id = "metadata") {
           dplyr$pull(analysis)
 
 
-        if (!is.null(getOption("analysis_filter"))) analysis <- getOption("analysis_filter")
         shiny$selectizeInput(ns("analysis"), "Analysis",
           choices = analysis,
           selected = analysis, multiple = TRUE
@@ -128,10 +160,6 @@ server_metadata <- function(id = "metadata") {
               analysis, filename,
               filepath = path
             )
-
-          # if (nchar(getOption("datamisc_cache_path")) > 0) {
-          #   files$filepath <- paste0(getOption("datamisc_cache_path"), files$filepath)
-          # }
 
           files
         }

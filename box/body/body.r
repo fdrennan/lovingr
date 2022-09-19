@@ -19,7 +19,6 @@ ui_body <- function(id = "body") {
     shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
       id = "mainSort", sortable$sortable_js("mainSort"),
-      options$ui_options(ns("options"), width = 12),
       bs4Dash$box(
         title = "Code Review", width = 12, closable = TRUE, collapsed = TRUE,
         collapsible = TRUE, maximizable = TRUE,
@@ -139,8 +138,6 @@ server_body <- function(id = "body", appSession) {
         )
       })
 
-      shiny$observe(chatty$chatty(session, input))
-      opts <- options$server_options("options")
       metadata <- metadata$server_metadata("metadata")
       datapathUpload <- file_upload$server_file_upload("file_upload")
 

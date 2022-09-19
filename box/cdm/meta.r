@@ -1,12 +1,10 @@
 #' @export get_data
-get_data <- function() {
+get_data <- function(base_directory, file_regex) {
   message("Loading Libraries")
   box::use(
     openxlsx, fs, dplyr, purrr, stringr,
     lubridate, cli, tictoc, stats, shiny, glue
   )
-  file_regex <- getOption("file_regex")
-  base_directory <- getOption("base_directory")
   cli$cli_alert("Pattern: {.path {file_regex}}")
   cli$cli_alert("Directory: {.path {base_directory}}")
   tictoc$tic()
@@ -17,10 +15,8 @@ get_data <- function() {
     regexp = file_regex,
     type = "directory"
   )
-  datamisc_folders <- dplyr$filter(datamisc_folders, !stringr$str_detect(path, "blinded"))
   cli$cli_alert("Grabbing datamisc files")
   tictoc$toc()
-  #
   datamisc_files <- purrr$map_dfr(
     split(datamisc_folders, datamisc_folders$path),
     function(path) {
@@ -28,7 +24,7 @@ get_data <- function() {
         path,
         {
           cli$cli_alert("Importing {.path {path}}")
-          fs$dir_info(path, type = "file")
+          fs$dir_info(path, type = "file", fail = FALSE)
         }
       )
     }
