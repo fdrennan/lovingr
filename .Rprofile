@@ -6,8 +6,8 @@ options(csm_version = "0.0.9000")
 options(
   analysis_dataset_names = c(
     aei = "csmaesttrt.sas7bdat",
-    aei = 'csmaest.sas7bdat', # old
-    rgm = "csmgmsum.sas7bdat", 
+    aei = "csmaest.sas7bdat", # old
+    rgm = "csmgmsum.sas7bdat",
     rgv = "csmrgvst.sas7bdat",
     vitals = "csmvs.sas7bdat",
     missdose = "csmmdosest.sas7bdat",

@@ -60,7 +60,8 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets", es
               ui_id,
               "afterBegin",
               datatable$ui_dt(
-                ns(uuid), width = width,
+                ns(uuid),
+                width = width,
                 title = data$sheetName,
                 esquisse_it = esquisse_it
               )

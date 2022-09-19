@@ -101,7 +101,7 @@ server_body <- function(id = "body", appSession) {
             id = "dataPreviewElements"
           )
         )
-        
+
         purrr$walk(
           import_files$filepath,
           function(path) {
