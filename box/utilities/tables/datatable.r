@@ -63,40 +63,45 @@ server_dt <- function(id = "dt", data, title, pageLength = 3) {
         )
 
       cleanedData <- shiny$reactive({
+        # browser()
         if (!is.null(input$columnsFilter)) {
           data <- data[, input$columnsFilter]
+        } else {
+          data.frame()
         }
-
-        output$ui <- DT$renderDT(
-          server = TRUE,
-          {
-            DT::datatable(data,
-              options = list(
-                scrollX = TRUE,
-                pageLength = pageLength,
-                filter = "top"
-              ),
-              class = "compact",
-              caption = NULL,
-              filter = c("top"),
-              escape = TRUE,
-              style = "bootstrap4",
-              width = NULL,
-              height = NULL,
-              elementId = NULL,
-              fillContainer = getOption("DT.fillContainer", NULL),
-              autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
-              selection = "multiple", #  c("multiple", "single", "none"),
-              extensions = list(),
-              plugins = NULL,
-              editable = FALSE
-            )
-          }
-        )
-
-
-        data
       })
+
+      shiny$observeEvent(
+        cleanedData(),
+        {
+          output$ui <- DT$renderDT(
+            server = TRUE,
+            {
+              DT::datatable(cleanedData(),
+                options = list(
+                  scrollX = TRUE,
+                  pageLength = pageLength,
+                  filter = "top"
+                ),
+                class = "compact",
+                caption = NULL,
+                filter = c("top"),
+                escape = TRUE,
+                style = "bootstrap4",
+                width = NULL,
+                height = NULL,
+                elementId = NULL,
+                fillContainer = getOption("DT.fillContainer", NULL),
+                autoHideNavigation = getOption("DT.autoHideNavigation", NULL),
+                selection = "multiple", #  c("multiple", "single", "none"),
+                extensions = list(),
+                plugins = NULL,
+                editable = FALSE
+              )
+            }
+          )
+        }
+      )
 
       # data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
       # esquisse$esquisse_server(paste0('esquisse', title), data_rv)
