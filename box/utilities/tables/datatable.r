@@ -4,11 +4,7 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = FALSE,
   box::use(shiny, DT, bs4Dash, esquisse)
   ns <- shiny$NS(id)
   print(ns("testing-ui"))
-  bs4Dash$box(
-    closable = TRUE,
-    maximizable = TRUE,
-    width = width,
-    status = status,
+  bs4Dash$box(closable = TRUE, maximizable = TRUE, width = width, status = status,
     solidHeader = TRUE,
     title = title, collapsed = collapsed,
     shiny$fluidRow(
@@ -19,28 +15,25 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = FALSE,
       bs4Dash$box(
         title = "Table", collapsible = TRUE, collapsed = FALSE, width = 12,
         DT$DTOutput(ns("ui"), width = "100%")
-      ),
-      bs4Dash$box(
-        title = "Plotting", collapsible = TRUE, width = 12, collapsed = FALSE, header = FALSE,
-        esquisse$esquisse_ui({
-          print(ns("esquisse"))
-          ns("esquisse")
-        })
       )
+      # bs4Dash$box(
+      #   title = "Plotting", collapsible = TRUE, width = 12, collapsed = FALSE, header = FALSE,
+      #   esquisse$esquisse_ui(paste0('esquisse', title))
+      # )
     )
   )
 }
 
 #' @export
-server_dt <- function(id = "dt", data, pageLength = 3) {
+server_dt <- function(id = "dt", data, title, pageLength = 3) {
   box::use(shiny, DT, esquisse, bs4Dash, dplyr, shinyWidgets, readr, writexl)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
-      print(ns("testing-server"))
+    
       output$filters <- shiny$renderUI({
-        # browser()
+        # 
         shiny$fluidRow(
           shiny$column(
             12,
@@ -105,12 +98,8 @@ server_dt <- function(id = "dt", data, pageLength = 3) {
         data
       })
 
-      data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
-      {
-        print(ns("esquisse"))
-        ns("esquisse")
-      }
-      esquisse$esquisse_server("esquisse", data_rv)
+      # data_rv <- shiny$reactiveValues(data = cleanedData(), name = ns("data"))
+      # esquisse$esquisse_server(paste0('esquisse', title), data_rv)
 
       cleanedData()
     }

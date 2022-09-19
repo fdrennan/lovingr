@@ -56,7 +56,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
         lapply(
           xlsx_data,
           function(data) {
-            browser()
+            
             uuid <- uuid::UUIDgenerate()
             shiny$insertUI(
               ui_id,
@@ -68,7 +68,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
               )
             )
            
-            out <- datatable$server_dt(uuid, data$data)
+            out <- datatable$server_dt(uuid, data$data, title = data$sheetName)
             out
           }
         )

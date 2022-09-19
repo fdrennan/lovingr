@@ -81,7 +81,7 @@ server_body <- function(id = "body", appSession) {
 
       shiny$observeEvent(metadata(), {
         metadata <- metadata()
-        import_files <- dplyr$distinct(metadata(), analysis, filepath)
+        import_files <- dplyr$distinct(metadata()$clean, analysis, filepath)
         uuid <- uuid::UUIDgenerate()
         shiny$removeUI("#dataPreviewElements")
         shiny$insertUI("#dataPreview", "afterBegin",
@@ -97,28 +97,20 @@ server_body <- function(id = "body", appSession) {
             out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreviewElements")
           }
         )
-        # browser()
+        # 
         output
       })
 
-      dataForScoreboard <- shiny$reactive({
-        shiny$req(metadata())
-        metadata <- metadata()
-        analysis_code <- fs$dir_info("box/analysis/execute")
-        analysis_code <- analysis_code |>
-          dplyr$select(path) |>
-          dplyr$mutate(
-            analysis = gsub("box/analysis/execute/analysis_", "", path),
-            analysis = fs$path_ext_remove(analysis)
-          )
-
-        analysis_code <- dplyr$inner_join(analysis_code, metadata)
-        analysis_code <- split(analysis_code, analysis_code$analysis)
-        n_increments <- length(analysis_code)
+      dataForScoreboard <- shiny$eventReactive(metadata(), {
+        
+        clean_metadata <- metadata()$clean
+        raw_metadata <- metadata()$raw
+        clean_metadata <- split(clean_metadata, clean_metadata$analysis)
+        n_increments <- length(clean_metadata)
 
         output <-
           purrr$imap(
-            analysis_code,
+            clean_metadata,
             function(analysis_data, name) {
               shiny$insertUI(
                 "#uiAnalyses",
@@ -127,8 +119,7 @@ server_body <- function(id = "body", appSession) {
                   ns(paste0("run_analysis", name)), analysis_data
                 )
               )
-
-              variables <- dplyr$mutate_all(config()()[[1]]$data, tolower)
+              variables <- dplyr$mutate_all(raw_metadata[[1]]$data, tolower)
               names(variables) <- tolower(names(variables))
               output <- run_analysis$server_run_analysis(
                 paste0("run_analysis", name), analysis_data, variables
@@ -142,8 +133,9 @@ server_body <- function(id = "body", appSession) {
 
 
       shiny$observeEvent(
-        input$getResults,
+        dataForScoreboard(),
         {
+          
           scoreboardSheet <- config()()[[3]]$data |>
             dplyr$rename(
               analysis = Analysis.Type,
