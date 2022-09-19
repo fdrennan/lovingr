@@ -8,8 +8,8 @@ ui_code_review <- function(id = "code_review") {
 #' @export
 server_code_review <- function(id = "code_review") {
   box::use(shiny, fs, shinyAce, uuid)
-  box::use(.. /../ utilities / io / file_read_multi_ext)
-  
+  box::use(.. / .. / utilities / io / file_read_multi_ext)
+
   shiny$moduleServer(
     id,
     function(input, output, session) {
@@ -45,7 +45,7 @@ server_code_review <- function(id = "code_review") {
           )
         )
       })
-      
+
       output$codeUIEditor <- shiny$renderUI({
         shiny$req(input$filePathForDisplay)
         lapply(

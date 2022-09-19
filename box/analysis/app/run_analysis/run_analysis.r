@@ -107,7 +107,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         )
         print(analysis_name)
         print(names(results))
-        # 
+        #
         results <- dplyr$mutate(results, paramcd = tolower(paramcd))
         results <- dplyr$inner_join(data, results)
         datatable$server_dt("statsResults", results)

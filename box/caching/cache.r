@@ -12,7 +12,7 @@
 #'     data
 #'   } else {
 #'     box::use(.. / cdm / meta)
-#'     # 
+#'     #
 #'
 #'     #
 #'     readr$write_rds(data, cache_path)

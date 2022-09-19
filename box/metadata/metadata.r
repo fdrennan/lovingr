@@ -9,12 +9,13 @@ ui_metadata <- function(id = "metadata", width = 6) {
   bs4Dash$box(
     title = "File Aggregation", width = 6,
     shiny$fluidRow(
-      shiny$column(12,
+      shiny$column(
+        12,
         shiny$wellPanel(
           shinyFiles$shinyDirButton(ns("inputDir"),
-                                    "Input Directory",
-                                    "Please select a folder", FALSE,
-                                    class = "btn btn-primary"
+            "Input Directory",
+            "Please select a folder", FALSE,
+            class = "btn btn-primary"
           ),
           shiny$uiOutput(ns("study"), container = input_container),
           shiny$uiOutput(ns("year"), container = input_container),
@@ -49,18 +50,18 @@ server_metadata <- function(id = "metadata") {
       shinyFiles$shinyDirChoose(input, id = "inputDir", roots = c(`Working Directory` = getwd(), Root = "/"))
 
       datafiles <- shiny$eventReactive(input$inputDir, {
-        shiny$req(!inherits(input$inputDir, 'shinyActionButtonValue'))
-        
+        shiny$req(!inherits(input$inputDir, "shinyActionButtonValue"))
+
         base_directory <- input$inputDir$path[[2]]
         box::use(.. / cdm / meta)
-        
+
         datafiles <- meta$get_data(base_directory)
         datafiles
       })
 
       output$study <- shiny$renderUI({
         shiny$req(datafiles())
-        
+
         datafiles <- datafiles()
         study <- datafiles$study
         shiny$selectizeInput(ns("study"), shiny$h5("Study"),
@@ -72,7 +73,7 @@ server_metadata <- function(id = "metadata") {
 
       output$year <- shiny$renderUI({
         shiny$req(input$study)
-        
+
         datafiles <- datafiles()
         year <- datafiles |>
           dplyr$filter(study %in% input$study) |>

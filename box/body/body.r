@@ -19,13 +19,14 @@ ui_body <- function(id = "body") {
   bs4Dash$dashboardBody(
     shiny$includeCSS("www/styles.css"),
     shiny$fluidRow(
-      # id = "mainSort", 
+      # id = "mainSort",
       # sortable$sortable_js("mainSort"),
       codereview$ui_code_review(),
       # DATA IMPORT
       {
         shiny$column(
-          6, offset = 3,
+          6,
+          offset = 3,
           bs4Dash$box(
             closable = TRUE,
             id = ns("dataImport"),
@@ -35,8 +36,9 @@ ui_body <- function(id = "body") {
             shiny$fluidRow(
               metadata$ui_metadata(ns("metadata"), width = 6),
               file_upload$ui_file_upload(ns("file_upload"), width = 6),
-              shiny$column(12,class = "text-right py-3",
-                           bs4Dash$actionButton(ns("start"), "Start", status = "primary")
+              shiny$column(12,
+                class = "text-right py-3",
+                bs4Dash$actionButton(ns("start"), "Start", status = "primary")
               )
             )
           )
@@ -82,7 +84,7 @@ server_body <- function(id = "body", appSession) {
       codereview$server_code_review()
       metadata <- metadata$server_metadata("metadata")
       datapathUpload <- file_upload$server_file_upload("file_upload")
-      # 
+      #
       config <- shiny$eventReactive(datapathUpload, {
         datapathUpload <- datapathUpload()
         out <- xlsx$server_xlsx("xlsx-local", datapathUpload, width = 12)
@@ -231,7 +233,7 @@ server_body <- function(id = "body", appSession) {
             dplyr$mutate(analysis = tolower(analysis))
           dataForScoreboard <- dataForScoreboard()
           #
-          # 
+          #
           dataForScoreboardSummary <-
             purrr$imap_dfr(dataForScoreboard, function(data, analysis) {
               print(analysis)
