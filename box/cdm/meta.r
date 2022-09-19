@@ -50,7 +50,7 @@ get_data <- function(base_directory = getwd()) {
         current_time = Sys.time()
       )
   }
-
+  # 
   subfiles <- dplyr$inner_join(subfiles, analysis_code_files)
-  dplyr$glimpse(subfiles)
+  subfiles
 }

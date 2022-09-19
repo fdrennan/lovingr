@@ -3,8 +3,8 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = FALSE,
                   width = 12, status = "secondary") {
   box::use(shiny, DT, bs4Dash, esquisse)
   ns <- shiny$NS(id)
-  print(ns("testing-ui"))
-  bs4Dash$box(closable = TRUE, maximizable = TRUE, width = width, status = status,
+  bs4Dash$box(
+    closable = TRUE, maximizable = TRUE, width = width, status = status,
     solidHeader = TRUE,
     title = title, collapsed = collapsed,
     shiny$fluidRow(
@@ -31,9 +31,9 @@ server_dt <- function(id = "dt", data, title, pageLength = 3) {
     id,
     function(input, output, session) {
       ns <- session$ns
-    
+
       output$filters <- shiny$renderUI({
-        # 
+        #
         shiny$fluidRow(
           shiny$column(
             12,

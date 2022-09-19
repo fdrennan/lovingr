@@ -1,6 +1,6 @@
 #' @export compare_f
 compare_f <- function(r, n, siteid = NULL, subfix = NULL, variables = NULL) {
-  box::use(. / CompareProportion / CompareProportion)
+  box::use(.  / CompareProportion)
   box::use(dplyr)
   t_zscore_limit <- as.numeric(dplyr$filter(variables, parameter == "t_zscore")$value)
   min_n_value <- as.numeric(dplyr$filter(variables, parameter == "min_n_value")$value)

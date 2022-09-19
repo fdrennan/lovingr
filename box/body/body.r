@@ -84,7 +84,8 @@ server_body <- function(id = "body", appSession) {
         import_files <- dplyr$distinct(metadata()$clean, analysis, filepath)
         uuid <- uuid::UUIDgenerate()
         shiny$removeUI("#dataPreviewElements")
-        shiny$insertUI("#dataPreview", "afterBegin",
+        shiny$insertUI(
+          "#dataPreview", "afterBegin",
           shiny$column(12,
             id = "dataPreviewElements"
           )
@@ -97,7 +98,7 @@ server_body <- function(id = "body", appSession) {
             out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#dataPreviewElements")
           }
         )
-        # 
+        #
         output
       })
 
@@ -135,8 +136,7 @@ server_body <- function(id = "body", appSession) {
       shiny$observeEvent(
         dataForScoreboard(),
         {
-          
-          scoreboardSheet <- config()()[[3]]$data |>
+          scoreboardSheet <- metadata()$raw[[3]]$data |>
             dplyr$rename(
               analysis = Analysis.Type,
               flagging_value = Signal.Flag.Value

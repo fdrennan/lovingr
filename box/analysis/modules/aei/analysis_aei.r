@@ -3,7 +3,7 @@ analysis_aei <- function(aei_data = NULL, variables) {
   print(aei_data)
   print(variables)
   box::use(dplyr, purrr)
-  box::use(. / subfunction / compare_f)
+  box::use(.. / ../ stats / CompareProportion/compare_f)
   data_split <- split(aei_data, aei_data$paramcd)
 
   analysis_data <- purrr$map_df(

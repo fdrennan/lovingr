@@ -2,8 +2,8 @@
 analysis_underdose <- function(dose_subj = NULL,
                                variables = NULL) {
   box::use(dplyr, purrr, stats)
-  box::use(. / subfunction / TukeyOutliers / TukeyOutliers)
-  box::use(. / subfunction / CompareProportion / CompareProportion)
+  box::use(.. / ../ stats / TukeyOutliers / TukeyOutliers)
+  box::use(.. / ../ stats / CompareProportion / CompareProportion)
   cutdt <- unique(dose_subj$cutdt)
   #
   country_mapping <- dplyr$distinct(

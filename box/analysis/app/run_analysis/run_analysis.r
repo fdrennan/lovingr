@@ -20,11 +20,12 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       ns <- session$ns
 
       analysisInput <- shiny$reactive({
+        
         shiny$req(data)
         shiny$req(variables)
-
+        
         analysis_name <- unique(data$analysis)
-        analysis_code_path <- unique(data$path)
+        analysis_code_path <- list.files(unique(data$analysis_code_path), full.names = T)
         analysis_data_path <- unique(data$filepath)
         list(
           analysis_name = analysis_name,
@@ -33,9 +34,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           analysis_data = {
             analysis_data <- file_read_multi_ext$run(analysis_data_path)[[1]]$data
             names(analysis_data) <- tolower(names(analysis_data))
-            if (all(getOption("development"), nrow(analysis_data) > getOption("sample_min"))) {
-              analysis_data <- dplyr$sample_frac(analysis_data, getOption("sample_frac"))
-            }
             analysis_data
           }
         )
@@ -77,15 +75,15 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
 
 
       analysisStatistics <- shiny$eventReactive(analysisInput(), {
-        box::use(.. / .. / execute / analysis_aei)
-        box::use(.. / .. / execute / analysis_rgv)
-        box::use(.. / .. / execute / analysis_aecnt)
-        box::use(.. / .. / execute / analysis_aegap)
-        box::use(.. / .. / execute / analysis_vitals)
-        box::use(.. / .. / execute / analysis_underdose)
+        box::use(.. / .. / modules / aei / analysis_aei)
+        box::use(.. / .. / modules / rgv / analysis_rgv)
+        box::use(.. / .. / modules / aecnt / analysis_aecnt)
+        box::use(.. / .. / modules / aegap / analysis_aegap)
+        box::use(.. / .. / modules / vitals / analysis_vitals)
+        box::use(.. / .. / modules / underdose / analysis_underdose)
         box::use(dplyr, purrr)
+        
         analysisInput <- analysisInput()
-
         analysis_name <- analysisInput$analysis_name
         shiny$showNotification(ui = paste0(
           "Generating data for ", analysis_name
@@ -102,12 +100,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             analysis_underdose$analysis_underdose(analysis_data, variables)
           }
         )
-        data <- dplyr$select(
-          data, study, month, paramcd, flagging_code, flagging_value
-        )
         print(analysis_name)
-        print(names(results))
-        #
         results <- dplyr$mutate(results, paramcd = tolower(paramcd))
         results <- dplyr$inner_join(data, results)
         datatable$server_dt("statsResults", results)
@@ -119,7 +112,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         analysisStatistics(),
         {
           box::use(dplyr, stats, purrr)
-          # rowser()
           analysisStatistics <- analysisStatistics()
           analysisInput <- analysisInput()
           analysis_name <- analysisInput$analysis_name
@@ -138,7 +130,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             ) |>
             dplyr$filter(is_flagged) |>
             dplyr$distinct()
-
           list(
             analysisStatistics = analysisStatistics,
             names_statistics_input = names_statistics_input,

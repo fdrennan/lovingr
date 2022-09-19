@@ -2,7 +2,7 @@
 analysis_aegap <- function(aegap, variables) {
   box::use(. / analysis_aegap)
   box::use(purrr, dplyr)
-  box::use(. / subfunction / CompareMean / CompareMean)
+  box::use(.. / ../ stats / CompareMean / CompareMean)
   df <- analysis_aegap$clean(aegap)
   split_aegap <- split(df, df$paramcd)
   purrr$map_dfr(

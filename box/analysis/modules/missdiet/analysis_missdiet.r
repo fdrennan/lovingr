@@ -3,7 +3,7 @@ analysis_missdiet <- function(missdiet_data = NULL, variables) {
   print(missdiet_data)
   print(variables)
   box::use(dplyr, purrr)
-  box::use(. / subfunction / compare_f)
+  box::use(.. / ../ stats /CompareProportion / compare_f)
   data_split <- split(missdiet_data, missdiet_data$paramcd)
 
   analysis_data <- purrr$map_df(

@@ -14,4 +14,4 @@ server <- function(input, output, session) {
 box::use(shiny)
 app <- shiny$shinyApp(ui, server)
 # shiny$runApp(app)
-# shiny$reactlogShow()
+# shiny$reactlogShow()r

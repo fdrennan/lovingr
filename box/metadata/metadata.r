@@ -140,9 +140,7 @@ server_metadata <- function(id = "metadata") {
               monthName %in% input$monthName,
               analysis %in% input$analysis
             ) |>
-            dplyr$select(
-              study, month, monthName, year, date,
-              analysis, filename,
+            dplyr$rename(
               filepath = path
             )
 
@@ -197,12 +195,12 @@ server_metadata <- function(id = "metadata") {
             data = openxlsx$read.xlsx(configPath, sheetName)
           )
         })
-       
+
         out <- list(
           clean = dplyr$inner_join(clean$clean_config(out), filteredData()),
           raw = out
         )
-        
+
         out
       })
 
