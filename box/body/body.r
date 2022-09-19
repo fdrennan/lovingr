@@ -54,7 +54,7 @@ server_body <- function(id = "body", appSession) {
     box::use(.. / utilities / read / xlsx)
     box::use(.. / utilities / codereview / codereview)
   }
-  shiny$moduleServer(
+  shiny$moduleServer(  
     id,
     function(input, output, session) {
       ns <- session$ns
@@ -140,6 +140,7 @@ server_body <- function(id = "body", appSession) {
               flagging_value = Signal.Flag.Value
             ) |>
             dplyr$mutate(analysis = tolower(analysis))
+          
           dataForScoreboard <- dataForScoreboard()
 
           dataForScoreboardSummary <-

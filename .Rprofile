@@ -5,18 +5,18 @@ options(csm_version = "0.0.9000")
 options(
   analysis_dataset_names = c(
     aei = "csmaesttrt.sas7bdat",
-    aei = "csmaest.sas7bdat", # old
+    aei = "csmaest.sas7bdat" # old
     # rgm = "csmgmsum.sas7bdat",
     # rgv = "csmrgvst.sas7bdat",
     # vitals = "csmvs.sas7bdat",
     # missdose = "csmmdosest.sas7bdat",
     # diet = "csmdiet.sas7bdat",
-    aegap = "csmaetrt.sas7bdat",
-    aegap = "csmae.sas7bdat", # old
+    # aegap = "csmaetrt.sas7bdat",
+    # aegap = "csmae.sas7bdat", # old
     # underdose = "csmexvis.sas7bdat",
     # aecnt = "csm_aecnt.csv",
     # diet = "csmdiet.sas7bdat",
-    meta = "csmpt.sas7bdat"
+    # meta = "csmpt.sas7bdat"
   )
 )
 options(dir_chooser_directories = c(`Local Cache` = "./datamisc", `Working Directory` = getwd(), Root = "/"))
