@@ -2,6 +2,7 @@
 run <- function(datapath) {
   box::use(fs, haven, readr, openxlsx)
   datapath_ext <- fs$path_ext(datapath)
+
   data_for_analysis <- switch(datapath_ext,
     "xlsx" = {
       sheetNames <- openxlsx$getSheetNames(datapath)

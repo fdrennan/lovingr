@@ -112,6 +112,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         analysisStatistics(),
         {
           box::use(dplyr, stats, purrr)
+
           analysisStatistics <- analysisStatistics()
           analysisInput <- analysisInput()
           analysis_name <- analysisInput$analysis_name
@@ -172,16 +173,17 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
             )
           )
         })
+
         datatable$server_dt("flags", data = analysisSummary$analysisStatistics)
       })
 
-      analysisSummaryToScoreboard <- shiny$eventReactive(analysisSummary(), {
-        box::use(dplyr, stats, purrr)
-        analysisSummary <- analysisSummary()
-        analysisSummary
-      })
+      # analysisSummaryToScoreboard <- shiny$eventReactive(analysisSummary(), {
+      #   box::use(dplyr, stats, purrr)
+      #   analysisSummary <- analysisSummary()
+      #   analysisSummary
+      # })
 
-      analysisSummaryToScoreboard
+      analysisSummary()
     }
   )
 }

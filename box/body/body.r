@@ -21,16 +21,18 @@ ui_body <- function(id = "body") {
       codereview$ui_code_review(),
       shiny$column(8,
         offset = 2,
-        metadata$ui_metadata(ns("metadata"), width = 12),
-        shiny$uiOutput(ns("dataRaw"), container = function(...) {
-          shiny$column(12, ...)
-        }),
-        shiny$uiOutput(ns("codeUI"), container = function(...) {
-          shiny$column(12, ...)
-        }),
-        shiny$uiOutput(ns("scoreboard"), container = function(...) {
-          shiny$column(12, ...)
-        })
+        shiny$fluidRow(
+          metadata$ui_metadata(ns("metadata"), width = 12),
+          shiny$uiOutput(ns("dataRaw"), container = function(...) {
+            shiny$column(12, ...)
+          }),
+          shiny$uiOutput(ns("codeUI"), container = function(...) {
+            shiny$column(12, ...)
+          }),
+          shiny$uiOutput(ns("scoreboard"), container = function(...) {
+            shiny$column(12, ...)
+          })
+        )
       )
     )
   )
@@ -124,7 +126,8 @@ server_body <- function(id = "body", appSession) {
               output <- run_analysis$server_run_analysis(
                 paste0("run_analysis", name), analysis_data, variables
               )
-              output()
+              #
+              output
             }
           )
 

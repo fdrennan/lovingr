@@ -22,6 +22,7 @@ server_xlsx <- function(id = "xlsx", datapath, width = 12, ui_id = "#sheets") {
       xlsx_data <- shiny$reactive({
         shiny$req(datapath)
         datapath_ext <- fs$path_ext(datapath)
+
         out <- switch(datapath_ext,
           "xlsx" = {
             sheetNames <- openxlsx$getSheetNames(datapath)

@@ -1,13 +1,12 @@
 source("renv/activate.R")
 options(shiny.maxRequestSize = 300 * 1024^2)
-options(base_config = "Config2.xlsx")
 options(bmrn_base_dir = "/sassys/cdm/cdmdev/pegpal/pku/165306/csm202201x")
 options(csm_version = "0.0.9000")
 options(
   analysis_dataset_names = c(
-    # aei = "csmaesttrt.sas7bdat",
-    # aei = "csmaest.sas7bdat" # old
-    rgm = "csmgmsum.sas7bdat",
+    aei = "csmaesttrt.sas7bdat",
+    aei = "csmaest.sas7bdat", # old
+    # rgm = "csmgmsum.sas7bdat",
     rgv = "csmrgvst.sas7bdat",
     vitals = "csmvs.sas7bdat",
     missdose = "csmmdosest.sas7bdat",
@@ -21,7 +20,7 @@ options(
   )
 )
 options(dir_chooser_directories = c(`Local Cache` = "./datamisc", `Working Directory` = getwd(), Root = "/"))
-options(internal_config_path = "Config3.xlsx")
+options(internal_config_path = "Config2.xlsx")
 
 # aei	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmaest.sas7bdat
 # rgm	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmgmsum.sas7bdat

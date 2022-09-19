@@ -2,6 +2,7 @@
 ui_metadata <- function(id = "metadata", width = 6) {
   box::use(shiny, bs4Dash, shinyFiles)
   box::use(.. / utilities / io / file_upload)
+  box::use(.. / utilities / tables / datatable)
   ns <- shiny$NS(id)
   bs4Dash$box(
     title = "Data Manager", closable = TRUE, id = ns("dataImport"), status = "primary", maximizable = TRUE, width = 12,
@@ -21,6 +22,8 @@ ui_metadata <- function(id = "metadata", width = 6) {
         "Selectors for study, year, month, and analysis type will be generated after choosing a root directory for search."
       ), shiny$tags$p(
         "Candidate files for analysis are set in the .Rprofile"
+      ), shiny$tags$p(
+        "Analysis Metadata available after successful configuration setup."
       )),
       shiny$uiOutput(ns("study"), container = function(...) {
         shiny$column(6, ...)
@@ -36,7 +39,8 @@ ui_metadata <- function(id = "metadata", width = 6) {
       }),
       shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
         shiny$column(12, ...)
-      })
+      }),
+      datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
     )
   )
 }
@@ -45,6 +49,7 @@ ui_metadata <- function(id = "metadata", width = 6) {
 #' @export
 server_metadata <- function(id = "metadata") {
   box::use(.. / utilities / read / xlsx)
+  box::use(.. / utilities / tables / datatable)
   box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx, shinyWidgets)
   box::use(.. / utilities / io / file_upload)
   box::use(.. / csm_config / clean)
@@ -154,20 +159,11 @@ server_metadata <- function(id = "metadata") {
         shiny$fluidRow(
           shiny$column(
             12,
-            shiny$p(
-              shiny$h3("2. Download and Set up Configuration."),
-              shinyWidgets$prettyToggle(ns("internalConfig"),
-                "Use Internal Configuration",
-                shape = "square",
-                label_on = "Use",
-                label_off = "Ignore",
-                icon_on = shiny$icon("thumbs-up"),
-                icon_off = shiny$icon("thumbs-down"),
-                status_on = "default", status_off = "default",
-                value = TRUE
-              ),
-              shiny$downloadButton(ns("downloadData"), "Download Configuration Template")
-            )
+            shiny$h3("2. Download and Set up Configuration."),
+            shinyWidgets$prettySwitch(ns("internalConfig"),
+              "Use Internal Configuration",
+              value = TRUE
+            ), shiny$downloadButton(ns("downloadData"), "Download Configuration Template")
           ),
           shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
             shiny$column(12, ...)
@@ -202,9 +198,6 @@ server_metadata <- function(id = "metadata") {
       )
 
       config <- shiny$eventReactive(input$startAnalysis, {
-        # shiny$req(input$internalConfig)
-        # shiny$req(filteredData())
-
         if (input$internalConfig) {
           configPath <- getOption("internal_config_path")
         } else {
@@ -230,6 +223,10 @@ server_metadata <- function(id = "metadata") {
           raw = out
         )
         out
+      })
+
+      shiny$observeEvent(config(), {
+        datatable$server_dt("metaDataReview", config()$clean)
       })
 
       config
