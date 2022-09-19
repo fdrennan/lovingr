@@ -57,7 +57,7 @@ clean <- function(aegap) {
   box::use(. / analysis_aegap)
   aegap_clean <-
     aegap |>
-    dplyr$rename_all(tolower) |>
+    # dplyr$rename_all(tolower) |>
     dplyr$mutate(
       aeyn = analysis_aegap$recode_binary_yes_no(aeyn),
       saeyn = analysis_aegap$recode_binary_yes_no(saeyn)

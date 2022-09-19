@@ -16,6 +16,7 @@ options(analysis_filter = {
   if (getOption("development")) {
     c("aei", "rgv", "aecnt", "aegap", "vitals", "underdose")
     # c("aei", "rgv", "aecnt", "aegap")
+    c('aegap', 'vitals')
   } else {
   }
 })
