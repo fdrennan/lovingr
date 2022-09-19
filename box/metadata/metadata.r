@@ -40,7 +40,9 @@ ui_metadata <- function(id = "metadata", width = 6) {
       shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
         shiny$column(12, ...)
       }),
-      datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
+      shiny$uiOutput(ns("metaDataReviewUI"), container = function(...) {
+        shiny$column(12, ...)
+      })
     )
   )
 }
@@ -227,6 +229,14 @@ server_metadata <- function(id = "metadata") {
 
       shiny$observeEvent(config(), {
         datatable$server_dt("metaDataReview", config()$clean)
+      })
+
+      shiny$observeEvent(config(), {
+        output$metaDataReviewUI <- shiny$renderUI({
+          shiny$fluidRow(
+            datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
+          )
+        })
       })
 
       config
