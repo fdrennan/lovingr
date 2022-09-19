@@ -162,6 +162,7 @@ server_metadata <- function(id = "metadata") {
             shiny$h3("2. Download and Set up Configuration.")
           ),
           shiny$column(
+            class = "d-flex justify-content-between align-items-center",
             6, shinyWidgets$prettySwitch(ns("internalConfig"),
               "Use Internal Configuration",
               value = TRUE

@@ -68,11 +68,7 @@ server_body <- function(id = "body", appSession) {
           shiny$req(metadata())
           shiny$fluidRow(
             shiny$column(12, id = "dataPreview"),
-            bs4Dash$box(
-              width = 12,
-              title = "Flagging Results and Review",
-              shiny$div(id = "uiAnalyses")
-            ),
+            shiny$column(12, id = "uiAnalyses"),
             shiny$column(
               class = "d-flex justify-content-end align-items-center p-2", 12,
               bs4Dash$actionButton(ns("getResults"), "Get Results")
