@@ -22,11 +22,11 @@ ui_metadata <- function(id = "metadata", width = 6) {
               "Please select a folder", FALSE,
               class = "btn btn-primary"
             ),
-            shiny$textInput(
-              ns("file_regex"),
-              "file_regex",
-              "csm[0-9]{6}[a|b|c]/datamisc$"
-            ),
+            # shiny$textInput(
+            #   ns("file_regex"),
+            #   "file_regex",
+            #   "csm[0-9]{6}[a|b|c]/datamisc$"
+            # ),
             shiny$textInput(
               ns("base_dir"),
               "base_dir",
@@ -70,14 +70,11 @@ server_metadata <- function(id = "metadata") {
 
       shinyFiles$shinyDirChoose(input, id = "inputDir", roots = c(`Working Directory` = getwd(), Root = "/"))
 
-
-
-
       datafiles <- shiny$eventReactive(input$pull, {
         shiny$req(input$inputDir$path[[2]])
         base_directory <- input$inputDir$path[[2]]
         box::use(.. / cdm / meta)
-        datafiles <- meta$get_data(base_directory, input$file_regex)
+        datafiles <- meta$get_data(base_directory)
         datafiles
       })
 
