@@ -42,7 +42,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
     id,
     function(input, output, session) {
       ns <- session$ns
-      browser()
+
       analysis_data <- preAnalysisData$data |> dplyr$rename_all(tolower)
       variables <- preAnalysisData$variables |> dplyr$rename_all(tolower)
 
@@ -53,10 +53,11 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
       postAnalysisData <- shiny$reactive({
         message("postAnalysisData")
+
         shiny$req(preAnalysisData)
         shiny$req(is.logical(input$runWithDebugger))
 
-        if (shouldDebug()) browser() # call debug(analysis_aei$analysis_aei)
+        if (shouldDebug()) do.call("browser", list()) # call debug(analysis_aei$analysis_aei)
         results <- tryCatch(
           {
             results <- switch(preAnalysisData$analysis,
@@ -198,9 +199,9 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
       shiny$observe({
         message("observepostAnalysisData")
-        browser()
         shiny$req(postAnalysisData())
       })
+
 
       postAnalysisData
     }

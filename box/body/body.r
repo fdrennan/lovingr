@@ -128,6 +128,7 @@ server_body <- function(id = "body", appSession) {
         purrr$map(
           dataFiles(),
           function(analysis_data) {
+            #
             shiny$insertUI(
               "#uiAnalyses", "afterBegin",
               run_analysis$ui_run_analysis(
@@ -139,7 +140,7 @@ server_body <- function(id = "body", appSession) {
               paste0("run_analysis", analysis_data$analysis), analysis_data
             )
 
-            output
+            output()
           }
         )
       output
