@@ -63,7 +63,7 @@ server_dt <- function(id = "dt", data, title, pageLength = 3) {
         )
 
       cleanedData <- shiny$reactive({
-        # browser()
+        #
         if (!is.null(input$columnsFilter)) {
           data <- data[, input$columnsFilter]
         } else {

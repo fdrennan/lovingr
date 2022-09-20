@@ -118,9 +118,7 @@ server_body <- function(id = "body", appSession) {
 
     shiny$observeEvent(input$proceedToStartAnalysis, {
       output$analysisUI <- shiny$renderUI({
-        shiny$fluidRow(
-          shiny$column(12, id = "uiAnalyses")
-        )
+        shiny$fluidRow(id = "uiAnalyses")
       })
     })
 
@@ -129,7 +127,7 @@ server_body <- function(id = "body", appSession) {
         purrr$map(
           dataFiles(),
           function(analysis_data) {
-            # browser()
+            #
             shiny$insertUI(
               "#uiAnalyses", "afterBegin",
               run_analysis$ui_run_analysis(

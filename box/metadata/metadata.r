@@ -42,7 +42,8 @@ server_metadata <- function(id = "metadata") {
   {
     box::use(.. / utilities / read / xlsx)
     box::use(.. / utilities / tables / datatable)
-    box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx, shinyWidgets)
+    box::use(shiny, dplyr, stats, bs4Dash, fs)
+    box::use(shinyFiles, openxlsx, shinyWidgets, purrr)
     box::use(.. / utilities / io / file_upload)
     box::use(.. / csm_config / clean)
     box::use(.. / cdm / meta)
@@ -183,7 +184,6 @@ server_metadata <- function(id = "metadata") {
 
       shiny$observeEvent(input$internalConfig, {
         output$configurationUploadToggle <- shiny$renderUI({
-          # shiny$req(input$internalConfig)
           if (!isTRUE(input$internalConfig)) {
             shiny$p(
               shiny$h3("3. Upload a configuration file."),
@@ -192,6 +192,10 @@ server_metadata <- function(id = "metadata") {
                 label = "",
                 accept = "*",
                 multiple = TRUE
+              ),
+              shinyWidgets$prettySwitch(ns("ignoreConfigDataPaths"),
+                "Ignore Data Paths in Configuration",
+                value = TRUE
               )
             )
           }
@@ -213,13 +217,13 @@ server_metadata <- function(id = "metadata") {
           configPath <- input$fileUpload$datapath
         }
         sheetNames <- openxlsx$getSheetNames(configPath)
-        out <- lapply(sheetNames, function(sheetName) {
+        raw_config <- lapply(sheetNames, function(sheetName) {
           list(
             sheetName = sheetName,
             data = openxlsx$read.xlsx(configPath, sheetName)
           )
         })
-        clean_data <- clean$clean_config(out)
+        clean_data <- clean$clean_config(raw_config)
         clean_data <- dplyr$inner_join(clean_data, filteredCsmDataTable())
         if (nrow(clean_data) == 0) {
           shiny$showModal(shiny$modalDialog(
@@ -227,13 +231,48 @@ server_metadata <- function(id = "metadata") {
           ))
           shiny$req(nrow(clean_data) > 0)
         }
+
+
+        if (isFALSE(input$ignoreConfigDataPaths)) {
+          clean_data$filepath <- NULL
+          clean_data$filename <- NULL
+          input_config_datapaths <- dplyr$rename(
+            raw_config[[4]]$data,
+            filepath = final
+          ) |> dplyr$mutate(analysis = tolower(analysis))
+          clean_data <- dplyr$inner_join(
+            clean_data,
+            input_config_datapaths
+          )
+
+
+          filepath_exists <- file.exists(clean_data$filepath)
+          if (!all(filepath_exists)) {
+            path_doesnt_exist <- unique(clean_data$filepath[!filepath_exists])
+            shiny$showModal(
+              shiny$modalDialog(
+                shiny$fluidRow(
+                  shiny$column(
+                    12, shiny$h4("Data not found"),
+                    shiny$tags$pre(
+                      paste0(path_doesnt_exist, collapse = "\n")
+                    )
+                  )
+                )
+              )
+            )
+          }
+          shiny$req(FALSE)
+        }
         bs4Dash$updateBox(id = "dataImport", action = "remove")
         out <- list(
           clean = clean_data,
-          raw = out
+          raw = raw_config
         )
         out
       })
+
+
 
       config
     }
