@@ -21,7 +21,7 @@ options(
 )
 options(dir_chooser_directories = c(`Local Cache` = "./datamisc", `Working Directory` = getwd(), Root = "/"))
 options(internal_config_path = "Config2.xlsx")
-
+options(file_import_working_directory = c(datamisc = "./datamisc", `Working Directory` = getwd(), Root = "/"))
 # aei	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmaest.sas7bdat
 # rgm	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmgmsum.sas7bdat
 # vitals	/sassys/cdm/cdmdev/bmn111/ach/111206/csm202108a/datamisc	csmvs.sas7bdat

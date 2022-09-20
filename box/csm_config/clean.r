@@ -39,7 +39,7 @@ clean_config <- function(config) {
             shiny$column(
               12,
               shiny$tags$p(
-                shiny$tags$pre(err$message, class = "p-3")
+                shiny$tags$pre(err$message, class = "py-3")
               )
             )
           )

@@ -64,14 +64,14 @@ server_body <- function(id = "body", appSession) {
     shiny$observeEvent(metadata(), {
       output$metaDataReviewUI <- shiny$renderUI({
         shiny$fluidRow(
-          datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE),
-          shiny$column(12, class = "text-right p-3", shiny$actionButton(ns("proceedToDataReview"), "Input Data Review")),
+          datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
         )
       })
       datatable$server_dt("metaDataReview", metadata()$clean)
     })
 
-    shiny$observeEvent(input$proceedToDataReview, {
+    dataFiles <- shiny$eventReactive(metadata(), {
+      bs4Dash$updateBox("metaDataReview", action = "toggle")
       metadata <- metadata()
       import_files <- dplyr$distinct(metadata()$clean, analysis, filepath)
       uuid <- uuid::UUIDgenerate()
@@ -79,7 +79,7 @@ server_body <- function(id = "body", appSession) {
       output$dataRaw <- shiny$renderUI({
         shiny$fluidRow(
           shiny$column(12, id = "datamiscFilesRaw"),
-          shiny$column(12, class = "text-right p-3", shiny$actionButton(ns("startAnalyses"), "Start Analyses"))
+          shiny$column(12, class = "text-right py-3", shiny$actionButton(ns("proceedToStartAnalysis"), "Start Analyses"))
         )
       })
 
@@ -91,15 +91,24 @@ server_body <- function(id = "body", appSession) {
         )
       )
 
-      output <- purrr$map(import_files$filepath, function(path) {
+      variables <- dplyr$mutate_all(metadata()$raw[[1]]$data, tolower)
+      output <- purrr$map2(import_files$filepath, import_files$analysis, function(path, analysis) {
         shiny$insertUI("#datamiscFilesRawElements", "afterBegin", xlsx$ui_xlsx(ns(uuid)))
         out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#datamiscFilesRawElements")
+        out <- out()[[1]]
+        out$analysis <- analysis
+        out$metadata <- dplyr$filter(metadata()$clean, analysis == !!analysis)
+        out$variables
+        out
       })
-
       output
     })
 
-    shiny$observeEvent(input$startAnalyses, {
+    shiny$observe({
+      shiny$req(dataFiles())
+    })
+
+    shiny$observeEvent(input$proceedToStartAnalysis, {
       output$analysisUI <- shiny$renderUI({
         shiny$fluidRow(
           shiny$column(12, id = "uiAnalyses")
@@ -107,12 +116,11 @@ server_body <- function(id = "body", appSession) {
       })
     })
 
-    dataForScoreboard <- shiny$eventReactive(input$startAnalyses, {
+    dataForScoreboard <- shiny$eventReactive(input$proceedToStartAnalysis, {
       clean_metadata <- metadata()$clean
       raw_metadata <- metadata()$raw
       clean_metadata <- split(clean_metadata, clean_metadata$analysis)
       n_increments <- length(clean_metadata)
-
       output <-
         purrr$imap(
           clean_metadata,
@@ -123,7 +131,7 @@ server_body <- function(id = "body", appSession) {
                 ns(paste0("run_analysis", name)), analysis_data
               )
             )
-            variables <- dplyr$mutate_all(raw_metadata[[1]]$data, tolower)
+
             names(variables) <- tolower(names(variables))
             output <- run_analysis$server_run_analysis(
               paste0("run_analysis", name), analysis_data, variables

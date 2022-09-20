@@ -5,7 +5,7 @@ ui_controlbar <- function(id = "controlbar") {
   ns <- shiny$NS(id)
   bs4Dash$dashboardControlbar(
     collapsed = TRUE,
-    shiny$div(class = "p-3", devop$ui_devop(ns("devop")))
+    shiny$div(class = "py-3", devop$ui_devop(ns("devop")))
   )
 }
 

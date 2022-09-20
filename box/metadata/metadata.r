@@ -5,7 +5,8 @@ ui_metadata <- function(id = "metadata", width = 6) {
   box::use(.. / utilities / tables / datatable)
   ns <- shiny$NS(id)
   bs4Dash$box(
-    title = "Data Manager", closable = TRUE, id = ns("dataImport"), maximizable = TRUE, width = 12,
+    title = "Data Manager", id = ns("dataImport"),
+    closable = TRUE, collpased = FALSE, maximizable = TRUE, width = 12,
     shiny$fluidRow(
       shiny$column(
         12,
@@ -28,20 +29,8 @@ ui_metadata <- function(id = "metadata", width = 6) {
       ), shiny$tags$p(
         "Analysis Metadata available after successful configuration setup."
       )),
-      shiny$uiOutput(ns("study"), container = function(...) {
-        shiny$column(6, class = "p-3", ...)
-      }),
-      shiny$uiOutput(ns("year"), container = function(...) {
-        shiny$column(6, class = "p-3", ...)
-      }),
-      shiny$uiOutput(ns("month"), container = function(...) {
-        shiny$column(6, class = "p-3", ...)
-      }),
-      shiny$uiOutput(ns("analysis"), container = function(...) {
-        shiny$column(6, class = "p-3", ...)
-      }),
-      shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
-        shiny$column(12, class = "p-3", ...)
+      shiny$uiOutput(ns("metaDataFilterPanel"), container = function(...) {
+        shiny$column(12, ...)
       })
     )
   )
@@ -50,131 +39,145 @@ ui_metadata <- function(id = "metadata", width = 6) {
 
 #' @export
 server_metadata <- function(id = "metadata") {
-  box::use(.. / utilities / read / xlsx)
-  box::use(.. / utilities / tables / datatable)
-  box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx, shinyWidgets)
-  box::use(.. / utilities / io / file_upload)
-  box::use(.. / csm_config / clean)
+  {
+    box::use(.. / utilities / read / xlsx)
+    box::use(.. / utilities / tables / datatable)
+    box::use(shiny, dplyr, stats, bs4Dash, fs, shinyFiles, openxlsx, shinyWidgets)
+    box::use(.. / utilities / io / file_upload)
+    box::use(.. / csm_config / clean)
+    box::use(.. / cdm / meta)
+  }
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
-      shinyFiles$shinyDirChoose(input, id = "inputDir", roots = c(`Working Directory` = getwd(), Root = "/"))
+      shinyFiles$shinyDirChoose(input, id = "inputDir", roots = getOption("file_import_working_directory"))
 
-      datafiles <- shiny$eventReactive(input$inputDir, {
+      csmDataLocationsTable <- shiny$eventReactive(input$inputDir, {
         shiny$req(!inherits(input$inputDir, "shinyActionButtonValue"))
-
-        base_directory <- input$inputDir$path[[2]]
-        box::use(.. / cdm / meta)
-
-        datafiles <- meta$get_data(base_directory)
-        datafiles
+        base_directory <- file.path(input$inputDir$root, input$inputDir$path[[2]])
+        csmDataLocationsTable <- meta$get_data(base_directory)
+        csmDataLocationsTable
       })
 
-      output$study <- shiny$renderUI({
-        shiny$req(datafiles())
-        datafiles <- datafiles()
-        study <- datafiles$study
-        shiny$selectizeInput(ns("study"), shiny$h5("Study"),
-          choices = unique(study),
-          selected = unique(study)[[1]],
-          multiple = FALSE
-        )
-      })
+      shiny$observeEvent(csmDataLocationsTable(), {
+        output$metaDataFilterPanel <- shiny$renderUI({
+          shiny$fluidRow(
+            shiny$uiOutput(ns("study"), container = function(...) {
+              shiny$column(6, class = "py-3", ...)
+            }),
+            shiny$uiOutput(ns("year"), container = function(...) {
+              shiny$column(6, class = "py-3", ...)
+            }),
+            shiny$uiOutput(ns("month"), container = function(...) {
+              shiny$column(6, class = "py-3", ...)
+            }),
+            shiny$uiOutput(ns("analysis"), container = function(...) {
+              shiny$column(6, class = "py-3", ...)
+            }),
+            shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
+              shiny$column(12, class = "py-3", ...)
+            })
+          )
+        })
 
-      output$year <- shiny$renderUI({
-        shiny$req(input$study)
-        shiny$removeUI("#metadatawarning")
-        datafiles <- datafiles()
-        year <- datafiles |>
-          dplyr$filter(study %in% input$study) |>
-          dplyr$pull(year)
+        output$study <- shiny$renderUI({
+          study <- csmDataLocationsTable()$study
+          shiny$selectizeInput(ns("study"), shiny$h5("Study"),
+            choices = unique(study),
+            selected = unique(study)[[1]],
+            multiple = FALSE
+          )
+        })
 
-        shiny$selectizeInput(
-          ns("year"),
-          shiny$h5("Year"),
-          choices = unique(year),
-          selected = max(as.numeric(year)),
-          multiple = FALSE
-        )
-      })
+        output$year <- shiny$renderUI({
+          shiny$req(input$study)
+          shiny$removeUI("#metadatawarning")
+          year <- csmDataLocationsTable() |>
+            dplyr$filter(study %in% input$study) |>
+            dplyr$pull(year)
 
-      output$month <- shiny$renderUI({
-        shiny$req(input$year)
-        datafiles <- dplyr$filter(datafiles(), study %in% input$study, year %in% input$year)
-        monthName <- dplyr$pull(datafiles, monthName)
-        max_month <- datafiles |>
-          dplyr$filter(date == max(date)) |>
-          dplyr$pull(monthName)
+          shiny$selectizeInput(
+            ns("year"),
+            shiny$h5("Year"),
+            choices = unique(year),
+            selected = max(as.numeric(year)),
+            multiple = FALSE
+          )
+        })
 
-        shiny$selectizeInput(
-          ns("monthName"),
-          shiny$h5("Month"),
-          choices = unique(monthName),
-          selected = unique(max_month),
-          multiple = TRUE
-        )
-      })
+        output$month <- shiny$renderUI({
+          shiny$req(input$year)
+          csmDataLocationsTableFiltered <- dplyr$filter(csmDataLocationsTable(), study %in% input$study, year %in% input$year)
+          monthName <- dplyr$pull(csmDataLocationsTableFiltered, monthName)
+          max_month <- csmDataLocationsTableFiltered |>
+            dplyr$filter(date == max(date)) |>
+            dplyr$pull(monthName)
 
-      output$analysis <- shiny$renderUI({
-        shiny$req(input$monthName)
-        shiny$req(datafiles())
-        datafiles <- datafiles()
+          shiny$selectizeInput(
+            ns("monthName"),
+            shiny$h5("Month"),
+            choices = unique(monthName),
+            selected = unique(max_month),
+            multiple = TRUE
+          )
+        })
 
-        analysis <- datafiles |>
-          dplyr$filter(
-            study %in% input$study,
-            year %in% input$year,
-            monthName %in% input$monthName
-          ) |>
-          dplyr$pull(analysis)
+        output$analysis <- shiny$renderUI({
+          shiny$req(input$monthName)
 
-        shiny$selectizeInput(ns("analysis"), shiny$h5("Analysis"),
-          choices = analysis,
-          selected = analysis, multiple = TRUE
-        )
-      })
-
-      filteredData <- shiny$eventReactive(
-        input$analysis,
-        {
-          datafiles <- datafiles()
-          files <- datafiles |>
+          analysis <- csmDataLocationsTable() |>
             dplyr$filter(
               study %in% input$study,
               year %in% input$year,
-              monthName %in% input$monthName,
-              analysis %in% input$analysis
+              monthName %in% input$monthName
             ) |>
-            dplyr$rename(
-              filepath = path
-            )
+            dplyr$pull(analysis)
 
-          files
-        }
-      )
+          shiny$selectizeInput(ns("analysis"), shiny$h5("Analysis"),
+            choices = analysis,
+            selected = analysis, multiple = TRUE
+          )
+        })
+      })
 
+      filteredCsmDataTable <- shiny$reactive({
+        shiny$req(input$analysis)
+        csmDataLocationsTable <- csmDataLocationsTable()
+        files <- csmDataLocationsTable |>
+          dplyr$filter(
+            study %in% input$study,
+            year %in% input$year,
+            monthName %in% input$monthName,
+            analysis %in% input$analysis
+          ) |>
+          dplyr$rename(
+            filepath = path
+          )
+
+        files
+      })
 
       output$configurationUploadPanel <- shiny$renderUI({
-        shiny$req(filteredData())
+        shiny$req(filteredCsmDataTable())
         shiny$fluidRow(
           shiny$column(
             12,
             shiny$h3("2. Download and Set up Configuration.")
           ),
-          shiny$column(
+          shiny$column(6,
             class = "d-flex justify-content-between align-items-center",
-            6, shinyWidgets$prettySwitch(ns("internalConfig"),
+            shinyWidgets$prettySwitch(ns("internalConfig"),
               "Use Internal Configuration",
               value = TRUE
             )
           ),
-          shiny$column(6, class = "p-3", shiny$downloadButton(ns("downloadData"), "Download Configuration Template")),
+          shiny$column(6, class = "py-3", shiny$downloadButton(ns("downloadData"), "Download Configuration Template")),
           shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
-            shiny$column(12, class = "p-3", ...)
+            shiny$column(12, class = "py-3", ...)
           }),
-          shiny$column(12, class = "p-3 text-right", shiny$actionButton(ns("startAnalysis"), "Begin"))
+          shiny$column(12, class = "py-3 text-right", shiny$actionButton(ns("startAnalysis"), "Begin"))
         )
       })
 
@@ -217,13 +220,15 @@ server_metadata <- function(id = "metadata") {
           )
         })
         clean_data <- clean$clean_config(out)
-        clean_data <- dplyr$inner_join(clean_data, filteredData())
+        clean_data <- dplyr$inner_join(clean_data, filteredCsmDataTable())
         if (nrow(clean_data) == 0) {
           shiny$showModal(shiny$modalDialog(
             "No analysis possible. Data not available for configuration in chosen directory."
           ))
           shiny$req(nrow(clean_data) > 0)
         }
+
+        bs4Dash$updateBox(id = "dataImport", action = "toggle") # , options = list(collapsed = TRUE)
         out <- list(
           clean = clean_data,
           raw = out
