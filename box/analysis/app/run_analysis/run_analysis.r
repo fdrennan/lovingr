@@ -53,11 +53,14 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
       postAnalysisData <- shiny$reactive({
         message("postAnalysisData")
-
+        print(input$runAgain)
         shiny$req(preAnalysisData)
         shiny$req(is.logical(input$runWithDebugger))
 
-        if (shouldDebug()) do.call("browser", list()) # call debug(analysis_aei$analysis_aei)
+        if (shouldDebug()) {
+          print(preAnalysisData)
+          do.call("browser", list())
+        } # call debug(analysis_aei$analysis_aei)
         results <- tryCatch(
           {
             results <- switch(preAnalysisData$analysis,
@@ -72,11 +75,15 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
               "missdose" = analysis_missdose$analysis_missdose(analysis_data, variables),
             )
 
+            if (shouldDebug()) {
+              print(results)
+              do.call("browser", list())
+            }
+
             results <- dplyr$mutate(results, paramcd = tolower(paramcd))
             postAnalysisData <- list()
             postAnalysisData <- append(preAnalysisData, results)
-            postAnalysisData$flags <-
-              flag_analysis_data$flag_analysis_data(results, postAnalysisData$metadata)
+            postAnalysisData$flags <- flag_analysis_data$flag_analysis_data(results, postAnalysisData$metadata)
 
             datatable$server_dt("statsResults", results)
             shiny$removeNotification(id = postAnalysisData$analysis)
@@ -112,6 +119,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             postAnalysisData
           },
           error = function(err) {
+            if (shouldDebug()) do.call("browser", list())
             postAnalysisData <- list()
             postAnalysisData$err <- err
             postAnalysisData$title <- shiny$fluidRow(
@@ -196,12 +204,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
         datatable$server_dt("flags", data = postAnalysisData()$flags)
       })
-
-      shiny$observe({
-        message("observepostAnalysisData")
-        shiny$req(postAnalysisData())
-      })
-
 
       postAnalysisData
     }
