@@ -8,7 +8,7 @@ options(
     aei = "csmaest.sas7bdat", # old
     # rgm = "csmgmsum.sas7bdat",
     rgv = "csmrgvst.sas7bdat",
-    vitals = "csmvs.sas7bdat",
+    # vitals = "csmvs.sas7bdat",
     missdose = "csmmdosest.sas7bdat",
     diet = "csmdiet.sas7bdat",
     aegap = "csmaetrt.sas7bdat",

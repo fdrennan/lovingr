@@ -129,6 +129,7 @@ server_body <- function(id = "body", appSession) {
         purrr$map(
           dataFiles(),
           function(analysis_data) {
+            # browser()
             shiny$insertUI(
               "#uiAnalyses", "afterBegin",
               run_analysis$ui_run_analysis(
@@ -148,69 +149,22 @@ server_body <- function(id = "body", appSession) {
 
     shiny$observeEvent(dataForScoreboard(), {
       scoreboardSheet <- metadata()$raw[[3]]$data |>
-        dplyr$rename(
-          analysis = Analysis.Type,
-          flagging_value = Signal.Flag.Value
-        ) |>
+        dplyr$rename(analysis = Analysis.Type) |>
         dplyr$mutate(analysis = tolower(analysis))
 
       dataForScoreboard <- dataForScoreboard()
 
-      dataForScoreboardSummary <-
-        purrr$imap_dfr(dataForScoreboard, function(data, analysis) {
-          print(analysis)
-          print(lapply(data, typeof))
-          out <- data$analysisOutput
-          out$analysis <- analysis
-          out
-        })
-      scoreboardSheet <- dplyr$inner_join(
-        dataForScoreboardSummary, scoreboardSheet
-      )
+      flags <- purrr$map_dfr(dataForScoreboard(), function(x) {
+        x$flags
+      })
+
 
       output$scoreboard <- shiny$renderUI({
         shiny$fluidRow(
           datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
         )
       })
-
-      # TODO
-      scoreboardSheet <-
-        readRDS("scoreboardSheet.rda") |>
-        dplyr$mutate_if(is.numeric, function(x) round(x, 2)) |>
-        dplyr$mutate(
-          # analysis, paramcd,
-          # Potential.Issue,
-          # Potential.Issue.Subfix,
-          # flagging_value,
-          # Max.Number.Signal.Summary, sitediff.vs.study, Signal.Prefix, Signal.Subfix,
-          # Name.of.endpoint.of.interest,
-          StudyStatResult = glue$glue(StudyStat),
-          SiteStatResult = glue$glue(SiteStat)
-          # csm_version,
-          # site
-        ) |>
-        dplyr$mutate(Potential.Issue = sample(c(1, 4, 2), 1)) |>
-        dplyr$group_by(Potential.Issue, sitediff.vs.study) |>
-        dplyr$select(Potential.Issue, sitediff.vs.study, diff_pct)
-
-      purrr$map_dfr(
-        split(scoreboardSheet, scoreboardSheet$Potential.Issue),
-        function(x) {
-          sort_col <- unique(x$sitediff.vs.study)
-          print(sort_col)
-          x |>
-            dplyr$arrange(sort_col)
-        }
-      )
-      # `# print() |>
-      # dplyr$glimpse()
-      # dplyr$group_by(Potential.Issue)
-      # dplyr$select(sitediff.vs.study)
-      # dplyr$group_by(Potential.Issue, Max.Number.Signal.Summary) |>
-      # dplyr$count()
-
-      datatable$server_dt("scoreboardConfiguration", data = scoreboardSheet)
+      datatable$server_dt("scoreboardConfiguration", data = flags)
     })
   })
 }
