@@ -30,7 +30,9 @@ ui_body <- function(id = "body") {
             shiny$column(12, ...)
           }),
           shiny$uiOutput(ns("analysisUI"), container = function(...) {
-            shiny$column(12, ...)
+            shiny$column(12, shiny$fluidRow(
+              ...
+            ))
           }),
           shiny$uiOutput(ns("scoreboard"), container = function(...) {
             shiny$column(12, ...)
@@ -99,7 +101,7 @@ server_body <- function(id = "body", appSession) {
         )
       )
       variables <- dplyr$mutate_all(metadata()$raw[[1]]$data, tolower)
-      # browser()
+      #
       output <- purrr$map2(import_files$filepath, import_files$analysis, function(path, analysis) {
         shiny$insertUI("#datamiscFilesRawElements", "afterBegin", xlsx$ui_xlsx(ns(uuid)))
         out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#datamiscFilesRawElements")
@@ -118,7 +120,7 @@ server_body <- function(id = "body", appSession) {
 
     shiny$observeEvent(input$proceedToStartAnalysis, {
       output$analysisUI <- shiny$renderUI({
-        shiny$fluidRow(id = "uiAnalyses")
+        shiny$column(12, id = "uiAnalyses")
       })
     })
 
@@ -140,7 +142,6 @@ server_body <- function(id = "body", appSession) {
             output
           }
         )
-
       output
     })
 

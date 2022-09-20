@@ -3,35 +3,13 @@ ui_run_analysis <- function(id = "run_analysis", data) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
   box::use(.. / .. / .. / utilities / tables / datatable)
-  bs4Dash$box(
-    collapsible = TRUE, maximizable = TRUE,
-    closable = TRUE,
-    id = ns("analysisBox"),
-    width = 12,
-    title = paste0("Flagging Results for ", toupper(unique(data$analysis))), collapsed = TRUE,
-    shiny$fluidRow(
-      shiny$column(
-        12,
-        shiny$uiOutput(ns("uiSummary"), container = function(...) {
-          shiny$fluidRow(...)
-        }),
-        shiny$fluidRow(
-          datatable$ui_dt(
-            ns("statsResults"),
-            title = "Pre-Flagging",
-            width = 12
-          ),
-          datatable$ui_dt(
-            ns("flags"), "Flags"
-          )
-        )
-      )
-    )
-  )
+  shiny$uiOutput(ns("ui"), container = function(...) {
+    shiny$fluidRow(...)
+  })
 }
 
 #' @export
-server_run_analysis <- function(id = "run_analysis", analysisData) {
+server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
   {
     box::use(shiny, bs4Dash, shinyAce, readr, glue, dplyr, stats, shinyAce, purrr)
     box::use(.. / .. / .. / utilities / tables / datatable)
@@ -54,13 +32,13 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
     function(input, output, session) {
       ns <- session$ns
 
-      analysisOutput <- shiny$reactive({
-        shiny$req(analysisData)
-        analysis_data <- analysisData$data |> dplyr$rename_all(tolower)
-        variables <- analysisData$variables |> dplyr$rename_all(tolower)
+      postAnalysisData <- shiny$reactive({
+        shiny$req(preAnalysisData)
+        analysis_data <- preAnalysisData$data |> dplyr$rename_all(tolower)
+        variables <- preAnalysisData$variables |> dplyr$rename_all(tolower)
         results <- tryCatch(
           {
-            switch(analysisData$analysis,
+            results <- switch(preAnalysisData$analysis,
               "aei" = analysis_aei$analysis_aei(analysis_data, variables),
               "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
               "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
@@ -71,38 +49,92 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
               "diet" = analysis_diet$analysis_diet(analysis_data, variables),
               "missdose" = analysis_missdose$analysis_missdose(analysis_data, variables),
             )
-          },
-          error = function(err) {
-            shiny$showModal(
-              shiny$modalDialog(
-                shiny$fluidRow(
-                  shiny$column(
-                    12, shiny$h3(glue$glue("Error in {analysisData$analysis}")),
-                    shiny$tags$pre(
-                      as.character(err)
+
+            results <- dplyr$mutate(results, paramcd = tolower(paramcd))
+            postAnalysisData <- list()
+            postAnalysisData <- append(preAnalysisData, results)
+            postAnalysisData$flags <-
+              flag_analysis_data$flag_analysis_data(results, postAnalysisData$metadata)
+
+            datatable$server_dt("statsResults", results)
+            shiny$removeNotification(id = postAnalysisData$analysis)
+            postAnalysisData$status <- "success"
+            postAnalysisData$title <- {
+              paste0("Flagging Results for ", toupper(postAnalysisData$analysis))
+            }
+            postAnalysisData$footer <- shiny$fluidRow(
+              shiny$column(
+                12, shiny$h5(glue$glue("Flags: {nrow(results)}"))
+              )
+            )
+            postAnalysisData$body <-
+              shiny$fluidRow(
+                shiny$column(
+                  12,
+                  shiny$uiOutput(ns("uiSummary"), container = function(...) {
+                    shiny$fluidRow(...)
+                  }),
+                  shiny$fluidRow(
+                    datatable$ui_dt(
+                      ns("statsResults"),
+                      title = "Pre-Flagging",
+                      width = 12
+                    ),
+                    datatable$ui_dt(
+                      ns("flags"), "Flags"
                     )
                   )
                 )
               )
-            )
 
-            bs4Dash$updateBox(ns("analysisBox"),
-              action = "update"
+            postAnalysisData
+          },
+          error = function(err) {
+            postAnalysisData <- list()
+            postAnalysisData$err <- err
+            postAnalysisData$title <- shiny$fluidRow(
+              shiny$column(12, glue$glue("Failure in {preAnalysisData$analysis}"))
             )
-            shiny$req(FALSE)
+            postAnalysisData$status <- "danger"
+            postAnalysisData$body <-
+              shiny$fluidRow(
+                shiny$column(
+                  12,
+                  shiny$tags$h4("Call"),
+                  shiny$tags$pre(paste0(deparse(err$call), collapse = "\n")),
+                  shiny$tags$h4("Message"),
+                  shiny$tags$code(paste0(err$message, collapse = "\n"))
+                )
+              )
+            postAnalysisData
           }
         )
-        results <- dplyr$mutate(results, paramcd = tolower(paramcd))
-        analysisData$results <- results
-        analysisData$flags <-
-          flag_analysis_data$flag_analysis_data(results, analysisData$metadata)
 
-        datatable$server_dt("statsResults", results)
-        shiny$removeNotification(id = analysisData$analysis)
-        analysisData
+        results$ns <- ns
+        results
       })
 
-      shiny$observeEvent(analysisOutput(), {
+
+
+      shiny$observeEvent(postAnalysisData(), {
+        output$ui <- shiny$renderUI({
+          bs4Dash$box(
+            postAnalysisData()$body,
+            id = ns("analysisBox"),
+            title = postAnalysisData()$title,
+            width = 12,
+            status = postAnalysisData()$status,
+            collapsible = TRUE,
+            maximizable = TRUE,
+            closable = TRUE,
+            collapsed = ifelse(postAnalysisData()$status == "danger", TRUE, FALSE),
+            footer = postAnalysisData()$footer
+          )
+        })
+      })
+
+
+      shiny$observeEvent(postAnalysisData(), {
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
             id = ns("analysisResultsBox"),
@@ -112,20 +144,20 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
             shiny$fluidRow(
               shiny$column(12, shiny$h1("Inputs")),
               shiny$column(12, shiny$fluidRow(
-                lapply(names(analysisOutput()$data), function(x) {
+                lapply(names(postAnalysisData()$data), function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
               )),
               shiny$column(12, shiny$h1("Outputs")),
               shiny$column(12, shiny$fluidRow(
-                lapply(names(analysisOutput()$results), function(x) {
+                lapply(names(postAnalysisData()$results), function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
               )),
               shiny$column(12, shiny$h1("Flags")),
               shiny$column(12, purrr$map2(
-                analysisOutput()$metadata$flagging_value,
-                analysisOutput()$metadata$flagging_code,
+                postAnalysisData()$metadata$flagging_value,
+                postAnalysisData()$metadata$flagging_code,
                 function(x, y) {
                   shiny$fluidRow(
                     shiny$column(2, x, class = "d-flex justify-content-center align-items-center"),
@@ -138,10 +170,10 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
           )
         })
 
-        datatable$server_dt("flags", data = analysisOutput()$flags)
+        datatable$server_dt("flags", data = postAnalysisData()$flags)
       })
 
-      analysisOutput()
+      postAnalysisData()
     }
   )
 }
