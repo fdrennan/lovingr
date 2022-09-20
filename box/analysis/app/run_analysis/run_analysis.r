@@ -32,19 +32,21 @@ ui_run_analysis <- function(id = "run_analysis", data) {
 
 #' @export
 server_run_analysis <- function(id = "run_analysis", analysisData) {
-  box::use(shiny, bs4Dash, shinyAce, readr, dplyr, stats, shinyAce, purrr)
-  box::use(.. / .. / .. / utilities / tables / datatable)
-  box::use(.. / .. / utilities / flagging / flag_analysis_data)
-  box::use(.. / .. / modules / aei / analysis_aei)
-  box::use(.. / .. / modules / rgv / analysis_rgv)
-  box::use(.. / .. / modules / rgm / analysis_rgm)
-  box::use(.. / .. / modules / missdose / analysis_missdose)
-  box::use(.. / .. / modules / diet / analysis_diet)
-  box::use(.. / .. / modules / retention / analysis_retention)
-  box::use(.. / .. / modules / aecnt / analysis_aecnt)
-  box::use(.. / .. / modules / aegap / analysis_aegap)
-  box::use(.. / .. / modules / vitals / analysis_vitals)
-  box::use(.. / .. / modules / underdose / analysis_underdose)
+  {
+    box::use(shiny, bs4Dash, shinyAce, readr, glue, dplyr, stats, shinyAce, purrr)
+    box::use(.. / .. / .. / utilities / tables / datatable)
+    box::use(.. / .. / utilities / flagging / flag_analysis_data)
+    box::use(.. / .. / modules / aei / analysis_aei)
+    box::use(.. / .. / modules / rgv / analysis_rgv)
+    box::use(.. / .. / modules / rgm / analysis_rgm)
+    box::use(.. / .. / modules / missdose / analysis_missdose)
+    box::use(.. / .. / modules / diet / analysis_diet)
+    box::use(.. / .. / modules / retention / analysis_retention)
+    box::use(.. / .. / modules / aecnt / analysis_aecnt)
+    box::use(.. / .. / modules / aegap / analysis_aegap)
+    box::use(.. / .. / modules / vitals / analysis_vitals)
+    box::use(.. / .. / modules / underdose / analysis_underdose)
+  }
 
 
   shiny$moduleServer(
@@ -53,20 +55,42 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
       ns <- session$ns
 
       analysisOutput <- shiny$reactive({
-        browser()
         shiny$req(analysisData)
         analysis_data <- analysisData$data |> dplyr$rename_all(tolower)
         variables <- analysisData$variables |> dplyr$rename_all(tolower)
-        results <- switch(analysisData$analysis,
-          "aei" = analysis_aei$analysis_aei(analysis_data, variables),
-          "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
-          "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
-          "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
-          "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables),
-          "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables),
-          "rgm" = analysis_rgm$analysis_rgm(analysis_data, variables),
-          "diet" = analysis_diet$analysis_diet(analysis_data, variables),
-          "missdose" = analysis_missdose$analysis_missdose(analysis_data, variables),
+        results <- tryCatch(
+          {
+            switch(analysisData$analysis,
+              "aei" = analysis_aei$analysis_aei(analysis_data, variables),
+              "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
+              "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
+              "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
+              "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables),
+              "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables),
+              "rgm" = analysis_rgm$analysis_rgm(analysis_data, variables),
+              "diet" = analysis_diet$analysis_diet(analysis_data, variables),
+              "missdose" = analysis_missdose$analysis_missdose(analysis_data, variables),
+            )
+          },
+          error = function(err) {
+            shiny$showModal(
+              shiny$modalDialog(
+                shiny$fluidRow(
+                  shiny$column(
+                    12, shiny$h3(glue$glue("Error in {analysisData$analysis}")),
+                    shiny$tags$pre(
+                      as.character(err)
+                    )
+                  )
+                )
+              )
+            )
+
+            bs4Dash$updateBox(ns("analysisBox"),
+              action = "update"
+            )
+            shiny$req(FALSE)
+          }
         )
         results <- dplyr$mutate(results, paramcd = tolower(paramcd))
         analysisData$results <- results
