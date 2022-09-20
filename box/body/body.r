@@ -152,12 +152,9 @@ server_body <- function(id = "body", appSession) {
         dplyr$rename(analysis = Analysis.Type) |>
         dplyr$mutate(analysis = tolower(analysis))
 
-      dataForScoreboard <- dataForScoreboard()
-
       flags <- purrr$map_dfr(dataForScoreboard(), function(x) {
         x$flags
       })
-
 
       output$scoreboard <- shiny$renderUI({
         shiny$fluidRow(
