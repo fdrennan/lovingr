@@ -5,7 +5,7 @@ ui_options <- function(id = "options", width = 6) {
   bs4Dash$box(
     closable = TRUE,
     maximizable = TRUE,
-    collapsed = TRUE, status = "warning",
+    collapsed = TRUE,
     title = "Options and General Settings",
     width = width,
     shiny$uiOutput(ns("optionUI"), container = shiny$fluidRow),
@@ -15,7 +15,7 @@ ui_options <- function(id = "options", width = 6) {
         12,
         shiny$div(
           class = "text-right py-2",
-          bs4Dash$actionButton(ns("resetOptions"), "Reset", status = "warning")
+          bs4Dash$actionButton(ns("resetOptions"), "Reset")
         )
       )
     )

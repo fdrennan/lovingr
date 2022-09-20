@@ -5,18 +5,18 @@ ui_metadata <- function(id = "metadata", width = 6) {
   box::use(.. / utilities / tables / datatable)
   ns <- shiny$NS(id)
   bs4Dash$box(
-    title = "Data Manager", closable = TRUE, id = ns("dataImport"), status = "primary", maximizable = TRUE, width = 12,
+    title = "Data Manager", closable = TRUE, id = ns("dataImport"), maximizable = TRUE, width = 12,
     shiny$fluidRow(
       shiny$column(
         12,
         shiny$p(
           shiny$h3("1. Import CSM Data from Filesystem"),
           shiny$div(
-            class='text-right',
+            class = "text-right",
             shinyFiles$shinyDirButton(ns("inputDir"),
-                                      "Import",
-                                      "Please select a folder to import CSM data from.", FALSE,
-                                      class = "btn btn-default action-button"
+              "Import",
+              "Please select a folder to import CSM data from.", FALSE,
+              class = "btn btn-default action-button"
             )
           )
         )
@@ -170,11 +170,11 @@ server_metadata <- function(id = "metadata") {
               value = TRUE
             )
           ),
-          shiny$column(6,class='p-3', shiny$downloadButton(ns("downloadData"), "Download Configuration Template")),
+          shiny$column(6, class = "p-3", shiny$downloadButton(ns("downloadData"), "Download Configuration Template")),
           shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
-            shiny$column(12,class='p-3', ...)
+            shiny$column(12, class = "p-3", ...)
           }),
-          shiny$column(12, class='p-3 text-right', shiny$actionButton(ns("startAnalysis"), "Begin"))
+          shiny$column(12, class = "p-3 text-right", shiny$actionButton(ns("startAnalysis"), "Begin"))
         )
       })
 

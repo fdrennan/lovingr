@@ -65,26 +65,25 @@ server_body <- function(id = "body", appSession) {
 
       codereview$server_code_review()
       metadata <- metadata$server_metadata("metadata")
-      
-    
-        shiny$observeEvent(metadata(), {
-          
-          output$metaDataReviewUI <-shiny$renderUI({
-            shiny$fluidRow(
+
+
+      shiny$observeEvent(metadata(), {
+        output$metaDataReviewUI <- shiny$renderUI({
+          shiny$fluidRow(
             datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
           )
         })
-        
+
         datatable$server_dt("metaDataReview", metadata()$clean)
-        
+
         output$dataRaw <- shiny$renderUI({
           shiny$fluidRow(
             shiny$column(12, id = "dataPreview"),
-            shiny$column(12, id = "uiAnalyses"),
-            shiny$column(
-              class = "d-flex justify-content-end align-items-center p-2", 12,
-              bs4Dash$actionButton(ns("getResults"), "Get Results")
-            )
+            shiny$column(12, id = "uiAnalyses")
+            # shiny$column(
+            #   class = "d-flex justify-content-end align-items-center p-2", 12,
+            #   bs4Dash$actionButton(ns("getResults"), "Get Results")
+            # )
           )
         })
       })
@@ -123,8 +122,7 @@ server_body <- function(id = "body", appSession) {
             clean_metadata,
             function(analysis_data, name) {
               shiny$insertUI(
-                "#uiAnalyses",
-                "afterBegin",
+                "#uiAnalyses", "afterBegin",
                 run_analysis$ui_run_analysis(
                   ns(paste0("run_analysis", name)), analysis_data
                 )

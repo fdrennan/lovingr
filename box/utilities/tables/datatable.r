@@ -1,25 +1,25 @@
 #' @export
-ui_dt <- function(id = "dt", title = NULL, collapsed = FALSE,
-                  width = 12, status = "secondary") {
+ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
+                  width = 12) {
   box::use(shiny, DT, bs4Dash, esquisse)
   ns <- shiny$NS(id)
   bs4Dash$box(
-    closable = TRUE, maximizable = TRUE, width = width, status = status,
+    closable = TRUE, maximizable = TRUE, width = width,
     solidHeader = TRUE,
     title = title, collapsed = collapsed,
     shiny$fluidRow(
       shiny$uiOutput(ns("filters"), container = function(...) {
         shiny$column(12, ...)
       }),
-      shiny$column(12,class='p-3', shiny$div(class='text-right', shiny$downloadButton(ns("downloadData"), "Download"))),
+      shiny$column(12, class = "p-3", shiny$div(class = "text-right", shiny$downloadButton(ns("downloadData"), "Download"))),
       bs4Dash$box(
         title = "Table", collapsible = TRUE, collapsed = FALSE, width = 12,
         DT$DTOutput(ns("ui"), width = "100%")
+        # bs4Dash$box(
+        #   title = "Plotting", collapsible = TRUE, width = 12, collapsed = FALSE, header = FALSE,
+        #   esquisse$esquisse_ui(paste0('esquisse', title))
+        # )
       )
-      # bs4Dash$box(
-      #   title = "Plotting", collapsible = TRUE, width = 12, collapsed = FALSE, header = FALSE,
-      #   esquisse$esquisse_ui(paste0('esquisse', title))
-      # )
     )
   )
 }

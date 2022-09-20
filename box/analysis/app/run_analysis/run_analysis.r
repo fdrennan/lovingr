@@ -43,10 +43,11 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         analysisInput <- analysisInput()
         box::use(purrr)
         bs4Dash$box(
+          collapsible = TRUE, maximizable = TRUE,
           closable = TRUE,
           id = ns("analysisBox"),
           width = 12,
-          title = shiny$h2("Flagging Results for ", toupper(analysisInput$analysis_name)), collapsed = TRUE,
+          title = shiny$h5("Flagging Results for ", toupper(analysisInput$analysis_name)), collapsed = TRUE,
           shiny$fluidRow(
             shiny$column(
               12,
@@ -58,7 +59,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
                 datatable$ui_dt(
                   ns("statsResults"),
                   title = "Pre-Flagging",
-                  collapsed = TRUE,
                   width = 12
                 ),
                 datatable$ui_dt(

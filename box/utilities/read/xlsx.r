@@ -4,8 +4,8 @@ ui_xlsx <- function(id = "xlsx") {
   box::use(shiny, .. / tables / datatable, sortable)
   ns <- shiny$NS(id)
   shiny$fluidRow(
-    shiny$column(12, shiny$fluidRow(id = "sheets")),
-    sortable$sortable_js(css_id = "sheets")
+    shiny$column(12, shiny$fluidRow(id = ns("sheets"))),
+    sortable$sortable_js(css_id = ns("sheets"))
   )
 }
 
