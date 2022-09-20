@@ -73,6 +73,7 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
       shiny$observeEvent(analysisOutput(), {
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
+            id = ns("analysisResultsBox"),
             collapsed = TRUE, closable = TRUE, maximizable = TRUE,
             width = 12,
             title = "Columns and Flags",
