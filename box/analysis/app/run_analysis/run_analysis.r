@@ -44,7 +44,6 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         box::use(purrr)
         bs4Dash$box(
           closable = TRUE,
-          status = "success",
           id = ns("analysisBox"),
           width = 12,
           title = shiny$h2("Flagging Results for ", toupper(analysisInput$analysis_name)), collapsed = TRUE,

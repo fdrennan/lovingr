@@ -23,6 +23,9 @@ ui_body <- function(id = "body") {
         offset = 2,
         shiny$fluidRow(
           metadata$ui_metadata(ns("metadata"), width = 12),
+          shiny$uiOutput(ns("metaDataReviewUI"), container = function(...) {
+            shiny$column(12, ...)
+          }),
           shiny$uiOutput(ns("dataRaw"), container = function(...) {
             shiny$column(12, ...)
           }),
@@ -62,10 +65,19 @@ server_body <- function(id = "body", appSession) {
 
       codereview$server_code_review()
       metadata <- metadata$server_metadata("metadata")
-
-      shiny$observeEvent(metadata(), {
+      
+    
+        shiny$observeEvent(metadata(), {
+          
+          output$metaDataReviewUI <-shiny$renderUI({
+            shiny$fluidRow(
+            datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
+          )
+        })
+        
+        datatable$server_dt("metaDataReview", metadata()$clean)
+        
         output$dataRaw <- shiny$renderUI({
-          shiny$req(metadata())
           shiny$fluidRow(
             shiny$column(12, id = "dataPreview"),
             shiny$column(12, id = "uiAnalyses"),
@@ -84,7 +96,7 @@ server_body <- function(id = "body", appSession) {
         shiny$removeUI("#dataPreviewElements")
         shiny$insertUI(
           "#dataPreview", "afterBegin",
-          shiny$column(12,
+          shiny$fluidRow(
             id = "dataPreviewElements"
           )
         )
