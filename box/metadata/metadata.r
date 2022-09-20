@@ -11,11 +11,10 @@ ui_metadata <- function(id = "metadata", width = 6) {
         12,
         shiny$p(
           shiny$h3("1. Import CSM Data from Filesystem"),
-          shinyFiles$shinyDirButton(ns("inputDir"),
-            "Import",
-            "Please select a folder to import CSM data from.", FALSE,
-            class = "btn btn-lg btn-primary"
-          )
+          {
+            # browser()
+            shiny$HTML('<button id="body-metadata-inputDir" type="button" class="shinyDirectories btn btn-FALSE btn btn-lg btn-primary action-button" data-title="Please select a folder to import CSM data from.">Import</button>')
+          }
         )
       ),
       shiny$column(12, id = "metadatawarning", shiny$tags$p(
@@ -26,24 +25,23 @@ ui_metadata <- function(id = "metadata", width = 6) {
         "Analysis Metadata available after successful configuration setup."
       )),
       shiny$uiOutput(ns("study"), container = function(...) {
-        shiny$column(6, class = 'p-3', ...)
+        shiny$column(6, class = "p-3", ...)
       }),
       shiny$uiOutput(ns("year"), container = function(...) {
-        shiny$column(6, class = 'p-3', ...)
+        shiny$column(6, class = "p-3", ...)
       }),
       shiny$uiOutput(ns("month"), container = function(...) {
-        shiny$column(6, class = 'p-3', ...)
+        shiny$column(6, class = "p-3", ...)
       }),
       shiny$uiOutput(ns("analysis"), container = function(...) {
-        shiny$column(6, class = 'p-3', ...)
+        shiny$column(6, class = "p-3", ...)
       }),
       shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
-        shiny$column(12, class = 'p-3', ...)
+        shiny$column(12, class = "p-3", ...)
       }),
-      shiny$column(A
-        12, class = 'p-3',
-        datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
-      )
+      shiny$uiOutput(ns("metaDataReviewUI"), container = function(...) {
+        shiny$column(12, class = "p-3", ...)
+      })
     )
   )
 }
@@ -233,6 +231,11 @@ server_metadata <- function(id = "metadata") {
       })
 
       shiny$observeEvent(config(), {
+        output$metaDataReviewUI <- shiny$renderUI({
+          shiny$fluidRow(
+            datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
+          )
+        })
         datatable$server_dt("metaDataReview", config()$clean)
       })
 
