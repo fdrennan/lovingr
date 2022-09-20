@@ -13,6 +13,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
     ),
     shiny$column(
       12,
+      class = "d-flex justify-content-around align-items-center",
       shinyWidgets$switchInput(ns("runWithDebugger"), "Run With Debugger", value = FALSE),
       shiny$actionButton(ns("runAgain"), "Run Again")
     )
@@ -60,7 +61,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
         if (shouldDebug()) {
           print(preAnalysisData)
           do.call("browser", list())
-        } # call debug(analysis_aei$analysis_aei)
+        }
         results <- tryCatch(
           {
             results <- switch(preAnalysisData$analysis,
