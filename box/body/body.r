@@ -18,27 +18,9 @@ ui_body <- function(id = "body") {
     shiny$includeCSS("www/styles.css"),
     shinyjs$useShinyjs(),
     shiny$fluidRow(
-      shiny$column(12, class = "text-right", shiny$actionButton(ns("resetPage"), "Reset")),
-      shiny$column(10,
-        offset = 1,
-        shiny$fluidRow(
-          metadata$ui_metadata(ns("metadata"), width = 12),
-          shiny$uiOutput(ns("metaDataReviewUI"), container = function(...) {
-            shiny$column(12, ...)
-          }),
-          shiny$uiOutput(ns("dataRaw"), container = function(...) {
-            shiny$column(12, ...)
-          }),
-          shiny$uiOutput(ns("analysisUI"), container = function(...) {
-            shiny$column(12, shiny$fluidRow(
-              ...
-            ))
-          }),
-          shiny$uiOutput(ns("scoreboard"), container = function(...) {
-            shiny$column(12, ...)
-          })
-        )
-      )
+      shiny$uiOutput(ns("mainUI"), container = function(...) {
+        shiny$column(12, ...)
+      })
     )
   )
 }
@@ -54,7 +36,7 @@ server_body <- function(id = "body", appSession) {
     box::use(.. / utilities / read / xlsx)
     box::use(.. / analysis / app / run_analysis / run_analysis)
     box::use(.. / utilities / tables / datatable)
-    box::use(.. / metadata / metadata)
+    box::use(mda = .. / metadata / metadata)
     box::use(.. / utilities / io / file_read_multi_ext)
     box::use(.. / utilities / options / options)
     box::use(.. / utilities / read / xlsx)
@@ -63,15 +45,32 @@ server_body <- function(id = "body", appSession) {
 
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    output$mainUI <- shiny$renderUI({
+      out <-
+        shiny$fluidRow(
+          mda$ui_metadata(ns("metadata"), width = 12),
+          shiny$uiOutput(ns("metaDataReviewUI"), container = function(...) {
+            shiny$column(12, ...)
+          }),
+          shiny$uiOutput(ns("dataRaw"), container = function(...) {
+            shiny$column(12, ...)
+          }),
+          shiny$uiOutput(ns("analysisUI"), container = function(...) {
+            shiny$column(12, shiny$fluidRow(...))
+          }),
+          shiny$uiOutput(ns("scoreboard"), container = function(...) {
+            shiny$column(12, ...)
+          })
+        )
 
-
+      out
+    })
     shiny$observeEvent(input$resetPage, {
       shinyjs$refresh()
     })
-
-    metadata <- metadata$server_metadata("metadata")
-
-    shiny$observeEvent(metadata(), {
+    metadata <- mda$server_metadata("metadata")
+    shiny$observe({
+      shiny$req(metadata())
       output$metaDataReviewUI <- shiny$renderUI({
         shiny$fluidRow(
           datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
@@ -79,7 +78,7 @@ server_body <- function(id = "body", appSession) {
       })
       datatable$server_dt("metaDataReview", metadata()$clean)
     })
-
+    #
     dataFiles <- shiny$eventReactive(metadata(), {
       bs4Dash$updateBox("metaDataReview", action = "toggle")
       metadata <- metadata()
@@ -139,6 +138,7 @@ server_body <- function(id = "body", appSession) {
             output <- run_analysis$server_run_analysis(
               paste0("run_analysis", analysis_data$analysis), analysis_data
             )
+
             output
           }
         )

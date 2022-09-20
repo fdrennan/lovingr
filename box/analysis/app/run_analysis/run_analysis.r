@@ -1,11 +1,22 @@
 #' @export
 ui_run_analysis <- function(id = "run_analysis", data) {
-  box::use(shiny, bs4Dash)
+  box::use(shiny, bs4Dash, shinyWidgets)
   ns <- shiny$NS(id)
   box::use(.. / .. / .. / utilities / tables / datatable)
-  shiny$uiOutput(ns("ui"), container = function(...) {
-    shiny$fluidRow(...)
-  })
+  shiny$fluidRow(
+    shiny$column(12, shiny$h3(shiny$h4(toupper(data$analysis)), class = "display-4")),
+    shiny$column(
+      12,
+      shiny$uiOutput(ns("ui"), container = function(...) {
+        shiny$fluidRow(...)
+      })
+    ),
+    shiny$column(
+      12,
+      shinyWidgets$switchInput(ns("runWithDebugger"), "Run With Debugger", value = FALSE),
+      shiny$actionButton(ns("runAgain"), "Run Again")
+    )
+  )
 }
 
 #' @export
@@ -31,11 +42,21 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
     id,
     function(input, output, session) {
       ns <- session$ns
+      browser()
+      analysis_data <- preAnalysisData$data |> dplyr$rename_all(tolower)
+      variables <- preAnalysisData$variables |> dplyr$rename_all(tolower)
+
+      shouldDebug <- shiny$reactive({
+        message("shouldDebug")
+        input$runWithDebugger
+      })
 
       postAnalysisData <- shiny$reactive({
+        message("postAnalysisData")
         shiny$req(preAnalysisData)
-        analysis_data <- preAnalysisData$data |> dplyr$rename_all(tolower)
-        variables <- preAnalysisData$variables |> dplyr$rename_all(tolower)
+        shiny$req(is.logical(input$runWithDebugger))
+
+        if (shouldDebug()) browser() # call debug(analysis_aei$analysis_aei)
         results <- tryCatch(
           {
             results <- switch(preAnalysisData$analysis,
@@ -117,6 +138,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
+        message("ui")
         output$ui <- shiny$renderUI({
           bs4Dash$box(
             postAnalysisData()$body,
@@ -135,6 +157,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
+        message("uiSummary")
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
             id = ns("analysisResultsBox"),
@@ -173,7 +196,13 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
         datatable$server_dt("flags", data = postAnalysisData()$flags)
       })
 
-      postAnalysisData()
+      shiny$observe({
+        message("observepostAnalysisData")
+        browser()
+        shiny$req(postAnalysisData())
+      })
+
+      postAnalysisData
     }
   )
 }

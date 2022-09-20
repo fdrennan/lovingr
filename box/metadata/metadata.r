@@ -22,13 +22,6 @@ ui_metadata <- function(id = "metadata", width = 6) {
           )
         )
       ),
-      shiny$column(12, id = "metadatawarning", shiny$tags$p(
-        "Selectors for study, year, month, and analysis type will be generated after choosing a root directory for search."
-      ), shiny$tags$p(
-        "Candidate files for analysis are set in the .Rprofile"
-      ), shiny$tags$p(
-        "Analysis Metadata available after successful configuration setup."
-      )),
       shiny$uiOutput(ns("metaDataFilterPanel"), container = function(...) {
         shiny$column(12, ...)
       })
@@ -167,14 +160,14 @@ server_metadata <- function(id = "metadata") {
             12,
             shiny$h3("2. Download and Set up Configuration.")
           ),
-          shiny$column(6,
-            class = "d-flex justify-content-between align-items-center",
+          shiny$column(12,
+            class = "d-flex justify-content-around align-items-center py-3",
             shinyWidgets$prettySwitch(ns("internalConfig"),
               "Use Internal Configuration",
               value = TRUE
-            )
+            ),
+            shiny$downloadButton(ns("downloadData"), "Download Configuration Template")
           ),
-          shiny$column(6, class = "py-3", shiny$downloadButton(ns("downloadData"), "Download Configuration Template")),
           shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
             shiny$column(12, class = "py-3", ...)
           }),
