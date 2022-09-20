@@ -98,7 +98,7 @@ server_body <- function(id = "body", appSession) {
 
       output
     })
-    
+
     shiny$observeEvent(input$startAnalyses, {
       output$analysisUI <- shiny$renderUI({
         shiny$fluidRow(
@@ -108,7 +108,6 @@ server_body <- function(id = "body", appSession) {
     })
 
     dataForScoreboard <- shiny$eventReactive(input$startAnalyses, {
-      
       clean_metadata <- metadata()$clean
       raw_metadata <- metadata()$raw
       clean_metadata <- split(clean_metadata, clean_metadata$analysis)
