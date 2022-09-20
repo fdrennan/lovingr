@@ -26,21 +26,24 @@ ui_metadata <- function(id = "metadata", width = 6) {
         "Analysis Metadata available after successful configuration setup."
       )),
       shiny$uiOutput(ns("study"), container = function(...) {
-        shiny$column(6, ...)
+        shiny$column(6, class = 'p-3', ...)
       }),
       shiny$uiOutput(ns("year"), container = function(...) {
-        shiny$column(6, ...)
+        shiny$column(6, class = 'p-3', ...)
       }),
       shiny$uiOutput(ns("month"), container = function(...) {
-        shiny$column(6, ...)
+        shiny$column(6, class = 'p-3', ...)
       }),
       shiny$uiOutput(ns("analysis"), container = function(...) {
-        shiny$column(6, ...)
+        shiny$column(6, class = 'p-3', ...)
       }),
       shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
-        shiny$column(12, ...)
+        shiny$column(12, class = 'p-3', ...)
       }),
-      datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
+      shiny$column(A
+        12, class = 'p-3',
+        datatable$ui_dt(ns("metaDataReview"), "Meta Data Review", collapsed = TRUE)
+      )
     )
   )
 }

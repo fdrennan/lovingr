@@ -43,7 +43,7 @@ ui_body <- function(id = "body") {
 server_body <- function(id = "body", appSession) {
   # Imports
   {
-    box::use(shiny, uuid, bs4Dash, glue, dplyr, shinyFiles, fs, utils, purrr, shinyAce, jsonlite)
+    box::use(shiny, uuid, bs4Dash, glue, dplyr, tidyselect, shinyFiles, fs, utils, purrr, shinyAce, jsonlite)
     box::use(.. / utilities / chatty / chatty)
     box::use(.. / utilities / read / xlsx)
     box::use(.. / analysis / app / run_analysis / run_analysis)
@@ -161,25 +161,43 @@ server_body <- function(id = "body", appSession) {
             )
           })
 
-
+          # TODO
           scoreboardSheet <-
-            scoreboardSheet |>
+            readRDS("scoreboardSheet.rda") |>
             dplyr$mutate_if(is.numeric, function(x) round(x, 2)) |>
-            dplyr$transmute(
-              analysis, paramcd, Potential.Issue, Potential.Issue.Subfix,
-              flagging_value,
-              Max.Number.Signal.Summary, sitediff.vs.study, Signal.Prefix, Signal.Subfix,
-              Name.of.endpoint.of.interest,
+            dplyr$mutate(
+              # analysis, paramcd,
+              # Potential.Issue,
+              # Potential.Issue.Subfix,
+              # flagging_value,
+              # Max.Number.Signal.Summary, sitediff.vs.study, Signal.Prefix, Signal.Subfix,
+              # Name.of.endpoint.of.interest,
               StudyStatResult = glue$glue(StudyStat),
-              SiteStatResult = glue$glue(SiteStat),
-              csm_version,
-              site
-            )
+              SiteStatResult = glue$glue(SiteStat)
+              # csm_version,
+              # site
+            ) |>
+            dplyr$mutate(Potential.Issue = sample(c(1, 4, 2), 1)) |>
+            dplyr$group_by(Potential.Issue, sitediff.vs.study) |>
+            dplyr$select(Potential.Issue, sitediff.vs.study, diff_pct)
 
-          datatable$server_dt(
-            "scoreboardConfiguration",
-            data = scoreboardSheet
+          purrr$map_dfr(
+            split(scoreboardSheet, scoreboardSheet$Potential.Issue),
+            function(x) {
+              sort_col <- unique(x$sitediff.vs.study)
+              print(sort_col)
+              x |>
+                dplyr$arrange(sort_col)
+            }
           )
+          # `# print() |>
+          # dplyr$glimpse()
+          # dplyr$group_by(Potential.Issue)
+          # dplyr$select(sitediff.vs.study)
+          # dplyr$group_by(Potential.Issue, Max.Number.Signal.Summary) |>
+          # dplyr$count()
+
+          datatable$server_dt("scoreboardConfiguration", data = scoreboardSheet)
         }
       )
     }
