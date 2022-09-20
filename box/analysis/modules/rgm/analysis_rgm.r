@@ -1,10 +1,9 @@
-#' analysis_gm
+#' analysis_rgm
 #' @importFrom dplyr as_tibble
 #' @param file_name Path to repeat growth data
 #' @family csm_analysis_loop
-#' @export analysis_gm
-analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
-  csm_cli_header("RUNNING BUILD REPEAT GROWTH ANALYSIS")
+#' @export analysis_rgm
+analysis_rgm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
   analysis_data <- mutate(analysis_data,
     signals = as.character(paramcd),
     gmtest = signals, sitenumber = siteid
@@ -161,28 +160,4 @@ analysis_gm <- function(analysis_data = NULL, configuration = NULL, NREP = 3) {
   out <-
     out |>
     rename(site = rowname)
-}
-
-if (FALSE) {
-  # library(csm)
-
-  home_path <- Sys.getenv("CSM_HOME")
-
-  csm_data_repeat_growth_testing <- analysis_gm(file_name = file.path("csm_dev", "cache", "summary.sas7bdat.rda"))
-
-  gm_output <- transmute(
-    .data = csm_data_repeat_growth_testing,
-    site = rowname,
-    paramcd = testname,
-    summary_level = "subj_visit",
-    r,
-    n_subj = 0,
-    n_subj_visit = n,
-    obs_pct = ObsPer,
-    stdy_pct = ExpPer,
-    diff_pct = obs_pct - stdy_pct,
-    p_value = pvalue,
-    method = pvalueMethod,
-    flag = 0
-  )
 }
