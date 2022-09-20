@@ -2,24 +2,53 @@
 ui_run_analysis <- function(id = "run_analysis", data) {
   box::use(shiny, bs4Dash)
   ns <- shiny$NS(id)
-  shiny$uiOutput(ns("app"), container = function(...) {
-    shiny$fluidRow(...)
-  })
+  box::use(.. / .. / .. / utilities / tables / datatable)
+  bs4Dash$box(
+    collapsible = TRUE, maximizable = TRUE,
+    closable = TRUE,
+    id = ns("analysisBox"),
+    width = 12,
+    title = paste0("Flagging Results for ", toupper(unique(data$analysis))), collapsed = TRUE,
+    shiny$fluidRow(
+      shiny$column(
+        12,
+        shiny$uiOutput(ns("uiSummary"), container = function(...) {
+          shiny$fluidRow(...)
+        }),
+        shiny$fluidRow(
+          datatable$ui_dt(
+            ns("statsResults"),
+            title = "Pre-Flagging",
+            width = 12
+          ),
+          datatable$ui_dt(
+            ns("flags"), "Flags"
+          )
+        )
+      )
+    )
+  )
 }
 
 #' @export
 server_run_analysis <- function(id = "run_analysis", data, variables) {
-  box::use(shiny, bs4Dash, shinyAce, readr, dplyr, shinyAce)
+  box::use(shiny, bs4Dash, shinyAce, readr, dplyr, stats, shinyAce, purrr)
   box::use(.. / .. / .. / utilities / chatty / chatty)
   box::use(.. / .. / .. / utilities / io / file_read_multi_ext)
   box::use(.. / .. / .. / utilities / tables / datatable)
+  box::use(.. / .. / modules / aei / analysis_aei)
+  box::use(.. / .. / modules / rgv / analysis_rgv)
+  box::use(.. / .. / modules / aecnt / analysis_aecnt)
+  box::use(.. / .. / modules / aegap / analysis_aegap)
+  box::use(.. / .. / modules / vitals / analysis_vitals)
+  box::use(.. / .. / modules / underdose / analysis_underdose)
 
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
-      analysisInput <- shiny$reactive({
+      analysisDataPrep <- shiny$reactive({
         shiny$req(data)
         shiny$req(variables)
 
@@ -39,55 +68,19 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
       })
 
       output$app <- shiny$renderUI({
-        shiny$req(analysisInput())
-        analysisInput <- analysisInput()
+        shiny$req(analysisDataPrep())
+        analysisDataPrep <- analysisDataPrep()
         box::use(purrr)
-        bs4Dash$box(
-          collapsible = TRUE, maximizable = TRUE,
-          closable = TRUE,
-          id = ns("analysisBox"),
-          width = 12,
-          title = shiny$h5("Flagging Results for ", toupper(analysisInput$analysis_name)), collapsed = TRUE,
-          shiny$fluidRow(
-            shiny$column(
-              12,
-              shiny$uiOutput(ns("uiSummary"), container = function(...) {
-                # shiny$column(12, ...)
-                shiny$fluidRow(...)
-              }),
-              shiny$fluidRow(
-                datatable$ui_dt(
-                  ns("statsResults"),
-                  title = "Pre-Flagging",
-                  width = 12
-                ),
-                datatable$ui_dt(
-                  ns("flags"), "Flags"
-                )
-              )
-            )
-          )
-        )
       })
 
-
-
-      analysisStatistics <- shiny$eventReactive(analysisInput(), {
-        box::use(.. / .. / modules / aei / analysis_aei)
-        box::use(.. / .. / modules / rgv / analysis_rgv)
-        box::use(.. / .. / modules / aecnt / analysis_aecnt)
-        box::use(.. / .. / modules / aegap / analysis_aegap)
-        box::use(.. / .. / modules / vitals / analysis_vitals)
-        box::use(.. / .. / modules / underdose / analysis_underdose)
-        box::use(dplyr, purrr)
-
-        analysisInput <- analysisInput()
-        analysis_name <- analysisInput$analysis_name
+      analysisOutput <- shiny$eventReactive(analysisDataPrep(), {
+        analysisDataPrep <- analysisDataPrep()
+        analysis_name <- analysisDataPrep$analysis_name
         shiny$showNotification(ui = paste0(
           "Generating data for ", analysis_name
         ), id = analysis_name, closeButton = FALSE, duration = NULL)
 
-        analysis_data <- analysisInput$analysis_data
+        analysis_data <- analysisDataPrep$analysis_data
 
         results <- switch(analysis_name,
           "aei" = analysis_aei$analysis_aei(analysis_data, variables),
@@ -107,38 +100,34 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
         results
       })
 
-      analysisSummary <- shiny$eventReactive(
-        analysisStatistics(),
-        {
-          box::use(dplyr, stats, purrr)
+      analysisSummary <- shiny$eventReactive(analysisOutput(), {
+        analysisOutput <- analysisOutput()
+        analysisDataPrep <- analysisDataPrep()
+        analysis_name <- analysisDataPrep$analysis_name
+        flaggingSummary <- dplyr$distinct(analysisOutput, flagging_value, flagging_code)
+        flagging_value <- flaggingSummary$flagging_value
+        flagging_code <- flaggingSummary$flagging_code
 
-          analysisStatistics <- analysisStatistics()
-          analysisInput <- analysisInput()
-          analysis_name <- analysisInput$analysis_name
-          flaggingSummary <- dplyr$distinct(analysisStatistics, flagging_value, flagging_code)
-          flagging_value <- flaggingSummary$flagging_value
-          flagging_code <- flaggingSummary$flagging_code
-
-          analysis_data <- analysisInput()$analysis_data
-          names_statistics_input <- names(analysis_data)
-          names_statistics_output <- names(analysisStatistics)
-          analysisStatistics <-
-            analysisStatistics |>
-            dplyr$rowwise() |>
-            dplyr$mutate(
-              is_flagged = eval(parse(text = flagging_code))
-            ) |>
-            dplyr$filter(is_flagged) |>
-            dplyr$distinct()
-          list(
-            analysisStatistics = analysisStatistics,
-            names_statistics_input = names_statistics_input,
-            names_statistics_output = names_statistics_output,
-            flagging_value = flagging_value,
-            flagging_code = flagging_code
-          )
-        }
-      )
+        analysis_data <- analysisDataPrep()$analysis_data
+        names_statistics_input <- names(analysis_data)
+        names_statistics_output <- names(analysisOutput)
+        analysisOutput <-
+          analysisOutput |>
+          dplyr$rowwise() |>
+          dplyr$mutate(
+            is_flagged = eval(parse(text = flagging_code))
+          ) |>
+          dplyr$filter(is_flagged) |>
+          dplyr$distinct()
+        list(
+          analysis_input = analysisDataPrep()$analysis_data,
+          analysisOutput = analysisOutput,
+          names_statistics_input = names_statistics_input,
+          names_statistics_output = names_statistics_output,
+          flagging_value = flagging_value,
+          flagging_code = flagging_code
+        )
+      })
 
       shiny$observeEvent(analysisSummary(), {
         box::use(purrr)
@@ -173,7 +162,7 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
           )
         })
 
-        datatable$server_dt("flags", data = analysisSummary$analysisStatistics)
+        datatable$server_dt("flags", data = analysisSummary$analysisOutput)
       })
 
       # analysisSummaryToScoreboard <- shiny$eventReactive(analysisSummary(), {
