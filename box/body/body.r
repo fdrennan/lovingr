@@ -98,15 +98,17 @@ server_body <- function(id = "body", appSession) {
 
       output
     })
-
-    dataForScoreboard <- shiny$eventReactive(input$startAnalyses, {
+    
+    shiny$observeEvent(input$startAnalyses, {
       output$analysisUI <- shiny$renderUI({
         shiny$fluidRow(
-          shiny$column(12, id = "uiAnalyses"),
-          shiny$column(12, class = "text-right p-3", shiny$actionButton(ns("proceedToScoreboard"), "Generate Scoreboard"))
+          shiny$column(12, id = "uiAnalyses")
         )
       })
+    })
 
+    dataForScoreboard <- shiny$eventReactive(input$startAnalyses, {
+      
       clean_metadata <- metadata()$clean
       raw_metadata <- metadata()$raw
       clean_metadata <- split(clean_metadata, clean_metadata$analysis)
@@ -135,7 +137,7 @@ server_body <- function(id = "body", appSession) {
       output
     })
 
-    shiny$observeEvent(input$proceedToScoreboard, {
+    shiny$observeEvent(dataForScoreboard(), {
       scoreboardSheet <- metadata()$raw[[3]]$data |>
         dplyr$rename(
           analysis = Analysis.Type,
