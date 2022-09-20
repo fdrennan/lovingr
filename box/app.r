@@ -1,7 +1,7 @@
 #' @export
 ui_app <- function() {
   box::use(
-    bs4Dash,
+    bs4Dash, waiter,
     . / header / header,
     . / body / body,
     . / sidebar / sidebar,
@@ -9,11 +9,10 @@ ui_app <- function() {
     . / footer / footer
   )
 
-
-
   bs4Dash$dashboardPage(
-    scrollToTop = TRUE,
+    preloader = list(html = waiter$spin_1(), color = "#333e48"),
     title = "CSM Management",
+    scrollToTop = TRUE,
     fullscreen = TRUE,
     header = header$ui_header(),
     body = body$ui_body(),
@@ -27,9 +26,11 @@ ui_app <- function() {
 server_app <- function(session) {
   box::use(
     . / body / body,
+    . / header / header,
     . / controlbar / controlbar
   )
 
   body$server_body(appSession = session)
+  header$server_header()
   controlbar$server_controlbar()
 }

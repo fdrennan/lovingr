@@ -227,8 +227,7 @@ server_metadata <- function(id = "metadata") {
           ))
           shiny$req(nrow(clean_data) > 0)
         }
-
-        bs4Dash$updateBox(id = "dataImport", action = "toggle") # , options = list(collapsed = TRUE)
+        bs4Dash$updateBox(id = "dataImport", action = "remove")
         out <- list(
           clean = clean_data,
           raw = out

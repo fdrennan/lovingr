@@ -31,10 +31,8 @@ ui_run_analysis <- function(id = "run_analysis", data) {
 }
 
 #' @export
-server_run_analysis <- function(id = "run_analysis", data, variables) {
+server_run_analysis <- function(id = "run_analysis", analysisData) {
   box::use(shiny, bs4Dash, shinyAce, readr, dplyr, stats, shinyAce, purrr)
-  box::use(.. / .. / .. / utilities / chatty / chatty)
-  box::use(.. / .. / .. / utilities / io / file_read_multi_ext)
   box::use(.. / .. / .. / utilities / tables / datatable)
   box::use(.. / .. / modules / aei / analysis_aei)
   box::use(.. / .. / modules / rgv / analysis_rgv)
@@ -48,61 +46,29 @@ server_run_analysis <- function(id = "run_analysis", data, variables) {
     function(input, output, session) {
       ns <- session$ns
 
-      analysisDataPrep <- shiny$reactive({
-        shiny$req(data)
-        shiny$req(variables)
-
-        analysis_name <- unique(data$analysis)
-        analysis_code_path <- list.files(unique(data$analysis_code_path), full.names = T)
-        analysis_data_path <- unique(data$filepath)
-        list(
-          analysis_name = analysis_name,
-          analysis_code_path = analysis_code_path,
-          analysis_file = file_read_multi_ext$run(analysis_code_path),
-          analysis_data = {
-            analysis_data <- file_read_multi_ext$run(analysis_data_path)[[1]]$data
-            names(analysis_data) <- tolower(names(analysis_data))
-            analysis_data
-          }
-        )
-      })
-
-      output$app <- shiny$renderUI({
-        shiny$req(analysisDataPrep())
-        analysisDataPrep <- analysisDataPrep()
-        box::use(purrr)
-      })
-
-      analysisOutput <- shiny$eventReactive(analysisDataPrep(), {
-        analysisDataPrep <- analysisDataPrep()
-        analysis_name <- analysisDataPrep$analysis_name
-        shiny$showNotification(ui = paste0(
-          "Generating data for ", analysis_name
-        ), id = analysis_name, closeButton = FALSE, duration = NULL)
-
-        analysis_data <- analysisDataPrep$analysis_data
-
-        results <- switch(analysis_name,
+      analysisOutput <- shiny$reactive({
+        shiny$req(analysisData)
+        analysis_data <- analysisData$data |> dplyr$rename_all(tolower)
+        variables <- analysisData$variables
+        results <- switch(analysisData$analysis,
           "aei" = analysis_aei$analysis_aei(analysis_data, variables),
           "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
           "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
           "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
           "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables),
-          "underdose" = {
-            analysis_underdose$analysis_underdose(analysis_data, variables)
-          }
+          "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables)
         )
-        print(analysis_name)
         results <- dplyr$mutate(results, paramcd = tolower(paramcd))
-        results <- dplyr$inner_join(data, results)
+        analysisData$results <- results
         datatable$server_dt("statsResults", results)
-        shiny$removeNotification(id = analysis_name)
+        shiny$removeNotification(id = analysisData$analysis)
         results
       })
 
       analysisSummary <- shiny$eventReactive(analysisOutput(), {
         analysisOutput <- analysisOutput()
         analysisDataPrep <- analysisDataPrep()
+        browser()
         analysis_name <- analysisDataPrep$analysis_name
         flaggingSummary <- dplyr$distinct(analysisOutput, flagging_value, flagging_code)
         flagging_value <- flaggingSummary$flagging_value

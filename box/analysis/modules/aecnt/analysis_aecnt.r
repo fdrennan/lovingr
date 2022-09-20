@@ -1,6 +1,7 @@
 #' @export analysis_aecnt
 analysis_aecnt <- function(data, configuration) {
   box::use(purrr, stringr, dplyr, glue)
+  # browser()
   split_names <- stringr$str_split(names(data), "_")
   types <- purrr$keep(split_names, ~ length(..1) > 1)
   types <- unique(purrr$map_chr(types, ~ ..1[[2]]))

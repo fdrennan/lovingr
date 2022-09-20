@@ -4,7 +4,7 @@
 ui_body <- function(id = "body") {
   # Imports
   {
-    box::use(shiny, bs4Dash, shinyFiles, fs)
+    box::use(shiny, bs4Dash, shinyFiles, fs, shinyjs)
     box::use(.. / utilities / options / options)
     box::use(.. / utilities / read / xlsx)
     box::use(.. / utilities / tables / datatable)
@@ -16,7 +16,9 @@ ui_body <- function(id = "body") {
   ns <- shiny$NS(id)
   bs4Dash$dashboardBody(
     shiny$includeCSS("www/styles.css"),
+    shinyjs$useShinyjs(),
     shiny$fluidRow(
+      shiny$column(12, class = "text-right", shiny$actionButton(ns("resetPage"), "Reset")),
       shiny$column(10,
         offset = 1,
         shiny$fluidRow(
@@ -44,7 +46,8 @@ ui_body <- function(id = "body") {
 server_body <- function(id = "body", appSession) {
   # Imports
   {
-    box::use(shiny, uuid, bs4Dash, glue, dplyr, tidyselect, shinyFiles, fs, utils, purrr, shinyAce, jsonlite)
+    box::use(shiny, uuid, bs4Dash, glue, dplyr, tidyselect, shinyFiles)
+    box::use(fs, utils, purrr, shinyAce, jsonlite, shinyjs)
     box::use(.. / utilities / chatty / chatty)
     box::use(.. / utilities / read / xlsx)
     box::use(.. / analysis / app / run_analysis / run_analysis)
@@ -58,6 +61,11 @@ server_body <- function(id = "body", appSession) {
 
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+
+    shiny$observeEvent(input$resetPage, {
+      shinyjs$refresh()
+    })
 
     metadata <- metadata$server_metadata("metadata")
 
@@ -90,15 +98,15 @@ server_body <- function(id = "body", appSession) {
           id = "datamiscFilesRawElements"
         )
       )
-
       variables <- dplyr$mutate_all(metadata()$raw[[1]]$data, tolower)
       output <- purrr$map2(import_files$filepath, import_files$analysis, function(path, analysis) {
         shiny$insertUI("#datamiscFilesRawElements", "afterBegin", xlsx$ui_xlsx(ns(uuid)))
         out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#datamiscFilesRawElements")
         out <- out()[[1]]
+        print("ITERATIOn")
         out$analysis <- analysis
         out$metadata <- dplyr$filter(metadata()$clean, analysis == !!analysis)
-        out$variables
+        out$variables <- variables
         out
       })
       output
@@ -117,26 +125,20 @@ server_body <- function(id = "body", appSession) {
     })
 
     dataForScoreboard <- shiny$eventReactive(input$proceedToStartAnalysis, {
-      clean_metadata <- metadata()$clean
-      raw_metadata <- metadata()$raw
-      clean_metadata <- split(clean_metadata, clean_metadata$analysis)
-      n_increments <- length(clean_metadata)
       output <-
-        purrr$imap(
-          clean_metadata,
-          function(analysis_data, name) {
+        purrr$map(
+          dataFiles(),
+          function(analysis_data) {
             shiny$insertUI(
               "#uiAnalyses", "afterBegin",
               run_analysis$ui_run_analysis(
-                ns(paste0("run_analysis", name)), analysis_data
+                ns(paste0("run_analysis", analysis_data$analysis)), analysis_data
               )
             )
 
-            names(variables) <- tolower(names(variables))
             output <- run_analysis$server_run_analysis(
-              paste0("run_analysis", name), analysis_data, variables
+              paste0("run_analysis", analysis_data$analysis), analysis_data
             )
-            #
             output
           }
         )
