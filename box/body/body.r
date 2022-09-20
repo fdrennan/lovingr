@@ -99,11 +99,11 @@ server_body <- function(id = "body", appSession) {
         )
       )
       variables <- dplyr$mutate_all(metadata()$raw[[1]]$data, tolower)
+      # browser()
       output <- purrr$map2(import_files$filepath, import_files$analysis, function(path, analysis) {
         shiny$insertUI("#datamiscFilesRawElements", "afterBegin", xlsx$ui_xlsx(ns(uuid)))
         out <- xlsx$server_xlsx(uuid, datapath = path, ui_id = "#datamiscFilesRawElements")
         out <- out()[[1]]
-        print("ITERATIOn")
         out$analysis <- analysis
         out$metadata <- dplyr$filter(metadata()$clean, analysis == !!analysis)
         out$variables <- variables
@@ -127,7 +127,6 @@ server_body <- function(id = "body", appSession) {
         purrr$map(
           dataFiles(),
           function(analysis_data) {
-            #
             shiny$insertUI(
               "#uiAnalyses", "afterBegin",
               run_analysis$ui_run_analysis(

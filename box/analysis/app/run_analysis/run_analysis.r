@@ -37,6 +37,10 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
   box::use(.. / .. / utilities / flagging / flag_analysis_data)
   box::use(.. / .. / modules / aei / analysis_aei)
   box::use(.. / .. / modules / rgv / analysis_rgv)
+  box::use(.. / .. / modules / rgm / analysis_rgm)
+  box::use(.. / .. / modules / missdose / analysis_missdose)
+  box::use(.. / .. / modules / diet / analysis_diet)
+  box::use(.. / .. / modules / retention / analysis_retention)
   box::use(.. / .. / modules / aecnt / analysis_aecnt)
   box::use(.. / .. / modules / aegap / analysis_aegap)
   box::use(.. / .. / modules / vitals / analysis_vitals)
@@ -49,6 +53,7 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
       ns <- session$ns
 
       analysisOutput <- shiny$reactive({
+        browser()
         shiny$req(analysisData)
         analysis_data <- analysisData$data |> dplyr$rename_all(tolower)
         variables <- analysisData$variables |> dplyr$rename_all(tolower)
@@ -58,7 +63,10 @@ server_run_analysis <- function(id = "run_analysis", analysisData) {
           "aecnt" = analysis_aecnt$analysis_aecnt(analysis_data, variables),
           "aegap" = analysis_aegap$analysis_aegap(analysis_data, variables),
           "vitals" = analysis_vitals$analysis_vitals(analysis_data, variables),
-          "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables)
+          "underdose" = analysis_underdose$analysis_underdose(analysis_data, variables),
+          "rgm" = analysis_rgm$analysis_rgm(analysis_data, variables),
+          "diet" = analysis_diet$analysis_diet(analysis_data, variables),
+          "missdose" = analysis_missdose$analysis_missdose(analysis_data, variables),
         )
         results <- dplyr$mutate(results, paramcd = tolower(paramcd))
         analysisData$results <- results
