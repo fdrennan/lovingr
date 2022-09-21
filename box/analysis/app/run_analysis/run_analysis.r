@@ -19,7 +19,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
       shiny$inputPanel(
         shinyWidgets$switchInput(ns("runWithDebugger"),
           size = "mini",
-          inline = TRUE, "Run With Debugger", value = TRUE
+          inline = TRUE, "Run With Debugger", value = getOption("debugging")
         ),
         bs4Dash$actionButton(ns("runAgain"), "Run Again", size = "xs")
       )
@@ -51,26 +51,27 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
     function(input, output, session) {
       ns <- session$ns
 
+
       analysis_data <- preAnalysisData$data |> dplyr$rename_all(tolower)
       variables <- preAnalysisData$variables |> dplyr$rename_all(tolower)
 
-      shouldDebug <- shiny$reactive({
-        message("shouldDebug")
-        input$runWithDebugger
-      })
 
       postAnalysisData <- shiny$reactive({
+        browser()
         message("postAnalysisData")
         print(input$runAgain)
         shiny$req(preAnalysisData)
-        shiny$req(is.logical(input$runWithDebugger))
-        if (shouldDebug()) {
+        runWithDebugger <- ifelse(is.null(input$runWithDebugger), FALSE, input$runWithDebugger)
+        # shiny$req(shouldDebug())
+
+        if (runWithDebugger) {
           print(preAnalysisData)
           do.call("browser", list())
         }
         results <- tryCatch(
           {
-            if (shouldDebug()) {
+            browser()
+            if (runWithDebugger) {
               print(preAnalysisData)
               do.call("browser", list())
             }
@@ -86,7 +87,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
               "missdose" = analysis_missdose$analysis_missdose(analysis_data, variables),
             )
 
-            if (shouldDebug()) {
+            if (runWithDebugger) {
               print(results)
               do.call("browser", list())
             }
@@ -130,7 +131,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             postAnalysisData
           },
           error = function(err) {
-            if (shouldDebug()) do.call("browser", list())
             postAnalysisData <- preAnalysisData
             postAnalysisData$err <- err
             postAnalysisData$title <- shiny$fluidRow(
@@ -159,7 +159,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
       shiny$observeEvent(postAnalysisData(), {
         message("ui")
-        if (shouldDebug()) do.call("browser", list())
         datatable$server_dt("statsResults", postAnalysisData()$results)
         output$ui <- shiny$renderUI({
           bs4Dash$box(
@@ -222,7 +221,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
         datatable$server_dt("flags", data = postAnalysisData()$flags)
       })
 
-      postAnalysisData
+      postAnalysisData()
     }
   )
 }

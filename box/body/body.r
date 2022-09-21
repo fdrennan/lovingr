@@ -128,7 +128,6 @@ server_body <- function(id = "body", appSession) {
     })
 
     dataForScoreboard <- shiny$eventReactive(input$proceedToStartAnalysis, {
-      browser()
       output <-
         purrr$map(
           dataFiles(),
@@ -140,13 +139,10 @@ server_body <- function(id = "body", appSession) {
               )
             )
 
-            output <- run_analysis$server_run_analysis(paste0("run_analysis", analysis_data$analysis), analysis_data)
             browser()
-            tryCatch(expr = {
-              output()
-            }, error = function(err) {
-              browser()
-            })
+            output <- run_analysis$server_run_analysis(paste0("run_analysis", analysis_data$analysis), analysis_data)
+
+            output()
           }
         )
 
@@ -155,6 +151,7 @@ server_body <- function(id = "body", appSession) {
 
 
     shiny$observeEvent(dataForScoreboard(), {
+      browser()
       shiny$req(all(sapply(dataForScoreboard(), is.null)))
       scoreboardSheet <- metadata()$raw[[3]]$data |>
         dplyr$rename(analysis = Analysis.Type) |>
