@@ -23,7 +23,19 @@ ui_metadata <- function(id = "metadata", width = 6) {
                 )
               )
             )
-          )
+          ),
+          shiny$uiOutput(ns("study"), container = function(...) {
+            shiny$column(6, class = "py-3", ...)
+          }),
+          shiny$uiOutput(ns("year"), container = function(...) {
+            shiny$column(6, class = "py-3", ...)
+          }),
+          shiny$uiOutput(ns("month"), container = function(...) {
+            shiny$column(6, class = "py-3", ...)
+          }),
+          shiny$uiOutput(ns("analysis"), container = function(...) {
+            shiny$column(6, class = "py-3", ...)
+          })
         )
       ),
       shiny$uiOutput(ns("dataFilterManager"), container = function(...) {
@@ -62,7 +74,7 @@ server_metadata <- function(id = "metadata") {
       shiny$observeEvent(csmDataLocationsTable(), {
         output$dataFilterManager <- shiny$renderUI({
           bs4Dash$box(
-            title = "Data", id = ns("dataIt"),
+            title = "Data", id = ns("metaDataFilterPanelBox"),
             closable = TRUE, collpased = FALSE, maximizable = TRUE, width = 12,
             shiny$uiOutput(ns("metaDataFilterPanel"), container = function(...) {
               shiny$fluidRow(shiny$column(
@@ -71,20 +83,10 @@ server_metadata <- function(id = "metadata") {
             })
           )
         })
+
+
         output$metaDataFilterPanel <- shiny$renderUI({
           shiny$fluidRow(
-            shiny$uiOutput(ns("study"), container = function(...) {
-              shiny$column(6, class = "py-3", ...)
-            }),
-            shiny$uiOutput(ns("year"), container = function(...) {
-              shiny$column(6, class = "py-3", ...)
-            }),
-            shiny$uiOutput(ns("month"), container = function(...) {
-              shiny$column(6, class = "py-3", ...)
-            }),
-            shiny$uiOutput(ns("analysis"), container = function(...) {
-              shiny$column(6, class = "py-3", ...)
-            }),
             shiny$uiOutput(ns("configurationUploadPanel"), container = function(...) {
               shiny$column(12, class = "py-3", ...)
             })
@@ -273,6 +275,8 @@ server_metadata <- function(id = "metadata") {
           shiny$req(FALSE)
         }
         bs4Dash$updateBox(id = "dataImport", action = "remove")
+        bs4Dash$updateBox(id = "metaDataFilterPanelBox", action = "remove")
+
         out <- list(
           clean = clean_data,
           raw = raw_config
