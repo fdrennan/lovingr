@@ -17,7 +17,10 @@ ui_run_analysis <- function(id = "run_analysis", data) {
     shiny$column(
       2,
       shiny$inputPanel(
-        shinyWidgets$switchInput(ns("runWithDebugger"), size = "mini", inline = TRUE, "Run With Debugger", value = FALSE),
+        shinyWidgets$switchInput(ns("runWithDebugger"),
+          size = "mini",
+          inline = TRUE, "Run With Debugger", value = TRUE
+        ),
         bs4Dash$actionButton(ns("runAgain"), "Run Again", size = "xs")
       )
     )
@@ -67,6 +70,10 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
         }
         results <- tryCatch(
           {
+            if (shouldDebug()) {
+              print(preAnalysisData)
+              do.call("browser", list())
+            }
             results <- switch(preAnalysisData$analysis,
               "aei" = analysis_aei$analysis_aei(analysis_data, variables),
               "rgv" = analysis_rgv$analysis_rgv(analysis_data, variables),
@@ -152,6 +159,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
       shiny$observeEvent(postAnalysisData(), {
         message("ui")
+        if (shouldDebug()) do.call("browser", list())
         datatable$server_dt("statsResults", postAnalysisData()$results)
         output$ui <- shiny$renderUI({
           bs4Dash$box(
@@ -171,6 +179,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
+        if (shouldDebug()) do.call("browser", list())
         flagging_data <- dplyr$distinct(postAnalysisData()$metadata, flagging_value, flagging_code)
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
@@ -209,7 +218,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             )
           )
         })
-
+        if (shouldDebug()) do.call("browser", list())
         datatable$server_dt("flags", data = postAnalysisData()$flags)
       })
 

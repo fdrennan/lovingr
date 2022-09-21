@@ -9,13 +9,13 @@ options(
     rgm = "csmgmsum.sas7bdat",
     rgv = "csmrgvst.sas7bdat",
     # vitals = "csmvs.sas7bdat",
-    missdose = "csmmdosest.sas7bdat",
-    diet = "csmdiet.sas7bdat",
-    aegap = "csmaetrt.sas7bdat",
-    aegap = "csmae.sas7bdat", # old
-    underdose = "csmexvis.sas7bdat",
-    aecnt = "csm_aecnt.csv",
-    diet = "csmdiet.sas7bdat",
+    # missdose = "csmmdosest.sas7bdat",
+    # diet = "csmdiet.sas7bdat",
+    # aegap = "csmaetrt.sas7bdat",
+    # aegap = "csmae.sas7bdat", # old
+    # underdose = "csmexvis.sas7bdat",
+    # aecnt = "csm_aecnt.csv",
+    # diet = "csmdiet.sas7bdat",
     meta = "csmpt.sas7bdat"
   )
 )

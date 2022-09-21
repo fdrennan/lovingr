@@ -142,17 +142,22 @@ server_body <- function(id = "body", appSession) {
             output <- run_analysis$server_run_analysis(
               paste0("run_analysis", analysis_data$analysis), analysis_data
             )
-            #
+
             tryCatch(expr = {
+              browser()
               output()
             }, error = function(err) {
+              browser()
             })
           }
         )
+      # browser()
       output
     })
 
+
     shiny$observeEvent(dataForScoreboard(), {
+      shiny$req(all(sapply(dataForScoreboard(), is.null)))
       scoreboardSheet <- metadata()$raw[[3]]$data |>
         dplyr$rename(analysis = Analysis.Type) |>
         dplyr$mutate(analysis = tolower(analysis))
