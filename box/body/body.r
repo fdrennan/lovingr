@@ -24,6 +24,9 @@ ui_body <- function(id = "body") {
       ),
       shiny$uiOutput(ns("mainUI"), container = function(...) {
         shiny$column(12, ...)
+      }),
+      shiny$uiOutput(ns("esquisseUI"), container = function(...) {
+        shiny$column(12, ...)
       })
     )
   )
@@ -35,7 +38,7 @@ server_body <- function(id = "body", appSession) {
   # Imports
   {
     box::use(shiny, uuid, bs4Dash, glue, dplyr, tidyselect, shinyFiles)
-    box::use(fs, utils, purrr, shinyAce, jsonlite, shinyjs)
+    box::use(fs, utils, purrr, shinyAce, jsonlite, shinyjs, esquisse)
     box::use(.. / utilities / chatty / chatty)
     box::use(.. / utilities / read / xlsx)
     box::use(.. / analysis / app / run_analysis / run_analysis)
@@ -150,12 +153,28 @@ server_body <- function(id = "body", appSession) {
 
 
     shiny$observeEvent(dataForScoreboard(), {
-      browser()
+      # browser()
 
       plotting_data <- purrr$map(dataForScoreboard(), function(analysisList) {
         print(names(analysisList))
-        analysisList[names(analysisList) %in% c("data", "variables", "results", "flags")]
+        analysisList[names(analysisList) %in% c("analysis", "data", "variables", "results", "flags")]
       })
+
+      output$esquisseUI <- shiny$renderUI({
+        esquisse$esquisse_ui(
+          id = ns("esquisse"),
+          header = FALSE # dont display gadget title
+        )
+      })
+
+      plotData <- plotting_data[[1]]
+
+      data_r <- shiny$reactiveValues(data = plotData$data, name = plotData$analysis)
+
+      results <- esquisse$esquisse_server(
+        id = "esquisse",
+        data_rv = data_r
+      )
       #   shiny$req(all(sapply(dataForScoreboard(), is.null)))
       #   scoreboardSheet <- metadata()$raw[[3]]$data |>
       #     dplyr$rename(analysis = Analysis.Type) |>
