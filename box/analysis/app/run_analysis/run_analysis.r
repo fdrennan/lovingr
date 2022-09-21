@@ -4,19 +4,20 @@ ui_run_analysis <- function(id = "run_analysis", data) {
   ns <- shiny$NS(id)
   box::use(.. / .. / .. / utilities / tables / datatable)
   shiny$fluidRow(
+    class = "border-top my-3",
     shiny$column(12, shiny$h3(shiny$h4(toupper(data$analysis)), class = "display-4")),
+    shiny$column(12,
+      class = "d-flex justify-content-between align-items-top",
+      shinyWidgets$switchInput(ns("runWithDebugger"), size = "mini", inline = TRUE, "Run With Debugger", value = FALSE),
+      bs4Dash$actionButton(ns("runAgain"), "Run Again", size = "xs")
+    ),
     shiny$column(
       12,
       shiny$uiOutput(ns("ui"), container = function(...) {
         shiny$fluidRow(...)
       })
     ),
-    shiny$column(
-      12,
-      class = "d-flex justify-content-around align-items-center",
-      shinyWidgets$switchInput(ns("runWithDebugger"), "Run With Debugger", value = FALSE),
-      shiny$actionButton(ns("runAgain"), "Run Again")
-    )
+    shiny$tags$hr()
   )
 }
 

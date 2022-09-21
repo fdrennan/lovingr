@@ -18,6 +18,10 @@ ui_body <- function(id = "body") {
     shiny$includeCSS("www/styles.css"),
     shinyjs$useShinyjs(),
     shiny$fluidRow(
+      shiny$column(
+        class = "d-flex justify-content-end align-items-top pb-3",
+        12, bs4Dash$actionButton(ns("resetPage"), "Start Over", size = "xs")
+      ),
       shiny$uiOutput(ns("mainUI"), container = function(...) {
         shiny$column(12, ...)
       })
@@ -142,7 +146,6 @@ server_body <- function(id = "body", appSession) {
             tryCatch(expr = {
               output()
             }, error = function(err) {
-              # browser()
             })
           }
         )

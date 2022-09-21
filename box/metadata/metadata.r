@@ -4,26 +4,30 @@ ui_metadata <- function(id = "metadata", width = 6) {
   box::use(.. / utilities / io / file_upload)
   box::use(.. / utilities / tables / datatable)
   ns <- shiny$NS(id)
-  bs4Dash$box(
-    title = "Data Manager", id = ns("dataImport"),
-    closable = TRUE, collpased = FALSE, maximizable = TRUE, width = 12,
+  shiny$column(
+    12,
     shiny$fluidRow(
-      shiny$column(
-        12,
-        shiny$p(
-          shiny$h3("1. Import CSM Data from Filesystem"),
-          shiny$div(
-            class = "text-right",
-            shinyFiles$shinyDirButton(ns("inputDir"),
-              "Import",
-              "Please select a folder to import CSM data from.", FALSE,
-              class = "btn btn-default action-button"
+      bs4Dash$box(
+        title = "Data Manager", id = ns("dataImport"),
+        closable = TRUE, collpased = FALSE, maximizable = TRUE, width = 12,
+        shiny$fluidRow(
+          shiny$column(
+            12,
+            shiny$p(
+              shiny$h3("1. Import CSM Data from Filesystem"),
+              shiny$div(
+                class = "text-right",
+                shinyFiles$shinyDirButton(ns("inputDir"), "Import",
+                  "Please select a folder to import CSM data from.", FALSE,
+                  class = "btn btn-default action-button"
+                )
+              )
             )
           )
         )
       ),
-      shiny$uiOutput(ns("metaDataFilterPanel"), container = function(...) {
-        shiny$column(12, ...)
+      shiny$uiOutput(ns("dataFilterManager"), container = function(...) {
+        shiny$column(12, shiny$fluidRow(...))
       })
     )
   )
@@ -56,6 +60,17 @@ server_metadata <- function(id = "metadata") {
       })
 
       shiny$observeEvent(csmDataLocationsTable(), {
+        output$dataFilterManager <- shiny$renderUI({
+          bs4Dash$box(
+            title = "Data", id = ns("dataIt"),
+            closable = TRUE, collpased = FALSE, maximizable = TRUE, width = 12,
+            shiny$uiOutput(ns("metaDataFilterPanel"), container = function(...) {
+              shiny$fluidRow(shiny$column(
+                12, ...
+              ))
+            })
+          )
+        })
         output$metaDataFilterPanel <- shiny$renderUI({
           shiny$fluidRow(
             shiny$uiOutput(ns("study"), container = function(...) {
@@ -171,7 +186,7 @@ server_metadata <- function(id = "metadata") {
           shiny$uiOutput(ns("configurationUploadToggle"), container = function(...) {
             shiny$column(12, class = "py-3", ...)
           }),
-          shiny$column(12, class = "py-3 text-right", shiny$actionButton(ns("startAnalysis"), "Begin"))
+          shiny$column(12, class = "py-3 text-right", bs4Dash$actionButton(ns("startAnalysis"), "Begin"))
         )
       })
 

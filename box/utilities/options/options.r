@@ -10,14 +10,14 @@ ui_options <- function(id = "options", width = 6) {
     width = width,
     shiny$uiOutput(ns("optionUI"), container = shiny$fluidRow),
     shiny$fluidRow(
-      shiny$tags$head(shinyToastify$useShinyToastify()),
-      shiny$column(
-        12,
-        shiny$div(
-          class = "text-right py-2",
-          bs4Dash$actionButton(ns("resetOptions"), "Reset")
-        )
-      )
+      shiny$tags$head(shinyToastify$useShinyToastify())
+      # shiny$column(
+      #   12,
+      #   shiny$div(
+      #     class = "text-right py-2",
+      #     bs4Dash$actionButton(ns("resetOptions"), "Reset")
+      #   )
+      # )
     )
   )
 }
