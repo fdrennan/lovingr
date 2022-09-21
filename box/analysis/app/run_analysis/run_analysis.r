@@ -1,6 +1,6 @@
 #' @export
 ui_run_analysis <- function(id = "run_analysis", data) {
-  box::use(shiny, bs4Dash, shinyWidgets)
+  box::use(shiny, bs4Dash, shinyWidgets, shinycssloaders)
   ns <- shiny$NS(id)
   box::use(.. / .. / .. / utilities / tables / datatable)
   shiny$fluidRow(
