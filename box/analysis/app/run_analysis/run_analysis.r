@@ -27,7 +27,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
 #' @export
 server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
   {
-    box::use(shiny, bs4Dash, shinyAce, readr, glue, dplyr, stats, shinyAce, purrr)
+    box::use(shiny, bs4Dash, shinyAce, readr, glue, utils, dplyr, stats, shinyAce, purrr)
     box::use(.. / .. / .. / utilities / tables / datatable)
     box::use(.. / .. / utilities / flagging / flag_analysis_data)
     box::use(.. / .. / modules / aei / analysis_aei)
@@ -124,7 +124,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
           },
           error = function(err) {
             if (shouldDebug()) do.call("browser", list())
-            postAnalysisData <- list()
+            postAnalysisData <- preAnalysisData
             postAnalysisData$err <- err
             postAnalysisData$title <- shiny$fluidRow(
               shiny$column(12, glue$glue("Failure in {preAnalysisData$analysis}"))
@@ -171,8 +171,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
-        # browser()
-        message("uiSummary")
+        flagging_data <- dplyr$distinct(postAnalysisData()$metadata, flagging_value, flagging_code)
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
             id = ns("analysisResultsBox"),
@@ -182,22 +181,25 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             shiny$fluidRow(
               shiny$column(12, shiny$h1("Inputs")),
               shiny$column(12, shiny$fluidRow(
+                class = "text-left",
                 lapply(names(postAnalysisData()$data), function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
               )),
               shiny$column(12, shiny$h1("Outputs")),
               shiny$column(12, shiny$fluidRow(
+                class = "text-left",
                 lapply(names(postAnalysisData()$results), function(x) {
                   shiny$div(class = "col-xl-2 col-lg-2 col-md-3 col-sm-4 col-xs-4", shiny$h5(x))
                 })
               )),
               shiny$column(12, shiny$h1("Flags")),
               shiny$column(12, purrr$map2(
-                postAnalysisData()$metadata$flagging_value,
-                postAnalysisData()$metadata$flagging_code,
+                flagging_data$flagging_value,
+                flagging_data$flagging_code,
                 function(x, y) {
                   shiny$fluidRow(
+                    class = "text-left",
                     shiny$column(2, x),
                     shiny$column(10, shiny$tags$pre(y)),
                     shiny$tags$hr()
