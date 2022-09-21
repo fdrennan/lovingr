@@ -56,7 +56,7 @@ server_code_review <- function(id = "code_review") {
               shiny$tags$p(fs$path_file(path)),
               shinyAce$aceEditor(
                 outputId = uuid$UUIDgenerate(),
-                value = file_read_multi_ext$run(path),
+                value = file_read_multi_ext$read_multi(path),
                 mode = "r",
                 hotkeys = list(
                   helpKey = "F1",

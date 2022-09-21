@@ -44,7 +44,6 @@ server_body <- function(id = "body", appSession) {
     box::use(.. / analysis / app / run_analysis / run_analysis)
     box::use(.. / utilities / tables / datatable)
     box::use(mda = .. / metadata / metadata)
-    box::use(.. / utilities / io / file_read_multi_ext)
     box::use(.. / utilities / options / options)
     box::use(.. / utilities / read / xlsx)
     box::use(.. / utilities / codereview / codereview)

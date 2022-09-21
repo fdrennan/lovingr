@@ -17,3 +17,6 @@ push:
 
 
 all: style snapshot push
+
+clean:
+	rm -rf *.rda

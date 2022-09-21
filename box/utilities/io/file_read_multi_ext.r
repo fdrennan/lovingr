@@ -1,5 +1,5 @@
 #' @export
-run <- function(datapath) {
+read_multi <- function(datapath) {
   box::use(fs, haven, readr, openxlsx)
   datapath_ext <- fs$path_ext(datapath)
 
