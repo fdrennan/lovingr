@@ -153,17 +153,17 @@ server_body <- function(id = "body", appSession) {
 
 
     shiny$observeEvent(dataForScoreboard(), {
-      # browser()
-
       plotting_data <- purrr$map(dataForScoreboard(), function(analysisList) {
         print(names(analysisList))
         analysisList[names(analysisList) %in% c("analysis", "data", "variables", "results", "flags")]
       })
 
       output$esquisseUI <- shiny$renderUI({
-        esquisse$esquisse_ui(
-          id = ns("esquisse"),
-          header = FALSE # dont display gadget title
+        shiny$fluidRow(
+          esquisse$esquisse_ui(
+            id = ns("esquisse"),
+            header = FALSE # dont display gadget title
+          )
         )
       })
 
