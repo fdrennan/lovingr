@@ -80,7 +80,7 @@ server_metadata <- function(id = "metadata") {
         )
         # c(input$inputDir$root, input$inputDir$path)
         # base_directory <- file.path(input$inputDir$root, input$inputDir$path[[2]])
-        browser()
+        
         csmDataLocationsTable <- meta$get_data(base_directory)
         csmDataLocationsTable
       })
