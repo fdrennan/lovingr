@@ -16,8 +16,7 @@ ui_run_analysis <- function(id = "run_analysis", data) {
       shiny$uiOutput(ns("ui"), container = function(...) {
         shiny$fluidRow(...)
       })
-    ),
-    shiny$tags$hr()
+    )
   )
 }
 
