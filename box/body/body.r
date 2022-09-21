@@ -150,21 +150,28 @@ server_body <- function(id = "body", appSession) {
 
 
     shiny$observeEvent(dataForScoreboard(), {
-      shiny$req(all(sapply(dataForScoreboard(), is.null)))
-      scoreboardSheet <- metadata()$raw[[3]]$data |>
-        dplyr$rename(analysis = Analysis.Type) |>
-        dplyr$mutate(analysis = tolower(analysis))
+      browser()
 
-      flags <- purrr$map_dfr(dataForScoreboard(), function(x) {
-        x$flags
+      plotting_data <- purrr$map(dataForScoreboard(), function(analysisList) {
+        print(names(analysisList))
+        analysisList[names(analysisList) %in% c("data", "variables", "results", "flags")]
       })
-
-      output$scoreboard <- shiny$renderUI({
-        shiny$fluidRow(
-          datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
-        )
-      })
-      datatable$server_dt("scoreboardConfiguration", data = flags)
+      #   shiny$req(all(sapply(dataForScoreboard(), is.null)))
+      #   scoreboardSheet <- metadata()$raw[[3]]$data |>
+      #     dplyr$rename(analysis = Analysis.Type) |>
+      #     dplyr$mutate(analysis = tolower(analysis))
+      #
+      #   flags <- purrr$map_dfr(dataForScoreboard(), function(x) {
+      #     x$flags
+      #   })
+      #
+      #   output$scoreboard <- shiny$renderUI({
+      #     shiny$fluidRow(
+      #       datatable$ui_dt(ns("scoreboardConfiguration"), "Scoreboard")
+      #     )
+      #   })
+      #   datatable$server_dt("scoreboardConfiguration", data = flags)
+      # })
     })
   })
 }
