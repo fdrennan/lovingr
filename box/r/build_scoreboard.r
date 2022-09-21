@@ -78,9 +78,9 @@ build_scoreboard <- function(analysis_results, scoreboard, n_sub_information, no
       try(expr = {
         # y <- split(y, 1:nrow(y))
         # browser()
-        
-        if ('siteid' %in% y) {
-          cli_alert_danger('Need to update to not use, pick site only - clean up names related to site')
+
+        if ("siteid" %in% y) {
+          cli_alert_danger("Need to update to not use, pick site only - clean up names related to site")
           y <- y %>% mutate(siteid = as.character(siteid))
         }
         y %>%

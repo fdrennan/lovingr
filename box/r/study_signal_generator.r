@@ -203,18 +203,18 @@ study_signal_generator <- function(path_csm_excel = "CSMConfigMastersheet.xlsx",
   if (rgv_tables) {
     # browser()
     base_path <- mastersheet$data_paths[[2]][[1]]
-    rgv_input <- str_split(str_remove(base_path, '/sassys/cdm/cdmdev/'), "/")[[1]]
-    
+    rgv_input <- str_split(str_remove(base_path, "/sassys/cdm/cdmdev/"), "/")[[1]]
+
     project <- rgv_input[[1]]
     study <- rgv_input[[3]]
-    cutoff <- paste0(str_extract_all(rgv_input, '[0-9]')[[4]], collapse = '')
+    cutoff <- paste0(str_extract_all(rgv_input, "[0-9]")[[4]], collapse = "")
     indication <- rgv_input[[2]]
-    
+
     csm_rgv_tbls(project, indication, study, cutoff)
   }
-  
-  
-  
+
+
+
   analysis_results <- csm_analysis(
     mastersheet = mastersheet,
     debugging = debugging,
@@ -222,7 +222,7 @@ study_signal_generator <- function(path_csm_excel = "CSMConfigMastersheet.xlsx",
   )
   c(analysis_results, analysis_errors) %<-% separate_analysis_errors(analysis_results)
   analysis_results <- remap_rename(analysis_results, meta_data, n_sub_information)
-  
+
   # browser()
   # Scoreboard Generation ---------------------------------------------------
   scoreboard <- tryCatch(expr = {
@@ -259,7 +259,7 @@ study_signal_generator <- function(path_csm_excel = "CSMConfigMastersheet.xlsx",
   tryCatch(expr = {
     write_plot_files(mastersheet, repository = repository)
   }, error = function(err) {
-    cli_alert_warning('Plots did not generate')
+    cli_alert_warning("Plots did not generate")
   })
 
   cli_alert_info("All done!")

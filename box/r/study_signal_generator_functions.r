@@ -48,7 +48,7 @@ remap_rename <- function(analysis_results, meta_data, n_sub_information) {
         print(x)
         if ("siteid" %in% colnames(x)) {
           x$site <- x$siteid
-          x$siteid = NULL
+          x$siteid <- NULL
         }
         x$site <- as.character(x$site)
         x$site <- Vectorize(CONVERT_TO_SITE)(x$site)

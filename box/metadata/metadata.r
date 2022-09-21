@@ -65,22 +65,21 @@ server_metadata <- function(id = "metadata") {
       shinyFiles$shinyDirChoose(input, id = "inputDir", roots = getOption("file_import_working_directory"))
 
       csmDataLocationsTable <- shiny$eventReactive(input$inputDir, {
-        
         shiny$req(!inherits(input$inputDir, "shinyActionButtonValue"))
-        
+
         file_path <- input$inputDir$path
         file_root <- input$inputDir$root
-        file_path[[1]] = NULL
+        file_path[[1]] <- NULL
         # file_path[[1]] = input$inputDir$root
         # file_path <- paste0(paste0(file_path, collapse="/"), collapse = '')
         # base_directory <- paste0(c(file_root, file_path), collapse = '')
-        base_directory <- paste0(c(file_root, file_path), collapse = '/')
+        base_directory <- paste0(c(file_root, file_path), collapse = "/")
         shiny$showNotification(
-          shiny$tags$pre(glue$glue('Searching for data in {base_directory}'))
+          shiny$tags$pre(glue$glue("Searching for data in {base_directory}"))
         )
         # c(input$inputDir$root, input$inputDir$path)
         # base_directory <- file.path(input$inputDir$root, input$inputDir$path[[2]])
-        
+
         csmDataLocationsTable <- meta$get_data(base_directory)
         csmDataLocationsTable
       })
