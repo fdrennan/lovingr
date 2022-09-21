@@ -13,9 +13,12 @@ ui_run_analysis <- function(id = "run_analysis", data) {
     ),
     shiny$column(
       12,
-      shiny$uiOutput(ns("ui"), container = function(...) {
-        shiny$fluidRow(...)
-      })
+      shinycssloaders$withSpinner(
+        image = gsub("www/", "", sample(list.files("www/spinners", full.names = T), 1)),
+        shiny$uiOutput(ns("ui"), container = function(...) {
+          shiny$fluidRow(...)
+        })
+      )
     )
   )
 }
@@ -57,7 +60,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
         print(input$runAgain)
         shiny$req(preAnalysisData)
         shiny$req(is.logical(input$runWithDebugger))
-
         if (shouldDebug()) {
           print(preAnalysisData)
           do.call("browser", list())
@@ -82,8 +84,8 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             }
 
             results <- dplyr$mutate(results, paramcd = tolower(paramcd))
-            postAnalysisData <- list()
-            postAnalysisData <- append(preAnalysisData, results)
+            postAnalysisData <- preAnalysisData
+            postAnalysisData$results <- results
             postAnalysisData$flags <- flag_analysis_data$flag_analysis_data(results, postAnalysisData$metadata)
 
             datatable$server_dt("statsResults", results)
@@ -169,6 +171,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
       shiny$observeEvent(postAnalysisData(), {
         message("uiSummary")
         output$uiSummary <- shiny$renderUI({
+          # browser()
           bs4Dash$box(
             id = ns("analysisResultsBox"),
             collapsed = TRUE, closable = TRUE, maximizable = TRUE,

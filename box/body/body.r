@@ -138,11 +138,11 @@ server_body <- function(id = "body", appSession) {
                 ns(paste0("run_analysis", analysis_data$analysis)), analysis_data
               )
             )
-            # browser()
+            #
             output <- run_analysis$server_run_analysis(
               paste0("run_analysis", analysis_data$analysis), analysis_data
             )
-            # browser()
+            #
             tryCatch(expr = {
               output()
             }, error = function(err) {
