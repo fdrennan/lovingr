@@ -4,7 +4,7 @@ get_data <- function(base_directory = getwd()) {
     openxlsx, fs, dplyr, purrr, stringr,
     lubridate, cli, tictoc, stats, shiny, glue
   )
-
+  
   analysis_dataset_names <- getOption("analysis_dataset_names")
   analysis_dataset_regex <- {
     adn <- analysis_dataset_names
