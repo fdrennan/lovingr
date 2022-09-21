@@ -57,7 +57,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       postAnalysisData <- shiny$reactive({
-        browser()
         message("postAnalysisData")
         print(input$runAgain)
         shiny$req(preAnalysisData)
@@ -70,7 +69,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
         }
         results <- tryCatch(
           {
-            browser()
             if (runWithDebugger) {
               print(preAnalysisData)
               do.call("browser", list())
@@ -178,7 +176,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
-        if (shouldDebug()) do.call("browser", list())
         flagging_data <- dplyr$distinct(postAnalysisData()$metadata, flagging_value, flagging_code)
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
@@ -217,7 +214,6 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             )
           )
         })
-        if (shouldDebug()) do.call("browser", list())
         datatable$server_dt("flags", data = postAnalysisData()$flags)
       })
 
