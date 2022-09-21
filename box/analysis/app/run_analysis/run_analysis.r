@@ -88,7 +88,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
             postAnalysisData$results <- results
             postAnalysisData$flags <- flag_analysis_data$flag_analysis_data(results, postAnalysisData$metadata)
 
-            datatable$server_dt("statsResults", results)
+
             shiny$removeNotification(id = postAnalysisData$analysis)
             postAnalysisData$status <- "success"
             postAnalysisData$title <- {
@@ -151,6 +151,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
       shiny$observeEvent(postAnalysisData(), {
         message("ui")
+        datatable$server_dt("statsResults", postAnalysisData()$results)
         output$ui <- shiny$renderUI({
           bs4Dash$box(
             postAnalysisData()$body,
@@ -169,9 +170,9 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
+        browser()
         message("uiSummary")
         output$uiSummary <- shiny$renderUI({
-          # browser()
           bs4Dash$box(
             id = ns("analysisResultsBox"),
             collapsed = TRUE, closable = TRUE, maximizable = TRUE,

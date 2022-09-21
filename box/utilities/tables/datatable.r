@@ -26,14 +26,17 @@ ui_dt <- function(id = "dt", title = NULL, collapsed = TRUE,
 
 #' @export
 server_dt <- function(id = "dt", data, title, pageLength = 3) {
-  box::use(shiny, DT, esquisse, bs4Dash, dplyr, shinyWidgets, readr, writexl)
+  box::use(shiny, DT, esquisse, bs4Dash, utils, dplyr, shinyWidgets, readr, writexl)
   shiny$moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
+      if (utils$hasName(data, "data")) {
+        data <- data$data
+      }
+
       output$filters <- shiny$renderUI({
-        #
         shiny$fluidRow(
           shiny$column(
             12,
@@ -64,15 +67,7 @@ server_dt <- function(id = "dt", data, title, pageLength = 3) {
 
       cleanedData <- shiny$reactive({
         if (!is.null(input$columnsFilter)) {
-          tryCatch(
-            {
-              data <- data[, input$columnsFilter]
-            },
-            error = function(err) {
-              browser()
-              data.frame()
-            }
-          )
+          data <- data[, input$columnsFilter]
         } else {
           data.frame()
         }
