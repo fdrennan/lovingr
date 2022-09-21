@@ -4,20 +4,21 @@ ui_run_analysis <- function(id = "run_analysis", data) {
   ns <- shiny$NS(id)
   box::use(.. / .. / .. / utilities / tables / datatable)
   shiny$fluidRow(
-    class = "border-top my-3",
-    shiny$column(12, shiny$h3(shiny$h4(toupper(data$analysis)), class = "display-4")),
-    shiny$column(12,
-      class = "d-flex justify-content-between align-items-top",
-      shinyWidgets$switchInput(ns("runWithDebugger"), size = "mini", inline = TRUE, "Run With Debugger", value = FALSE),
-      bs4Dash$actionButton(ns("runAgain"), "Run Again", size = "xs")
-    ),
+    class = "border-top my-3 py-2",
     shiny$column(
-      12,
+      10,
       shinycssloaders$withSpinner(
         image = gsub("www/", "", sample(list.files("www/spinners", full.names = T), 1)),
         shiny$uiOutput(ns("ui"), container = function(...) {
           shiny$fluidRow(...)
         })
+      )
+    ),
+    shiny$column(
+      2,
+      shiny$inputPanel(
+        shinyWidgets$switchInput(ns("runWithDebugger"), size = "mini", inline = TRUE, "Run With Debugger", value = FALSE),
+        bs4Dash$actionButton(ns("runAgain"), "Run Again", size = "xs")
       )
     )
   )
@@ -170,7 +171,7 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
 
 
       shiny$observeEvent(postAnalysisData(), {
-        browser()
+        # browser()
         message("uiSummary")
         output$uiSummary <- shiny$renderUI({
           bs4Dash$box(
@@ -197,8 +198,8 @@ server_run_analysis <- function(id = "run_analysis", preAnalysisData) {
                 postAnalysisData()$metadata$flagging_code,
                 function(x, y) {
                   shiny$fluidRow(
-                    shiny$column(2, x, class = "d-flex justify-content-center align-items-center"),
-                    shiny$column(10, shiny$tags$pre(y), class = "d-flex justify-content-start align-items-center"),
+                    shiny$column(2, x),
+                    shiny$column(10, shiny$tags$pre(y)),
                     shiny$tags$hr()
                   )
                 }
